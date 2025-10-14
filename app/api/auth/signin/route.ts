@@ -74,18 +74,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-```
-
----
-
-**Your folder structure should look like:**
-```
-app/
-├── api/
-│   └── auth/
-│       ├── signup/
-│       │   └── route.ts  ← CREATE THIS
-│       ├── signin/
-│       │   └── route.ts  ← CREATE THIS
-│       └── signout/
-│           └── route.ts  ← YOU HAVE THIS ✅

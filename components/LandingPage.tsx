@@ -168,7 +168,7 @@ export default function LandingPage() {
                 </button>
               </div>
               <p className="text-sm text-slate-500 font-light">
-                No credit card required • Start for free
+                Start for free • Upgrade anytime
               </p>
             </div>
 
@@ -359,7 +359,7 @@ export default function LandingPage() {
                 href={process.env.NEXT_PUBLIC_STRIPE_EXPLORER_MONTHLY || '/auth/signup'}
                 className="block w-full py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-normal transition-all text-center"
               >
-                Start Free Trial
+                Get Explorer - $29/mo
               </Link>
             </div>
           </div>
@@ -370,7 +370,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Partners Section - Enhanced */}
+      {/* Partners Section */}
       <section className="py-20 px-6 bg-gradient-to-br from-purple-50/30 via-white to-blue-50/30 border-y border-purple-100">
         <div className="max-w-7xl mx-auto">
           <p className="text-center text-slate-700 text-lg mb-12 font-normal">
@@ -419,7 +419,7 @@ export default function LandingPage() {
               href="/auth/signup"
               className="inline-flex items-center gap-2 px-8 py-4 bg-white hover:bg-slate-100 text-slate-900 rounded-xl font-normal transition-all"
             >
-              Start Free Trial
+              Start Free
               <ArrowRight size={20} />
             </Link>
           </div>
@@ -448,7 +448,7 @@ export default function LandingPage() {
         </div>
       </footer>
 
-      {/* VERA's Orb Styles - Your Exact Code */}
+      {/* VERA's Orb Styles */}
       <style jsx>{`
         .central-orb-container {
           width: 650px;

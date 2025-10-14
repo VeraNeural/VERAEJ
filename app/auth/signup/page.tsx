@@ -1,11 +1,11 @@
-'use client';
 
+import { Suspense } from 'react';
 import React, { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Mail, Lock, User, ArrowRight, AlertCircle } from 'lucide-react';
 
-export default function SignUp() {
+function SignupForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [formData, setFormData] = useState({
@@ -184,5 +184,13 @@ export default function SignUp() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+      <SignupForm />
+    </Suspense>
   );
 }

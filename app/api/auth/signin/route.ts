@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     
     // Find user
     const result = await query(
-      `SELECT id, email, password, subscription_status, subscription_tier, 
+      SELECT id, email, password_hash as password, subscription_status, subscription_tier, 
               trial_ends_at, orientation_completed, test_mode
        FROM users 
        WHERE email = $1`,

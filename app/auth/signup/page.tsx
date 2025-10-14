@@ -25,18 +25,29 @@ export default function SignUpPage() {
     e.preventDefault();
     setError('');
 
-    if (!email || !password || !confirmPassword) {
-      setError('All fields are required');
+    // Better validation messages
+    if (!email) {
+      setError('Please enter your email address');
+      return;
+    }
+
+    if (!password) {
+      setError('Please create a password');
+      return;
+    }
+
+    if (!confirmPassword) {
+      setError('Please confirm your password');
       return;
     }
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError('Please enter a valid email');
+      setError('Please enter a valid email address');
       return;
     }
 
     if (!allGood) {
-      setError('Password does not meet requirements');
+      setError('Password must meet all requirements');
       return;
     }
 
@@ -46,7 +57,7 @@ export default function SignUpPage() {
     }
 
     if (!acceptedTerms) {
-      setError('You must accept the terms');
+      setError('Please accept the terms to continue');
       return;
     }
 
@@ -62,12 +73,18 @@ export default function SignUpPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || 'Signup failed');
+        // Check if user already exists
+        if (data.error?.includes('already exists') || data.error?.includes('already registered')) {
+          setError('This email is already registered. Please sign in instead.');
+        } else {
+          throw new Error(data.error || 'Signup failed');
+        }
+        return;
       }
 
       router.push('/orientation');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong');
+      setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -91,6 +108,11 @@ export default function SignUpPage() {
           {error && (
             <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
               <p className="text-sm text-red-800">{error}</p>
+              {error.includes('already registered') && (
+                <Link href="/auth/signin" className="text-sm text-purple-600 hover:text-purple-700 font-medium mt-2 inline-block">
+                  Go to Sign In →
+                </Link>
+              )}
             </div>
           )}
 
@@ -104,6 +126,7 @@ export default function SignUpPage() {
                 className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-slate-900 placeholder:text-slate-400"
                 placeholder="your@email.com"
                 disabled={isLoading}
+                required
               />
             </div>
 
@@ -116,6 +139,7 @@ export default function SignUpPage() {
                 className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-slate-900 placeholder:text-slate-400"
                 placeholder="Create password"
                 disabled={isLoading}
+                required
               />
 
               {password && (
@@ -145,6 +169,7 @@ export default function SignUpPage() {
                 className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-slate-900 placeholder:text-slate-400"
                 placeholder="Confirm password"
                 disabled={isLoading}
+                required
               />
               {confirmPassword && (
                 <div className={`mt-2 text-xs ${passwordsMatch ? 'text-green-600' : 'text-red-600'}`}>
@@ -160,6 +185,7 @@ export default function SignUpPage() {
                 onChange={(e) => setAcceptedTerms(e.target.checked)}
                 className="mt-1 w-4 h-4 text-purple-600 rounded"
                 disabled={isLoading}
+                required
               />
               <label className="text-xs text-slate-700">
                 I understand VERA is <strong>NOT a medical device or therapist</strong>. 
@@ -169,7 +195,7 @@ export default function SignUpPage() {
 
             <button
               type="submit"
-              disabled={isLoading || !allGood || !passwordsMatch || !acceptedTerms}
+              disabled={isLoading || !allGood || !passwordsMatch || !acceptedTerms || !email || !password || !confirmPassword}
               className="w-full py-3 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white rounded-xl font-medium disabled:opacity-50 shadow-lg"
             >
               {isLoading ? 'Creating Account...' : 'Start Free'}

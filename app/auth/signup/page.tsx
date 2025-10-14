@@ -6,6 +6,7 @@ import Link from 'next/link';
 
 export default function SignUpPage() {
   const router = useRouter();
+  const [name, setName] = useState(''); // ← ADD THIS
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -25,7 +26,12 @@ export default function SignUpPage() {
     e.preventDefault();
     setError('');
 
-    // Better validation messages
+    // ADD NAME VALIDATION
+    if (!name) {
+      setError('Please enter your name');
+      return;
+    }
+
     if (!email) {
       setError('Please enter your email address');
       return;
@@ -67,13 +73,12 @@ export default function SignUpPage() {
       const res = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ name, email, password }), // ← ADD NAME HERE
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        // Check if user already exists
         if (data.error?.includes('already exists') || data.error?.includes('already registered')) {
           setError('This email is already registered. Please sign in instead.');
         } else {
@@ -117,6 +122,20 @@ export default function SignUpPage() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
+            {/* NAME FIELD - ADD THIS */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Name</label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-slate-900 placeholder:text-slate-400"
+                placeholder="Your name"
+                disabled={isLoading}
+                required
+              />
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">Email</label>
               <input
@@ -195,7 +214,7 @@ export default function SignUpPage() {
 
             <button
               type="submit"
-              disabled={isLoading || !allGood || !passwordsMatch || !acceptedTerms || !email || !password || !confirmPassword}
+              disabled={isLoading || !allGood || !passwordsMatch || !acceptedTerms || !email || !password || !confirmPassword || !name}
               className="w-full py-3 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white rounded-xl font-medium disabled:opacity-50 shadow-lg"
             >
               {isLoading ? 'Creating Account...' : 'Start Free'}

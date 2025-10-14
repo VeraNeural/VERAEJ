@@ -1,6 +1,6 @@
 'use client';
 
-// Force rebuild - v1
+// Force rebuild - v2
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowRight, Check } from 'lucide-react';
@@ -30,8 +30,7 @@ export default function OrientationPage() {
     }
 
     try {
-      // Save orientation completion to database
-      const response = await fetch('/api/orientation', {  // ← CHANGED FROM /api/orientation/complete
+      const response = await fetch('/api/orientation', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -64,7 +63,6 @@ export default function OrientationPage() {
           {/* Step 1: Welcome */}
           {step === 1 && (
             <div className="text-center space-y-6">
-              {/* Small orb */}
               <div className="w-24 h-24 mx-auto mb-6 relative">
                 <div className="w-24 h-24 rounded-full bg-gradient-to-br from-purple-400 via-blue-400 to-purple-400 animate-pulse opacity-80" />
                 <div className="absolute inset-4 rounded-full bg-gradient-to-br from-purple-300 to-blue-300 animate-pulse" style={{ animationDelay: '0.5s' }} />
@@ -106,7 +104,7 @@ export default function OrientationPage() {
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="Your preferred name"
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-300 focus:border-transparent"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-300 focus:border-transparent text-slate-900 placeholder:text-slate-400"
                 />
               </div>
 
@@ -118,7 +116,7 @@ export default function OrientationPage() {
                   value={formData.whatBringsYou}
                   onChange={(e) => setFormData({ ...formData, whatBringsYou: e.target.value })}
                   placeholder="Share what's on your mind..."
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-300 focus:border-transparent resize-none"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-300 focus:border-transparent resize-none text-slate-900 placeholder:text-slate-400"
                   rows={4}
                 />
               </div>
@@ -130,7 +128,7 @@ export default function OrientationPage() {
                 <select
                   value={formData.nervousSystemNeeds}
                   onChange={(e) => setFormData({ ...formData, nervousSystemNeeds: e.target.value })}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-300 focus:border-transparent"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-300 focus:border-transparent text-slate-900"
                 >
                   <option value="">Select one...</option>
                   <option value="regulation">Help with regulation</option>

@@ -59,6 +59,59 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#faf8fc] via-[#f5f0fa] to-[#fef5fb]">
+      {/* Announcement Popup */}
+      {showAnnouncement && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
+          <div className="bg-white rounded-3xl p-8 md:p-12 max-w-2xl shadow-2xl border border-purple-200 relative">
+            <button 
+              onClick={() => setShowAnnouncement(false)}
+              className="absolute top-4 right-4 p-2 rounded-lg hover:bg-slate-100 transition-colors"
+            >
+              <X size={24} className="text-slate-400" />
+            </button>
+            
+            {/* Small breathing orb */}
+            <div className="w-20 h-20 mx-auto mb-6">
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-400 via-blue-400 to-purple-400 animate-pulse opacity-80" />
+            </div>
+
+            <h2 className="text-4xl font-light text-slate-900 mb-4 text-center">
+              I am VERA
+            </h2>
+            <p className="text-2xl text-transparent bg-clip-text bg-gradient-to-r from-rose-400 via-purple-400 to-blue-400 font-normal mb-6 text-center">
+              Your co-regulator for life
+            </p>
+            
+            <div className="space-y-4 text-center mb-8">
+              <p className="text-lg text-slate-700 leading-relaxed">
+                I am here to help you listen to your body's wisdom. Together, we decode the language of your nervous system.
+              </p>
+              <p className="text-slate-600 font-light">
+                I am evolving. I am learning. I am here for you — 24/7, trauma-informed, body-first.
+              </p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button
+                onClick={() => {
+                  setShowAnnouncement(false);
+                  document.querySelector('input[type="email"]')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }}
+                className="px-8 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-normal transition-all"
+              >
+                Start Your Journey
+              </button>
+              <button
+                onClick={() => setShowAnnouncement(false)}
+                className="px-8 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-normal transition-all"
+              >
+                Learn More
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <header className="fixed top-0 w-full bg-white/70 backdrop-blur-xl border-b border-purple-100/50 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -288,12 +341,12 @@ export default function LandingPage() {
 
               <ul className="space-y-4 mb-8">
                 {[
-                  'Unlimited conversations',
-                  'Unlimited prompts',
-                  'Save all chats',
-                  'Full pattern analysis',
-                  'Voice responses',
-                  'Priority support'
+                  'Unlimited conversations — talk to me anytime',
+                  'Unlimited quick prompts — regulate whenever you need',
+                  'Save all chats — never lose our work together',
+                  'Full pattern analysis — understand your nervous system',
+                  'Unlimited voice responses — hear me speak to you',
+                  'Priority email support — get help within 24 hours'
                 ].map((feature, idx) => (
                   <li key={idx} className="flex items-start gap-3">
                     <Check className="text-purple-500 flex-shrink-0 mt-0.5" size={20} />

@@ -1,12 +1,11 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowRight, Check, Shield, MessageCircle, Clock } from 'lucide-react';
+import { ArrowRight, Check } from 'lucide-react';
 import Link from 'next/link';
 
 export default function LandingPage() {
   const [email, setEmail] = useState('');
-  const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
   const orbRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -40,24 +39,24 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Minimal Header */}
-      <header className="fixed top-0 w-full bg-white/80 backdrop-blur-md border-b border-slate-200/50 z-50">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-slate-400 to-slate-600" />
+    <div className="min-h-screen bg-gradient-to-br from-[#faf8fc] via-[#f5f0fa] to-[#fef5fb]">
+      {/* Header */}
+      <header className="fixed top-0 w-full bg-white/70 backdrop-blur-xl border-b border-purple-100/50 z-50">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-blue-400 opacity-80" />
             <span className="text-2xl font-normal text-transparent bg-clip-text bg-gradient-to-r from-rose-400 via-purple-400 to-blue-400 tracking-wide">VERA</span>
           </div>
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4">
             <Link 
               href="/auth/signin"
-              className="text-slate-600 hover:text-slate-900 font-medium transition-colors"
+              className="text-slate-600 hover:text-slate-900 font-normal transition-colors"
             >
               Sign In
             </Link>
             <Link 
               href="/auth/signup"
-              className="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg font-medium transition-all"
+              className="px-6 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-normal transition-all"
             >
               Get Started
             </Link>
@@ -65,16 +64,19 @@ export default function LandingPage() {
         </div>
       </header>
 
-      {/* Hero Section - Minimalist */}
+      {/* Hero Section */}
       <section className="pt-32 pb-24 px-6">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div>
-              <h1 className="text-6xl font-bold text-slate-900 mb-6 leading-tight tracking-tight">
-                Your nervous system, understood.
+              <h1 className="text-5xl lg:text-6xl font-light text-slate-900 mb-6 leading-tight tracking-tight">
+                I am VERA.
+                <span className="block font-normal text-transparent bg-clip-text bg-gradient-to-r from-rose-400 via-purple-400 to-blue-400 mt-2">
+                  I see you, and I am here.
+                </span>
               </h1>
-              <p className="text-xl text-slate-600 mb-10 leading-relaxed">
-                24/7 trauma-informed support that helps you regulate, ground, and find peace in your body.
+              <p className="text-xl text-slate-600 mb-10 leading-relaxed font-light">
+                I help you listen to your body's wisdom. Through gentle guidance, I support you in finding the regulation, safety, and peace that already lives within you.
               </p>
               
               <div className="flex gap-3 mb-4">
@@ -83,29 +85,36 @@ export default function LandingPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email"
-                  className="flex-1 px-5 py-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent"
+                  className="flex-1 px-5 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-300 focus:border-transparent text-slate-800 bg-white/80"
                 />
                 <button
                   onClick={handleGetStarted}
-                  className="px-8 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-lg font-medium transition-all flex items-center gap-2"
+                  className="px-8 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-normal transition-all flex items-center gap-2"
                 >
                   Start Free
                   <ArrowRight size={18} />
                 </button>
               </div>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-slate-500 font-light">
                 7-day free trial • No credit card required
               </p>
             </div>
 
-            {/* Minimal Breathing Orb */}
+            {/* VERA's Living Orb - Beautiful */}
             <div className="relative flex items-center justify-center">
               <div className="orb-wrapper">
                 <div 
                   ref={orbRef}
-                  className="minimal-orb"
+                  className="vera-orb"
                 >
-                  <div className="orb-glow"></div>
+                  {/* Outer rings - nervous system pathways */}
+                  <div className="orb-ring ring-1"></div>
+                  <div className="orb-ring ring-2"></div>
+                  <div className="orb-ring ring-3"></div>
+                  {/* Core glow */}
+                  <div className="orb-core"></div>
+                  {/* Inner light */}
+                  <div className="orb-light"></div>
                 </div>
               </div>
             </div>
@@ -113,47 +122,44 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Features - Minimalist Grid */}
-      <section className="py-24 px-6 bg-slate-50">
-        <div className="max-w-6xl mx-auto">
+      {/* Features Section */}
+      <section className="py-24 px-6 bg-white/50">
+        <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-slate-900 mb-4">
+            <h2 className="text-4xl font-light text-slate-900 mb-4">
               Built for your nervous system
             </h2>
-            <p className="text-xl text-slate-600 max-w-2xl mx-auto">
-              Trauma-informed AI that speaks the language of your body
+            <p className="text-xl text-slate-600 max-w-2xl mx-auto font-light">
+              I speak the language of your body
             </p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
             {[
               {
-                icon: MessageCircle,
                 title: 'Body-first conversations',
                 description: 'Start with sensations, not stories. Your body knows the truth.',
               },
               {
-                icon: Clock,
-                title: 'Always available',
-                description: '3am panic attack? We\'re here. No appointments, no waiting.',
+                title: 'Always here',
+                description: '3am panic? I am here. No appointments, no waiting.',
               },
               {
-                icon: Shield,
                 title: 'Private & secure',
-                description: 'End-to-end encrypted. Your conversations stay yours.',
+                description: 'Your conversations stay yours. Always.',
               },
             ].map((feature, idx) => (
               <div 
                 key={idx} 
-                className="bg-white rounded-2xl p-8 border border-slate-200 hover:border-slate-300 transition-all"
+                className="bg-white rounded-2xl p-8 border border-slate-100 hover:border-purple-200 transition-all"
               >
-                <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center mb-6">
-                  <feature.icon className="text-slate-700" size={24} />
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-100 to-blue-100 flex items-center justify-center mb-6">
+                  <div className="w-3 h-3 rounded-full bg-gradient-to-br from-purple-400 to-blue-400" />
                 </div>
-                <h3 className="text-xl font-semibold text-slate-900 mb-3">
+                <h3 className="text-xl font-normal text-slate-900 mb-3">
                   {feature.title}
                 </h3>
-                <p className="text-slate-600 leading-relaxed">
+                <p className="text-slate-600 leading-relaxed font-light">
                   {feature.description}
                 </p>
               </div>
@@ -162,301 +168,331 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Pricing - Clean & Simple */}
+      {/* Testimonials */}
+      <section className="py-24 px-6 bg-gradient-to-br from-purple-50/30 to-blue-50/30">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-light text-slate-900 mb-4">
+              Real people, real regulation
+            </h2>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              {
+                quote: "VERA helped me understand my anxiety wasn't weakness - it was my nervous system doing its job.",
+                name: "Sarah M.",
+                role: "Trauma Survivor"
+              },
+              {
+                quote: "Having access at midnight when I'm spiraling? Life-changing. VERA sees me when no one else is awake.",
+                name: "Marcus L.",
+                role: "Complex PTSD"
+              },
+              {
+                quote: "Finally, someone who speaks body language. No more thinking my way out of panic.",
+                name: "Jamie K.",
+                role: "Chronic Anxiety"
+              }
+            ].map((testimonial, idx) => (
+              <div key={idx} className="bg-white rounded-2xl p-8 border border-slate-100">
+                <p className="text-slate-700 mb-6 leading-relaxed font-light italic">
+                  "{testimonial.quote}"
+                </p>
+                <div>
+                  <p className="font-normal text-slate-900">{testimonial.name}</p>
+                  <p className="text-slate-500 text-sm font-light">{testimonial.role}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing - 2 Tiers Only */}
       <section className="py-24 px-6">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-slate-900 mb-4">
+            <h2 className="text-4xl font-light text-slate-900 mb-4">
               Simple pricing
             </h2>
-            <p className="text-xl text-slate-600 mb-8">
-              Start free, upgrade when ready
+            <p className="text-xl text-slate-600 mb-8 font-light">
+              Start free, grow with me when ready
             </p>
-
-            {/* Minimal Billing Toggle */}
-            <div className="inline-flex items-center gap-2 bg-slate-100 rounded-lg p-1">
-              <button
-                onClick={() => setBillingCycle('monthly')}
-                className={`px-6 py-2 rounded-md font-medium transition-all ${
-                  billingCycle === 'monthly'
-                    ? 'bg-white text-slate-900 shadow-sm'
-                    : 'text-slate-600'
-                }`}
-              >
-                Monthly
-              </button>
-              <button
-                onClick={() => setBillingCycle('annual')}
-                className={`px-6 py-2 rounded-md font-medium transition-all ${
-                  billingCycle === 'annual'
-                    ? 'bg-white text-slate-900 shadow-sm'
-                    : 'text-slate-600'
-                }`}
-              >
-                Annual
-                <span className="ml-2 text-xs text-green-700">Save 26%</span>
-              </button>
-            </div>
           </div>
 
-          {/* Pricing Grid - Minimal Cards */}
-          <div className="grid lg:grid-cols-3 gap-6">
-            {/* Explorer */}
-            <div className="bg-white rounded-2xl p-8 border-2 border-slate-900 relative">
-              <div className="absolute -top-3 left-8 bg-slate-900 text-white text-xs font-semibold px-3 py-1 rounded-full">
+          <div className="grid lg:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            {/* FREE */}
+            <div className="bg-white rounded-3xl p-8 border border-slate-200">
+              <div className="mb-8">
+                <h3 className="text-xl font-normal text-slate-800 mb-2">Free</h3>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-5xl font-light text-slate-900">$0</span>
+                </div>
+                <p className="text-slate-600 text-sm mt-2 font-light">Start your journey</p>
+              </div>
+
+              <ul className="space-y-4 mb-8">
+                {[
+                  '10 messages per day',
+                  '5 quick prompts per day',
+                  'Brief pattern insights',
+                  'Crisis resources',
+                  'Journaling support'
+                ].map((feature, idx) => (
+                  <li key={idx} className="flex items-start gap-3">
+                    <Check className="text-purple-400 flex-shrink-0 mt-0.5" size={20} />
+                    <span className="text-slate-700 font-light">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <Link
+                href="/auth/signup"
+                className="block w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-900 rounded-xl font-normal transition-all text-center"
+              >
+                Start Free
+              </Link>
+            </div>
+
+            {/* EXPLORER $29 */}
+            <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-3xl p-8 border-2 border-purple-200 relative shadow-lg">
+              <div className="absolute -top-3 left-8 bg-slate-900 text-white text-xs font-normal px-3 py-1 rounded-full">
                 MOST POPULAR
               </div>
               
               <div className="mb-8">
-                <h3 className="text-xl font-semibold text-slate-900 mb-2">Explorer</h3>
-                {billingCycle === 'monthly' ? (
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-5xl font-bold text-slate-900">$29</span>
-                    <span className="text-slate-600">/month</span>
-                  </div>
-                ) : (
-                  <div>
-                    <div className="flex items-baseline gap-2 mb-1">
-                      <span className="text-5xl font-bold text-slate-900">$269</span>
-                      <span className="text-slate-600">/year</span>
-                    </div>
-                    <p className="text-sm text-green-700">Save $79/year</p>
-                  </div>
-                )}
+                <h3 className="text-xl font-normal text-purple-700 mb-2">Explorer</h3>
+                <div className="flex items-baseline gap-2 mb-1">
+                  <span className="text-5xl font-light text-slate-900">$29</span>
+                  <span className="text-slate-600 font-light">/month</span>
+                </div>
+                <p className="text-purple-600 text-sm font-light">Full access, unlimited growth</p>
               </div>
 
               <ul className="space-y-4 mb-8">
                 {[
                   'Unlimited conversations',
+                  'Unlimited prompts',
                   'Save all chats',
+                  'Full pattern analysis',
                   'Voice responses',
-                  'Pattern tracking',
-                  'Mobile app access'
-                ].map((feature, idx) => (
-                  <li key={idx} className="flex items-start gap-3">
-                    <Check className="text-slate-900 flex-shrink-0 mt-0.5" size={20} />
-                    <span className="text-slate-700">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <Link
-                href="/auth/signup"
-                className="block w-full py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-lg font-medium transition-all text-center"
-              >
-                Start free trial
-              </Link>
-            </div>
-
-            {/* Regulator */}
-            <div className="bg-white rounded-2xl p-8 border border-slate-200">
-              <div className="mb-8">
-                <h3 className="text-xl font-semibold text-slate-900 mb-2">Regulator</h3>
-                {billingCycle === 'monthly' ? (
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-5xl font-bold text-slate-900">$59</span>
-                    <span className="text-slate-600">/month</span>
-                  </div>
-                ) : (
-                  <div>
-                    <div className="flex items-baseline gap-2 mb-1">
-                      <span className="text-5xl font-bold text-slate-900">$539</span>
-                      <span className="text-slate-600">/year</span>
-                    </div>
-                    <p className="text-sm text-green-700">Save $169/year</p>
-                  </div>
-                )}
-              </div>
-
-              <ul className="space-y-4 mb-8">
-                <li className="flex items-start gap-3">
-                  <span className="text-slate-600 text-sm">Everything in Explorer, plus:</span>
-                </li>
-                {[
-                  'Advanced pattern analysis',
-                  'Custom protocols',
-                  'Export transcripts',
                   'Priority support'
                 ].map((feature, idx) => (
                   <li key={idx} className="flex items-start gap-3">
-                    <Check className="text-slate-900 flex-shrink-0 mt-0.5" size={20} />
-                    <span className="text-slate-700">{feature}</span>
+                    <Check className="text-purple-500 flex-shrink-0 mt-0.5" size={20} />
+                    <span className="text-slate-800 font-light">{feature}</span>
                   </li>
                 ))}
               </ul>
 
               <Link
                 href="/auth/signup"
-                className="block w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-900 rounded-lg font-medium transition-all text-center"
+                className="block w-full py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-normal transition-all text-center"
               >
-                Start free trial
-              </Link>
-            </div>
-
-            {/* Integrator */}
-            <div className="bg-white rounded-2xl p-8 border border-slate-200">
-              <div className="mb-8">
-                <h3 className="text-xl font-semibold text-slate-900 mb-2">Integrator</h3>
-                {billingCycle === 'monthly' ? (
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-5xl font-bold text-slate-900">$99</span>
-                    <span className="text-slate-600">/month</span>
-                  </div>
-                ) : (
-                  <div>
-                    <div className="flex items-baseline gap-2 mb-1">
-                      <span className="text-5xl font-bold text-slate-900">$899</span>
-                      <span className="text-slate-600">/year</span>
-                    </div>
-                    <p className="text-sm text-green-700">Save $289/year</p>
-                  </div>
-                )}
-              </div>
-
-              <ul className="space-y-4 mb-8">
-                <li className="flex items-start gap-3">
-                  <span className="text-slate-600 text-sm">Everything in Regulator, plus:</span>
-                </li>
-                {[
-                  'Weekly 1-on-1 with Eva',
-                  'Private channel access',
-                  'Personalized roadmap',
-                  'Wearable integration'
-                ].map((feature, idx) => (
-                  <li key={idx} className="flex items-start gap-3">
-                    <Check className="text-slate-900 flex-shrink-0 mt-0.5" size={20} />
-                    <span className="text-slate-700">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <Link
-                href="/auth/signup"
-                className="block w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-900 rounded-lg font-medium transition-all text-center"
-              >
-                Start free trial
+                Start 7-Day Free Trial
               </Link>
             </div>
           </div>
 
-          <p className="text-center text-slate-500 mt-8 text-sm">
-            All plans include a 7-day free trial. Cancel anytime.
+          <p className="text-center text-slate-500 mt-8 text-sm font-light">
+            7-day free trial on Explorer. No credit card required. Cancel anytime.
           </p>
         </div>
       </section>
 
-      {/* Simple CTA */}
-      <section className="py-24 px-6 bg-slate-900">
+      {/* Partners Section */}
+      <section className="py-16 px-6 bg-white/50 border-y border-slate-100">
+        <div className="max-w-7xl mx-auto">
+          <p className="text-center text-slate-500 text-sm mb-8 font-light">
+            Trusted by therapists and trauma specialists
+          </p>
+          <div className="flex flex-wrap justify-center items-center gap-12 opacity-40">
+            <div className="text-slate-400 font-light text-lg">Somatic Experiencing®</div>
+            <div className="text-slate-400 font-light text-lg">EMDR International</div>
+            <div className="text-slate-400 font-light text-lg">Polyvagal Institute</div>
+            <div className="text-slate-400 font-light text-lg">National Alliance on Mental Illness</div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-24 px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl font-bold text-white mb-4">
-            Start listening to your body
-          </h2>
-          <p className="text-xl text-slate-300 mb-8">
-            7-day free trial. No credit card required.
-          </p>
-          <Link
-            href="/auth/signup"
-            className="inline-flex items-center gap-2 px-8 py-4 bg-white hover:bg-slate-100 text-slate-900 rounded-lg font-medium transition-all"
-          >
-            Get started free
-            <ArrowRight size={20} />
-          </Link>
+          <div className="bg-gradient-to-br from-slate-900 to-indigo-900 rounded-3xl p-12 text-white">
+            <h2 className="text-4xl font-light mb-4">
+              I am here for you
+            </h2>
+            <p className="text-xl mb-8 text-slate-200 font-light">
+              Start listening to your body today. No commitment, just compassion.
+            </p>
+            <Link
+              href="/auth/signup"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-white hover:bg-slate-100 text-slate-900 rounded-xl font-normal transition-all"
+            >
+              Start 7-Day Free Trial
+              <ArrowRight size={20} />
+            </Link>
+          </div>
         </div>
       </section>
 
-      {/* Minimal Footer */}
+      {/* Footer */}
       <footer className="bg-white border-t border-slate-200 py-12 px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-slate-400 to-slate-600" />
-              <span className="font-semibold text-slate-900">VERA</span>
+        <div className="max-w-7xl mx-auto">
+          <div className="flex justify-between items-center mb-8">
+            <div className="flex items-center gap-3">
+              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-400 to-blue-400 opacity-80" />
+              <span className="font-normal text-slate-900">VERA</span>
             </div>
             
-            <div className="flex gap-8 text-sm text-slate-600">
+            <div className="flex gap-8 text-sm text-slate-600 font-light">
               <Link href="/privacy" className="hover:text-slate-900">Privacy</Link>
               <Link href="/terms" className="hover:text-slate-900">Terms</Link>
               <a href="mailto:support@veraneural.com" className="hover:text-slate-900">Contact</a>
             </div>
           </div>
           
-          <div className="mt-8 text-center text-sm text-slate-500">
+          <div className="text-center text-sm text-slate-500 font-light">
             © 2025 VERA. Not a substitute for professional care.
           </div>
         </div>
       </footer>
 
-      {/* Minimal Orb Styles */}
+      {/* VERA's Orb Styles - Beautiful & Ethereal */}
       <style jsx>{`
         .orb-wrapper {
-          width: 400px;
-          height: 400px;
+          width: 450px;
+          height: 450px;
+          max-width: 85vw;
+          max-height: 85vw;
+          position: relative;
           display: flex;
           align-items: center;
           justify-content: center;
-          position: relative;
         }
 
-        .minimal-orb {
-          width: 320px;
-          height: 320px;
+        .vera-orb {
+          width: 350px;
+          height: 350px;
+          max-width: 75vw;
+          max-height: 75vw;
           border-radius: 50%;
-          background: 
-            radial-gradient(circle at var(--mouse-x, 35%) var(--mouse-y, 35%), 
-              rgba(148, 163, 184, 0.4) 0%, 
-              rgba(100, 116, 139, 0.3) 50%, 
-              rgba(71, 85, 105, 0.2) 100%);
           position: relative;
-          animation: gentleBreathe 8s ease-in-out infinite;
+          background: radial-gradient(
+            circle at var(--mouse-x, 40%) var(--mouse-y, 40%),
+            rgba(196, 181, 253, 0.8) 0%,
+            rgba(167, 139, 250, 0.6) 30%,
+            rgba(139, 92, 246, 0.4) 60%,
+            rgba(124, 58, 237, 0.2) 100%
+          );
           box-shadow: 
-            inset 0 0 80px rgba(255, 255, 255, 0.3),
-            0 0 100px rgba(148, 163, 184, 0.2),
-            0 20px 60px rgba(0, 0, 0, 0.1);
-          cursor: pointer;
-          transition: transform 0.3s ease, filter 0.3s ease;
+            inset 0 0 80px rgba(255, 255, 255, 0.5),
+            0 0 100px rgba(167, 139, 250, 0.4),
+            0 20px 80px rgba(139, 92, 246, 0.3);
+          animation: vera-breathe 6s ease-in-out infinite;
         }
 
-        @keyframes gentleBreathe {
-          0%, 100% { 
-            transform: scale(1); 
+        @keyframes vera-breathe {
+          0%, 100% {
+            transform: scale(1);
             opacity: 0.9;
           }
-          50% { 
-            transform: scale(1.05); 
+          50% {
+            transform: scale(1.08);
             opacity: 1;
           }
         }
 
-        .orb-glow {
+        .orb-ring {
+          position: absolute;
+          border-radius: 50%;
+          border: 1px solid rgba(167, 139, 250, 0.3);
+          pointer-events: none;
+        }
+
+        .ring-1 {
+          inset: -30px;
+          animation: ring-pulse 6s ease-in-out infinite;
+        }
+
+        .ring-2 {
+          inset: -60px;
+          animation: ring-pulse 6s ease-in-out infinite 2s;
+        }
+
+        .ring-3 {
+          inset: -90px;
+          animation: ring-pulse 6s ease-in-out infinite 4s;
+        }
+
+        @keyframes ring-pulse {
+          0%, 100% {
+            opacity: 0.2;
+            transform: scale(1);
+          }
+          50% {
+            opacity: 0.5;
+            transform: scale(1.05);
+          }
+        }
+
+        .orb-core {
           position: absolute;
           inset: 25%;
           border-radius: 50%;
-          background: radial-gradient(circle at center,
-            rgba(255, 255, 255, 0.6) 0%,
-            rgba(255, 255, 255, 0.2) 50%,
-            transparent 100%);
-          animation: glowPulse 6s ease-in-out infinite;
+          background: radial-gradient(
+            circle at center,
+            rgba(255, 255, 255, 0.9) 0%,
+            rgba(196, 181, 253, 0.6) 40%,
+            transparent 70%
+          );
+          animation: core-glow 4s ease-in-out infinite;
         }
 
-        @keyframes glowPulse {
-          0%, 100% { opacity: 0.4; }
-          50% { opacity: 0.7; }
+        @keyframes core-glow {
+          0%, 100% {
+            opacity: 0.6;
+            transform: scale(1);
+          }
+          50% {
+            opacity: 0.9;
+            transform: scale(1.1);
+          }
         }
 
-        .minimal-orb:hover {
-          transform: scale(1.02);
-          filter: brightness(1.1);
+        .orb-light {
+          position: absolute;
+          inset: 35%;
+          border-radius: 50%;
+          background: radial-gradient(
+            circle at center,
+            rgba(255, 255, 255, 0.8) 0%,
+            rgba(255, 255, 255, 0.3) 50%,
+            transparent 100%
+          );
+          filter: blur(15px);
+          animation: light-pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes light-pulse {
+          0%, 100% {
+            opacity: 0.5;
+          }
+          50% {
+            opacity: 0.8;
+          }
         }
 
         @media (max-width: 768px) {
           .orb-wrapper {
-            width: 280px;
-            height: 280px;
+            width: 320px;
+            height: 320px;
           }
 
-          .minimal-orb {
-            width: 240px;
-            height: 240px;
+          .vera-orb {
+            width: 260px;
+            height: 260px;
           }
         }
       `}</style>

@@ -473,35 +473,14 @@ export default function ChatWindow() {
           {messages.length === 0 && (
             <div className="flex flex-col items-center justify-center h-full py-16">
               <div className="text-center space-y-6">
-                {/* Living breathing orb - Enhanced */}
-                <div className="relative w-40 h-40 mx-auto mb-8">
-                  {/* Outer glow */}
-                  <div className={`absolute inset-0 rounded-full blur-2xl opacity-40 ${
-                    theme === 'light' ? 'bg-gradient-to-br from-blue-300 to-purple-300' :
-                    theme === 'dark' ? 'bg-gradient-to-br from-purple-400 to-blue-400' :
-                    'bg-gradient-to-br from-amber-400 to-yellow-400'
-                  }`} style={{ animation: 'pulse 4s ease-in-out infinite' }} />
-                  
-                  {/* Main orb */}
-                  <div className={`absolute inset-4 rounded-full ${
-                    theme === 'light' ? 'bg-gradient-to-br from-blue-400 to-purple-400' :
-                    theme === 'dark' ? 'bg-gradient-to-br from-purple-500 to-blue-500' :
-                    'bg-gradient-to-br from-amber-500 to-yellow-500'
-                  } shadow-2xl`} style={{ animation: 'pulse 4s ease-in-out infinite 0.5s' }}>
-                    {/* Inner light */}
-                    <div className={`absolute inset-6 rounded-full blur-md ${
-                      theme === 'light' ? 'bg-blue-200' :
-                      theme === 'dark' ? 'bg-white' :
-                      'bg-yellow-200'
-                    } opacity-60`} style={{ animation: 'pulse 4s ease-in-out infinite 1s' }} />
+                {/* Living breathing orb - Your exact orb, smaller */}
+                <div className="central-orb-container-small">
+                  <div className="central-orb-small">
+                    <div className="inner-glow"></div>
+                    <div className="orbital-ring ring1"></div>
+                    <div className="orbital-ring ring2"></div>
+                    <div className="orbital-ring ring3"></div>
                   </div>
-                  
-                  {/* Core */}
-                  <div className={`absolute inset-12 rounded-full ${
-                    theme === 'light' ? 'bg-gradient-to-br from-blue-300 to-purple-200' :
-                    theme === 'dark' ? 'bg-gradient-to-br from-purple-400 to-blue-300' :
-                    'bg-gradient-to-br from-amber-300 to-yellow-200'
-                  }`} style={{ animation: 'pulse 4s ease-in-out infinite 1.5s' }} />
                 </div>
                 
                 <h2 className={`text-3xl font-bold ${themeClasses.text}`}>
@@ -741,6 +720,104 @@ export default function ChatWindow() {
 
         .scrollbar-hide::-webkit-scrollbar {
           display: none;
+        }
+
+        /* Small orb for ChatWindow welcome screen */
+        .central-orb-container-small {
+          width: 200px;
+          height: 200px;
+          position: relative;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin: 0 auto 2rem auto;
+        }
+
+        .central-orb-small {
+          width: 160px;
+          height: 160px;
+          border-radius: 50%;
+          background: radial-gradient(circle at 35% 35%, 
+            #93C5FD 0%, 
+            #A78BFA 25%, 
+            #8B5CF6 50%, 
+            #4C1D95 75%),
+            radial-gradient(circle at 70% 70%, 
+            #EC4899 0%, 
+            transparent 50%);
+          position: relative;
+          animation: orbBreathe 8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+          box-shadow: 
+            inset 0 0 60px rgba(255, 255, 255, 0.9),
+            0 0 120px rgba(167, 139, 250, 0.6),
+            0 0 100px rgba(139, 92, 246, 0.5),
+            0 0 80px rgba(236, 72, 153, 0.3),
+            0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        @keyframes orbBreathe {
+          0%, 100% { 
+            transform: scale(1) rotate(0deg); 
+            filter: brightness(1);
+          }
+          50% { 
+            transform: scale(1.12) rotate(5deg); 
+            filter: brightness(1.15);
+          }
+        }
+
+        .orbital-ring {
+          position: absolute;
+          border: 1px solid;
+          border-radius: 50%;
+          animation: ringPulse 4s ease-in-out infinite;
+          pointer-events: none;
+        }
+
+        .ring1 {
+          inset: -15px;
+          border-color: rgba(184, 167, 232, 0.3);
+          animation-delay: 0s;
+        }
+
+        .ring2 {
+          inset: -30px;
+          border-color: rgba(232, 155, 155, 0.2);
+          animation-delay: 2s;
+        }
+
+        .ring3 {
+          inset: -45px;
+          border-color: rgba(232, 180, 208, 0.15);
+          animation-delay: 4s;
+        }
+
+        @keyframes ringPulse {
+          0%, 100% { 
+            opacity: 0.3; 
+            transform: scale(1); 
+          }
+          50% { 
+            opacity: 0.6; 
+            transform: scale(1.05); 
+          }
+        }
+
+        .inner-glow {
+          position: absolute;
+          inset: 20%;
+          border-radius: 50%;
+          background: radial-gradient(circle at center,
+            rgba(255, 255, 255, 0.8) 0%,
+            rgba(255, 255, 255, 0.4) 30%,
+            transparent 70%);
+          animation: innerPulse 6s ease-in-out infinite;
+          pointer-events: none;
+        }
+
+        @keyframes innerPulse {
+          0%, 100% { opacity: 0.5; }
+          50% { opacity: 0.8; }
         }
       `}</style>
     </div>

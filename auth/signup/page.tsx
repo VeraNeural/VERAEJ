@@ -1,162 +1,146 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Eye, EyeOff, AlertCircle, Check, Sparkles } from 'lucide-react';
+import { Eye, EyeOff, AlertCircle, Check, X } from 'lucide-react';
 
 export default function SignUpPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    confirmPassword: '',
+    acceptedTerms: false,
+  });
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Pre-fill email if passed from landing page
-  useEffect(() => {
-    const emailParam = searchParams?.get('email');
-    if (emailParam) {
-      setEmail(emailParam);
-    }
-  }, [searchParams]);
+  // Password strength validation
+  const passwordRequirements = {
+    length: formData.password.length >= 8,
+    lowercase: /[a-z]/.test(formData.password),
+    uppercase: /[A-Z]/.test(formData.password),
+    number: /[0-9]/.test(formData.password),
+  };
+
+  const passwordsMatch = formData.password === formData.confirmPassword && formData.confirmPassword.length > 0;
+  const allRequirementsMet = Object.values(passwordRequirements).every(req => req);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    // Validation
+    if (!formData.email || !formData.password || !formData.confirmPassword) {
+      setError('All fields are required');
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      setError('Please enter a valid email address');
+      return;
+    }
+
+    if (!allRequirementsMet) {
+      setError('Password does not meet requirements');
+      return;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    if (!formData.acceptedTerms) {
+      setError('You must accept the terms and understand VERA\'s limitations');
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      // First, capture as lead
-      await fetch('/api/leads/capture', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          email,
-          source: 'signup_page'
-        }),
-      });
-
-      // Then create account
       const response = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
       });
 
       const data = await response.json();
 
-      if (response.ok) {
-        // Always go to orientation first
-        router.push('/orientation');
-      } else {
-        setError(data.error || 'Failed to create account');
+      if (!response.ok) {
+        throw new Error(data.error || 'Signup failed');
       }
-    } catch (error) {
-      setError('Something went wrong. Please try again.');
+
+      // Redirect to orientation
+      router.push('/orientation');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#faf8fc] via-[#f5f0fa] to-[#fef5fb] flex items-center justify-center p-6">
-      <div className="max-w-6xl w-full grid lg:grid-cols-2 gap-8 items-center">
-        {/* Left: Benefits (What they get) */}
-        <div className="hidden lg:block">
-          <div className="w-20 h-20 mb-6 rounded-full bg-gradient-to-br from-purple-400 to-blue-400 opacity-80 animate-pulse" />
-          
-          <h2 className="text-4xl font-light text-slate-900 mb-4">
-            Start free. Grow with me.
-          </h2>
-          <p className="text-xl text-slate-600 mb-8 font-light">
-            I am VERA. I see you, and I am here for you — 24/7.
-          </p>
-
-          <div className="space-y-6">
-            <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center flex-shrink-0">
-                <Sparkles className="text-purple-600" size={20} />
-              </div>
-              <div>
-                <h3 className="font-normal text-slate-900 mb-1">Free tier gets you started</h3>
-                <p className="text-slate-600 text-sm font-light">10 messages/day, 5 prompts, pattern insights</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center flex-shrink-0">
-                <Check className="text-blue-600" size={20} />
-              </div>
-              <div>
-                <h3 className="font-normal text-slate-900 mb-1">Explorer ($29/mo) unlocks everything</h3>
-                <ul className="text-slate-600 text-sm font-light space-y-1">
-                  <li>• Unlimited conversations & prompts</li>
-                  <li>• Unlimited voice responses</li>
-                  <li>• Save all chats forever</li>
-                  <li>• Full nervous system pattern analysis</li>
-                  <li>• Priority support</li>
-                </ul>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-xl bg-rose-100 flex items-center justify-center flex-shrink-0">
-                <AlertCircle className="text-rose-600" size={20} />
-              </div>
-              <div>
-                <h3 className="font-normal text-slate-900 mb-1">Upgrade anytime</h3>
-                <p className="text-slate-600 text-sm font-light">Start free, upgrade when you're ready. Cancel anytime.</p>
-              </div>
-            </div>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 flex items-center justify-center px-4 py-12">
+      <div className="max-w-md w-full">
+        {/* VERA Logo */}
+        <div className="text-center mb-8">
+          <Link href="/" className="inline-block">
+            <h1 className="text-3xl font-normal bg-gradient-to-r from-rose-400 via-purple-400 to-blue-400 text-transparent bg-clip-text tracking-wide">
+              VERA
+            </h1>
+          </Link>
+          <p className="text-slate-600 mt-2">Begin your journey with me</p>
         </div>
 
-        {/* Right: Sign-up Form */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-xl border border-purple-100">
-          <div className="text-center mb-6">
-            <h1 className="text-3xl font-light text-transparent bg-clip-text bg-gradient-to-r from-rose-400 via-purple-400 to-blue-400 mb-2">
-              Begin Your Journey
-            </h1>
-            <p className="text-slate-600 font-light">Create your free account</p>
-          </div>
+        {/* Sign-Up Card */}
+        <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-purple-100 p-8">
+          <h2 className="text-2xl font-light text-slate-900 mb-6">Create Your Account</h2>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {error && (
-              <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3">
-                <AlertCircle className="text-red-600 flex-shrink-0 mt-0.5" size={20} />
-                <p className="text-red-800 text-sm">{error}</p>
-              </div>
-            )}
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
+              <AlertCircle size={20} className="text-red-600 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-red-800">{error}</p>
+            </div>
+          )}
 
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Email */}
             <div>
-              <label className="block text-slate-700 font-normal mb-2">
+              <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-2">
                 Email Address
               </label>
               <input
+                id="email"
                 type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                required
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-300 focus:border-transparent transition-all"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                placeholder="your@email.com"
+                disabled={isLoading}
               />
             </div>
 
+            {/* Password */}
             <div>
-              <label className="block text-slate-700 font-normal mb-2">
-                Create Password
+              <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-2">
+                Password
               </label>
               <div className="relative">
                 <input
+                  id="password"
                   type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="At least 8 characters"
-                  required
-                  minLength={8}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-300 focus:border-transparent transition-all pr-12"
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  className="w-full px-4 py-3 pr-12 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                  placeholder="Create a strong password"
+                  disabled={isLoading}
                 />
                 <button
                   type="button"
@@ -166,54 +150,122 @@ export default function SignUpPage() {
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
-              <p className="text-xs text-slate-500 mt-2 font-light">
-                Must be at least 8 characters with uppercase, lowercase, and number
-              </p>
+
+              {/* Password Requirements */}
+              {formData.password && (
+                <div className="mt-3 space-y-2">
+                  <p className="text-xs font-medium text-slate-600">Password must contain:</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className={`flex items-center gap-2 text-xs ${passwordRequirements.length ? 'text-green-600' : 'text-slate-400'}`}>
+                      {passwordRequirements.length ? <Check size={14} /> : <X size={14} />}
+                      <span>8+ characters</span>
+                    </div>
+                    <div className={`flex items-center gap-2 text-xs ${passwordRequirements.uppercase ? 'text-green-600' : 'text-slate-400'}`}>
+                      {passwordRequirements.uppercase ? <Check size={14} /> : <X size={14} />}
+                      <span>Uppercase letter</span>
+                    </div>
+                    <div className={`flex items-center gap-2 text-xs ${passwordRequirements.lowercase ? 'text-green-600' : 'text-slate-400'}`}>
+                      {passwordRequirements.lowercase ? <Check size={14} /> : <X size={14} />}
+                      <span>Lowercase letter</span>
+                    </div>
+                    <div className={`flex items-center gap-2 text-xs ${passwordRequirements.number ? 'text-green-600' : 'text-slate-400'}`}>
+                      {passwordRequirements.number ? <Check size={14} /> : <X size={14} />}
+                      <span>Number</span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
+            {/* Confirm Password */}
+            <div>
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-slate-700 mb-2">
+                Confirm Password
+              </label>
+              <div className="relative">
+                <input
+                  id="confirmPassword"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  value={formData.confirmPassword}
+                  onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                  className="w-full px-4 py-3 pr-12 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                  placeholder="Confirm your password"
+                  disabled={isLoading}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                >
+                  {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
+              {formData.confirmPassword && (
+                <div className={`mt-2 flex items-center gap-2 text-xs ${passwordsMatch ? 'text-green-600' : 'text-red-600'}`}>
+                  {passwordsMatch ? <Check size={14} /> : <X size={14} />}
+                  <span>{passwordsMatch ? 'Passwords match' : 'Passwords do not match'}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Terms Acceptance */}
+            <div className="flex items-start gap-3 p-4 bg-purple-50 rounded-xl border border-purple-100">
+              <input
+                id="terms"
+                type="checkbox"
+                checked={formData.acceptedTerms}
+                onChange={(e) => setFormData({ ...formData, acceptedTerms: e.target.checked })}
+                className="mt-1 w-4 h-4 text-purple-600 border-purple-300 rounded focus:ring-purple-500"
+                disabled={isLoading}
+              />
+              <label htmlFor="terms" className="text-xs text-slate-700 leading-relaxed">
+                I understand that VERA is <strong>NOT a medical device, therapist, or crisis intervention service</strong>. 
+                VERA complements professional care but does not replace it. I will seek professional help when needed 
+                and call 988 or 911 in emergencies.
+              </label>
+            </div>
+
+            {/* Submit Button */}
             <button
               type="submit"
-              disabled={isLoading}
-              className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-normal transition-all disabled:bg-slate-400 disabled:cursor-not-allowed"
+              disabled={isLoading || !allRequirementsMet || !passwordsMatch || !formData.acceptedTerms}
+              className="w-full py-3 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white rounded-xl font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
             >
-              {isLoading ? 'Creating account...' : 'Create Free Account'}
+              {isLoading ? 'Creating Account...' : 'Start Free'}
             </button>
           </form>
 
-          <div className="mt-6 text-center">
-            <p className="text-slate-600 text-sm font-light">
-              Already have an account?{' '}
-              <Link href="/auth/signin" className="text-purple-600 hover:text-purple-700 font-normal">
-                Sign in
-              </Link>
-            </p>
-          </div>
-
-          {/* Mobile Benefits */}
-          <div className="lg:hidden mt-8 pt-6 border-t border-slate-200">
-            <p className="text-sm text-slate-600 font-light mb-4">Starting free gives you:</p>
-            <ul className="space-y-2 text-sm text-slate-600 font-light">
-              <li className="flex items-start gap-2">
-                <Check className="text-purple-500 flex-shrink-0 mt-0.5" size={16} />
-                10 messages/day to explore
-              </li>
-              <li className="flex items-start gap-2">
-                <Check className="text-purple-500 flex-shrink-0 mt-0.5" size={16} />
-                Upgrade anytime for unlimited access
-              </li>
-            </ul>
-          </div>
+          {/* Sign In Link */}
+          <p className="mt-6 text-center text-sm text-slate-600">
+            Already have an account?{' '}
+            <Link href="/auth/signin" className="text-purple-600 hover:text-purple-700 font-medium">
+              Sign in
+            </Link>
+          </p>
         </div>
-      </div>
 
-      {/* Bottom Disclaimer */}
-      <div className="fixed bottom-0 left-0 right-0 bg-slate-900 text-white py-4 px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex items-start gap-3">
-            <AlertCircle className="flex-shrink-0 mt-0.5" size={18} />
-            <p className="text-sm font-light">
-              <strong className="font-normal">Important:</strong> VERA is not a medical device, therapist, or crisis service. I complement professional care but do not replace it. In crisis, call 988 (US/Canada) or your local emergency services.
-            </p>
+        {/* Important Disclaimer */}
+        <div className="mt-6 p-4 bg-slate-100 rounded-xl border border-slate-200">
+          <p className="text-xs text-slate-600 leading-relaxed">
+            <strong className="text-slate-900">⚠️ Important:</strong> VERA is an AI companion for nervous system regulation. 
+            She is <strong>NOT</strong> a substitute for medical advice, diagnosis, treatment, or professional mental health care. 
+            Always consult qualified healthcare providers for medical concerns. In crisis, call 988 (Suicide & Crisis Lifeline) 
+            or 911 immediately.
+          </p>
+        </div>
+
+        {/* What You Get */}
+        <div className="mt-6 bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg border border-purple-100 p-6">
+          <h3 className="text-sm font-semibold text-slate-900 mb-4">Start Free, Upgrade Anytime</h3>
+          <div className="space-y-3">
+            <div className="flex items-start gap-3">
+              <div className="w-2 h-2 rounded-full bg-purple-400 mt-1.5 flex-shrink-0" />
+              <p className="text-xs text-slate-600"><strong>Free Tier:</strong> 10 messages/day, 5 quick prompts</p>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="w-2 h-2 rounded-full bg-blue-400 mt-1.5 flex-shrink-0" />
+              <p className="text-xs text-slate-600"><strong>Explorer ($29/mo):</strong> Unlimited conversations, voice responses, full pattern analysis</p>
+            </div>
           </div>
         </div>
       </div>

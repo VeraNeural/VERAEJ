@@ -12,6 +12,9 @@ export async function GET() {
     await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS test_mode BOOLEAN DEFAULT FALSE`);
     await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS stripe_customer_id VARCHAR(255)`);
     
+    // Make name column optional
+    await query(`ALTER TABLE users ALTER COLUMN name DROP NOT NULL`);
+    
     // Copy password_hash to password if needed
     await query(`UPDATE users SET password = password_hash WHERE password IS NULL OR password = ''`);
     
@@ -20,7 +23,7 @@ export async function GET() {
     
     // Verify the fix
     const afterCheck = await query(
-      `SELECT column_name, data_type 
+      `SELECT column_name, data_type, is_nullable
        FROM information_schema.columns 
        WHERE table_name = 'users'
        ORDER BY ordinal_position`
@@ -28,7 +31,7 @@ export async function GET() {
     
     return NextResponse.json({
       success: true,
-      message: 'All columns added!',
+      message: 'All columns fixed! Name is now optional.',
       columns: afterCheck.rows
     });
     

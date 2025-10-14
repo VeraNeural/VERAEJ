@@ -16,7 +16,7 @@ export default function SignInPage() {
     setError('');
 
     if (!email || !password) {
-      setError('Email and password are required');
+      setError('Please enter both email and password');
       return;
     }
 
@@ -78,11 +78,20 @@ export default function SignInPage() {
                 className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-slate-900 placeholder:text-slate-400"
                 placeholder="your@email.com"
                 disabled={isLoading}
+                required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Password</label>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium text-slate-700">Password</label>
+                <a 
+                  href="mailto:support@veraneural.com?subject=Password Reset Request"
+                  className="text-xs text-purple-600 hover:text-purple-700 font-medium"
+                >
+                  Forgot password?
+                </a>
+              </div>
               <input
                 type="password"
                 value={password}
@@ -90,6 +99,7 @@ export default function SignInPage() {
                 className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-slate-900 placeholder:text-slate-400"
                 placeholder="Enter your password"
                 disabled={isLoading}
+                required
               />
             </div>
 

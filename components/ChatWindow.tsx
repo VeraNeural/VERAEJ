@@ -323,38 +323,44 @@ export default function ChatWindow() {
 
   return (
     <div className={`flex flex-col h-screen transition-all duration-700 ${themeClasses.bg} ${themeClasses.font}`}>
-      {userTier === 'free' && (
-        <div className={`border-b px-6 py-3 transition-colors ${
-          theme === 'light'
-            ? 'bg-purple-50 border-purple-200'
-            : theme === 'dark'
-              ? 'bg-purple-900/20 border-purple-500/30'
-              : theme === 'night'
-                ? 'bg-zinc-900/50 border-zinc-700'
-                : 'bg-amber-50 border-amber-200'
-        }`}>
-          <div className="flex items-center justify-between max-w-5xl mx-auto">
-            <div className="flex items-center gap-3">
-              <div className="w-2 h-2 rounded-full bg-purple-500 animate-pulse" />
-              <p className={`text-sm ${
-                theme === 'light' ? 'text-purple-700' : theme === 'dark' ? 'text-purple-300' : theme === 'night' ? 'text-zinc-300' : 'text-amber-800'
-              }`}>
-                {messageCount}/{MESSAGE_LIMIT} messages • {promptCount}/{PROMPT_LIMIT} prompts used today
-              </p>
-            </div>
-            
-  href={process.env.NEXT_PUBLIC_STRIPE_EXPLORER_MONTHLY} target="_blank"rel="noopener noreferrer">
-  target="_blank" rel="noopener noreferrer">
-  rel="noopener noreferrer"
-  className={`text-sm font-medium px-4 py-1.5 rounded-lg transition-all ${
+     {userTier === 'free' && (
+  <div className={`border-b px-6 py-3 transition-colors ${
     theme === 'light'
-      ? 'bg-purple-600 hover:bg-purple-700 text-white'
+      ? 'bg-purple-50 border-purple-200'
       : theme === 'dark'
-        ? 'bg-purple-500 hover:bg-purple-600 text-white'
+        ? 'bg-purple-900/20 border-purple-500/30'
         : theme === 'night'
-          ? 'bg-zinc-700 hover:bg-zinc-600 text-white'
-          : 'bg-amber-600 hover:bg-amber-700 text-white'
-  }`}
+          ? 'bg-zinc-900/50 border-zinc-700'
+          : 'bg-amber-50 border-amber-200'
+  }`}>
+    <div className="flex items-center justify-between max-w-5xl mx-auto">
+      <div className="flex items-center gap-3">
+        <div className="w-2 h-2 rounded-full bg-purple-500 animate-pulse" />
+        <p className={`text-sm ${
+          theme === 'light' ? 'text-purple-700' : theme === 'dark' ? 'text-purple-300' : theme === 'night' ? 'text-zinc-300' : 'text-amber-800'
+        }`}>
+          {messageCount}/{MESSAGE_LIMIT} messages • {promptCount}/{PROMPT_LIMIT} prompts used today
+        </p>
+      </div>
+      
+        href={process.env.NEXT_PUBLIC_STRIPE_EXPLORER_MONTHLY}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={`text-sm font-medium px-4 py-1.5 rounded-lg transition-all ${
+          theme === 'light'
+            ? 'bg-purple-600 hover:bg-purple-700 text-white'
+            : theme === 'dark'
+              ? 'bg-purple-500 hover:bg-purple-600 text-white'
+              : theme === 'night'
+                ? 'bg-zinc-700 hover:bg-zinc-600 text-white'
+                : 'bg-amber-600 hover:bg-amber-700 text-white'
+        }`}
+      >
+        Upgrade for Unlimited
+      </a>
+    </div>
+  </div>
+)}
 >
   Upgrade for Unlimited
 </a>

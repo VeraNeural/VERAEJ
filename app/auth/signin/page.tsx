@@ -70,28 +70,24 @@ export default function SignInPage() {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Email Address
-              </label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Email Address</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-slate-900 placeholder:text-slate-400"
                 placeholder="your@email.com"
                 disabled={isLoading}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Password
-              </label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Password</label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-slate-900 placeholder:text-slate-400"
                 placeholder="Enter your password"
                 disabled={isLoading}
               />
@@ -118,7 +114,7 @@ export default function SignInPage() {
           <p className="text-xs text-slate-600 leading-relaxed">
             <strong className="text-slate-900">⚠️ Important:</strong> VERA is an AI companion for nervous system regulation. 
             She is <strong>NOT</strong> a substitute for medical advice, diagnosis, treatment, or professional mental health care. 
-            In crisis, call 988 or 911 immediately.
+            In crisis, call 988 (Suicide & Crisis Lifeline) or 911 immediately.
           </p>
         </div>
       </div>

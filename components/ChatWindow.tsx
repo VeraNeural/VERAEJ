@@ -358,14 +358,12 @@ export default function ChatWindow() {
               <Menu size={20} />
             </button>
 
-            {/* CRISIS BUTTON - RED for emergency */}
+            {/* Crisis button - Quiet burgundy, no text */}
             <button
               onClick={() => setShowCrisisModal(true)}
-              className="px-4 py-2 rounded-xl transition-all border-2 border-red-600 bg-red-600 hover:bg-red-700 text-white font-bold shadow-lg"
-              title="Emergency Resources"
-            >
-              <span className="text-sm">EMERGENCY</span>
-            </button>
+              className="w-10 h-10 rounded-full transition-all bg-red-900 hover:bg-red-800 shadow-lg"
+              title="Crisis support"
+            />
           </div>
         </div>
       </div>

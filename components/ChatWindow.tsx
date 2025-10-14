@@ -132,6 +132,7 @@ export default function ChatWindow() {
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
+
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -341,8 +342,10 @@ export default function ChatWindow() {
                 {messageCount}/{MESSAGE_LIMIT} messages • {promptCount}/{PROMPT_LIMIT} prompts used today
               </p>
             </div>
-            <button
-              onClick={() => setShowUpgrade(true)}
+            
+              href={process.env.NEXT_PUBLIC_STRIPE_EXPLORER_MONTHLY}
+              target="_blank"
+              rel="noopener noreferrer"
               className={`text-sm font-medium px-4 py-1.5 rounded-lg transition-all ${
                 theme === 'light'
                   ? 'bg-purple-600 hover:bg-purple-700 text-white'
@@ -354,11 +357,10 @@ export default function ChatWindow() {
               }`}
             >
               Upgrade for Unlimited
-            </button>
+            </a>
           </div>
         </div>
       )}
-
       <div className={`backdrop-blur-xl border-b px-6 py-4 shadow-sm transition-all duration-500 ${themeClasses.header}`}>
         <div className="flex items-center justify-between max-w-5xl mx-auto">
           <div className="flex items-center gap-3">
@@ -415,6 +417,7 @@ export default function ChatWindow() {
           </div>
         </div>
       </div>
+
       {showCrisisModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className={`rounded-3xl p-8 max-w-2xl shadow-2xl ${
@@ -697,6 +700,7 @@ export default function ChatWindow() {
       />
 
       <audio ref={audioRef} className="hidden" />
+
       <style jsx>{`
         @keyframes fade-in {
           from {

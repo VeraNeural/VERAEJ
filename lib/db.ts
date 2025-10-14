@@ -314,36 +314,34 @@ export const db = {
     
     return total > 0 ? ((paid / total) * 100).toFixed(1) : '0';
   },
-  // ...existing code...
-  }
+}; // ✅ Fixed: Moved closing brace here
 
-  // Create test user (for staff)
-  export async function createTestUser(params: { name: string; email: string; password: string }) {
-    const { name, email, password } = params;
-    const saltRounds = 10;
-    let passwordHash;
-    try {
-      passwordHash = await bcrypt.hash(password, saltRounds);
-    } catch (err) {
-      return { error: 'Password hashing failed' };
-    }
-    try {
-      const result = await pool.query(
-        `INSERT INTO test_users (name, email, password_hash, subscription_tier, subscription_status)
-         VALUES ($1, $2, $3, 'integrator', 'active')
-         RETURNING id, name, email, subscription_tier, subscription_status, created_at`,
-        [name, email, passwordHash]
-      );
-      return { user: result.rows[0] };
-    } catch (error) {
-  const err = error as unknown as { code?: string };
-      if (err.code === '23505') {
-        return { error: 'Test user already exists' };
-      }
-      return { error: 'Database error' };
-    }
+// Create test user (for staff)
+export async function createTestUser(params: { name: string; email: string; password: string }) {
+  const { name, email, password } = params;
+  const saltRounds = 10;
+  let passwordHash;
+  try {
+    passwordHash = await bcrypt.hash(password, saltRounds);
+  } catch (err) {
+    return { error: 'Password hashing failed' };
   }
-// End of db object
+  try {
+    const result = await pool.query(
+      `INSERT INTO test_users (name, email, password_hash, subscription_tier, subscription_status)
+       VALUES ($1, $2, $3, 'integrator', 'active')
+       RETURNING id, name, email, subscription_tier, subscription_status, created_at`,
+      [name, email, passwordHash]
+    );
+    return { user: result.rows[0] };
+  } catch (error) {
+    const err = error as { code?: string }; // ✅ Fixed: Proper type assertion
+    if (err.code === '23505') {
+      return { error: 'Test user already exists' };
+    }
+    return { error: 'Database error' };
+  }
+}
 
 // Export query function for custom queries
 export async function query(text: string, params?: unknown[]) {

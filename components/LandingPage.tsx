@@ -162,7 +162,7 @@ export default function LandingPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Enter your email"
-                    className="flex-1 px-5 py-4 rounded-xl border-2 border-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-slate-800 bg-white shadow-sm text-lg"
+                    className="flex-1 px-5 py-4 rounded-xl border-2 border-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-slate-900 bg-white shadow-sm text-lg placeholder:text-slate-400"
                   />
                   <button
                     onClick={handleGetStarted}

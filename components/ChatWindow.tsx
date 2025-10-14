@@ -355,7 +355,6 @@ export default function ChatWindow() {
           ? 'bg-zinc-700 hover:bg-zinc-600 text-white'
           : 'bg-amber-600 hover:bg-amber-700 text-white'
   }`}
->
   Upgrade for Unlimited
 </a>
           </div>

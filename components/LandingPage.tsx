@@ -96,7 +96,7 @@ export default function LandingPage() {
                 </button>
               </div>
               <p className="text-sm text-slate-500 font-light">
-                7-day free trial • No credit card required
+                No credit card required • Start for free
               </p>
             </div>
 
@@ -290,13 +290,13 @@ export default function LandingPage() {
                 href="/auth/signup"
                 className="block w-full py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-normal transition-all text-center"
               >
-                Start 7-Day Free Trial
+                Start Free Trial
               </Link>
             </div>
           </div>
 
           <p className="text-center text-slate-500 mt-8 text-sm font-light">
-            7-day free trial on Explorer. No credit card required. Cancel anytime.
+            No credit card required to start. Cancel anytime.
           </p>
         </div>
       </section>
@@ -304,14 +304,14 @@ export default function LandingPage() {
       {/* Partners Section */}
       <section className="py-16 px-6 bg-white/50 border-y border-slate-100">
         <div className="max-w-7xl mx-auto">
-          <p className="text-center text-slate-500 text-sm mb-8 font-light">
+          <p className="text-center text-slate-600 text-base mb-8 font-light">
             Trusted by therapists and trauma specialists
           </p>
-          <div className="flex flex-wrap justify-center items-center gap-12 opacity-40">
-            <div className="text-slate-400 font-light text-lg">Somatic Experiencing®</div>
-            <div className="text-slate-400 font-light text-lg">EMDR International</div>
-            <div className="text-slate-400 font-light text-lg">Polyvagal Institute</div>
-            <div className="text-slate-400 font-light text-lg">National Alliance on Mental Illness</div>
+          <div className="flex flex-wrap justify-center items-center gap-12">
+            <div className="text-slate-700 font-normal text-lg">Vision Design Studio</div>
+            <div className="text-slate-700 font-normal text-lg">Regulate to Elevate</div>
+            <div className="text-slate-700 font-normal text-lg">Board Certified Neuroscientists</div>
+            <div className="text-slate-700 font-normal text-lg">Board Certified Neurologists</div>
           </div>
         </div>
       </section>
@@ -330,7 +330,7 @@ export default function LandingPage() {
               href="/auth/signup"
               className="inline-flex items-center gap-2 px-8 py-4 bg-white hover:bg-slate-100 text-slate-900 rounded-xl font-normal transition-all"
             >
-              Start 7-Day Free Trial
+              Start Free Trial
               <ArrowRight size={20} />
             </Link>
           </div>

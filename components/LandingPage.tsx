@@ -122,13 +122,13 @@ export default function LandingPage() {
           <div className="flex items-center gap-4">
             <Link 
               href="/auth/signin"
-              className="text-slate-600 hover:text-slate-900 font-normal transition-colors"
+              className="px-5 py-2 bg-white hover:bg-slate-50 text-slate-700 rounded-xl font-normal transition-all border-2 border-purple-200 hover:border-purple-300 shadow-sm"
             >
               Sign In
             </Link>
             <Link 
               href="/auth/signup"
-              className="px-6 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-normal transition-all"
+              className="px-6 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-normal transition-all shadow-md hover:shadow-lg"
             >
               Get Started
             </Link>
@@ -151,25 +151,31 @@ export default function LandingPage() {
                 I help you listen to your body's wisdom. Through gentle guidance, I support you in finding the regulation, safety, and peace that already lives within you.
               </p>
               
-              <div className="flex gap-3 mb-4">
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email"
-                  className="flex-1 px-5 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-300 focus:border-transparent text-slate-800 bg-white/80"
-                />
-                <button
-                  onClick={handleGetStarted}
-                  className="px-8 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-normal transition-all flex items-center gap-2"
-                >
-                  Start Free
-                  <ArrowRight size={18} />
-                </button>
+              {/* Highlighted Email Input */}
+              <div className="bg-gradient-to-br from-purple-50 to-blue-50 p-6 rounded-2xl border-2 border-purple-200 shadow-lg mb-4">
+                <p className="text-sm text-purple-700 font-medium mb-3 text-center">
+                  ✨ Start your journey today — free
+                </p>
+                <div className="flex gap-3">
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Enter your email"
+                    className="flex-1 px-5 py-4 rounded-xl border-2 border-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-slate-800 bg-white shadow-sm text-lg"
+                  />
+                  <button
+                    onClick={handleGetStarted}
+                    className="px-8 py-4 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-normal transition-all flex items-center gap-2 shadow-md hover:shadow-lg"
+                  >
+                    Start Free
+                    <ArrowRight size={18} />
+                  </button>
+                </div>
+                <p className="text-xs text-slate-600 font-light mt-3 text-center">
+                  No credit card required • 10 free messages daily
+                </p>
               </div>
-              <p className="text-sm text-slate-500 font-light">
-                Start for free • Upgrade anytime
-              </p>
             </div>
 
             {/* VERA's Living Orb */}
@@ -426,6 +432,71 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Stay Connected - Lead Capture */}
+      <section className="py-16 px-6 bg-gradient-to-br from-purple-50/50 to-blue-50/50 border-t border-purple-100">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl font-light text-slate-900 mb-4">
+            Stay connected with VERA
+          </h2>
+          <p className="text-slate-600 mb-8 font-light">
+            Get updates about new features, nervous system insights, and community support.
+          </p>
+          
+          <form 
+            onSubmit={async (e) => {
+              e.preventDefault();
+              const formData = new FormData(e.currentTarget);
+              const email = formData.get('email');
+              
+              try {
+                await fetch('/api/leads/capture', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ 
+                    email,
+                    source: 'footer_newsletter'
+                  }),
+                });
+                alert('✅ Thank you! We\'ll keep you updated.');
+                e.currentTarget.reset();
+              } catch (error) {
+                alert('Something went wrong. Please try again.');
+              }
+            }}
+            className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto"
+          >
+            <input
+              type="email"
+              name="email"
+              required
+              placeholder="your@email.com"
+              className="flex-1 px-5 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent"
+            />
+            <button
+              type="submit"
+              className="px-8 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-normal transition-all whitespace-nowrap"
+            >
+              Keep Me Updated
+            </button>
+          </form>
+
+          <div className="mt-8 pt-8 border-t border-slate-200">
+            <p className="text-slate-600 text-sm mb-3 font-light">
+              Have a question? We're here to help.
+            </p>
+            <a 
+              href="mailto:support@veraneural.com"
+              className="inline-flex items-center gap-2 text-purple-600 hover:text-purple-700 font-normal"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              support@veraneural.com
+            </a>
+          </div>
+        </div>
+      </section>
+
       {/* Footer */}
       <footer className="bg-white border-t border-slate-200 py-12 px-6">
         <div className="max-w-7xl mx-auto">
@@ -438,7 +509,6 @@ export default function LandingPage() {
             <div className="flex gap-8 text-sm text-slate-600 font-light">
               <Link href="/privacy" className="hover:text-slate-900">Privacy</Link>
               <Link href="/terms" className="hover:text-slate-900">Terms</Link>
-              <a href="mailto:support@veraneural.com" className="hover:text-slate-900">Contact</a>
             </div>
           </div>
           

@@ -30,7 +30,7 @@ export default function OrientationPage() {
 
     try {
       // Save orientation completion to database
-      const response = await fetch('/api/orientation/complete', {
+      const response = await fetch('/api/orientation', {  // ← CHANGED FROM /api/orientation/complete
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),

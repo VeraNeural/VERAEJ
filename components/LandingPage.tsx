@@ -34,7 +34,25 @@ export default function LandingPage() {
     };
   }, []);
 
-  const handleGetStarted = () => {
+  const handleGetStarted = async () => {
+    // Capture email as lead FIRST (even if they don't complete signup)
+    if (email) {
+      try {
+        await fetch('/api/leads/capture', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            email,
+            source: 'landing_page_hero'
+          }),
+        });
+        console.log('✅ Lead captured');
+      } catch (error) {
+        console.error('Lead capture failed:', error);
+      }
+    }
+    
+    // Then redirect to signup with email pre-filled
     window.location.href = `/auth/signup${email ? `?email=${encodeURIComponent(email)}` : ''}`;
   };
 

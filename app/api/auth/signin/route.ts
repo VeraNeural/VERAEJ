@@ -4,7 +4,12 @@ import { verifyPassword, generateToken, setAuthCookie } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('🔐 Signin request received');
+    
     const { email, password } = await request.json();
+    
+    console.log('📧 Email:', email);
+    console.log('🔑 Password provided:', !!password);
 
     // Validate input
     if (!email || !password) {
@@ -14,6 +19,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    console.log('🔍 Looking up user...');
+    
     // Find user
     const result = await query(
       `SELECT id, email, password, subscription_status, subscription_tier, 
@@ -23,6 +30,8 @@ export async function POST(request: NextRequest) {
       [email.toLowerCase()]
     );
 
+    console.log('👤 User found:', result.rows.length > 0);
+
     if (result.rows.length === 0) {
       return NextResponse.json(
         { error: 'Invalid email or password' },
@@ -31,9 +40,13 @@ export async function POST(request: NextRequest) {
     }
 
     const user = result.rows[0];
+    
+    console.log('🔐 Verifying password...');
 
     // Verify password
     const isValidPassword = await verifyPassword(password, user.password);
+
+    console.log('✅ Password valid:', isValidPassword);
 
     if (!isValidPassword) {
       return NextResponse.json(
@@ -41,6 +54,8 @@ export async function POST(request: NextRequest) {
         { status: 401 }
       );
     }
+
+    console.log('🎫 Generating token...');
 
     // Generate token and set cookie
     const token = generateToken(user.id, user.email, user.test_mode);

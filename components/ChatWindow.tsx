@@ -51,7 +51,7 @@ export default function ChatWindow() {
       case 'regulator':
         return 20;
       case 'explorer':
-        return 5;
+        return Infinity; // UNLIMITED for Explorer!
       default:
         return 0;
     }
@@ -61,7 +61,7 @@ export default function ChatWindow() {
 
   // Theme cycling
   const cycleTheme = () => {
-    const themes: ThemeMode[] = ['light', 'dark', 'neuro'];
+    const themes: ThemeMode[] = ['light', 'dark', 'night', 'neuro'];
     const currentIndex = themes.indexOf(theme);
     const nextIndex = (currentIndex + 1) % themes.length;
     setTheme(themes[nextIndex]);
@@ -371,11 +371,13 @@ export default function ChatWindow() {
                   ? 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
                   : theme === 'dark'
                     ? 'bg-indigo-900/50 text-purple-300 border-purple-500/30 hover:bg-indigo-900/70'
-                    : 'bg-amber-100 text-amber-800 border-amber-300 hover:bg-amber-200'
+                    : theme === 'night'
+                      ? 'bg-zinc-900 text-white border-zinc-800 hover:bg-zinc-800'
+                      : 'bg-amber-100 text-amber-800 border-amber-300 hover:bg-amber-200'
               }`}
               title="Switch theme"
             >
-              {theme === 'light' ? 'Light' : theme === 'dark' ? 'Dark' : 'Neuro'}
+              {theme === 'light' ? 'Light' : theme === 'dark' ? 'Dark' : theme === 'night' ? 'Night' : 'Neuro'}
             </button>
 
             <button

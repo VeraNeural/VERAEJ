@@ -1,4 +1,5 @@
 import { Pool } from 'pg';
+import bcrypt from 'bcryptjs';
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -319,7 +320,6 @@ export const db = {
   // Create test user (for staff)
   export async function createTestUser(params: { name: string; email: string; password: string }) {
     const { name, email, password } = params;
-    const bcrypt = require('bcryptjs');
     const saltRounds = 10;
     let passwordHash;
     try {
@@ -336,7 +336,7 @@ export const db = {
       );
       return { user: result.rows[0] };
     } catch (error) {
-      const err = error as any;
+  const err = error as unknown as { code?: string };
       if (err.code === '23505') {
         return { error: 'Test user already exists' };
       }
@@ -346,7 +346,7 @@ export const db = {
 // End of db object
 
 // Export query function for custom queries
-export async function query(text: string, params?: any[]) {
+export async function query(text: string, params?: unknown[]) {
   const client = await pool.connect();
   try {
     const result = await client.query(text, params);

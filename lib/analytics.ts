@@ -11,7 +11,7 @@ class Analytics {
   private events: AnalyticsEvent[] = [];
   private maxEvents = 1000;
 
-  track(event: string, properties?: Record<string, any>) {
+  track(event: string, properties?: Record<string, unknown>) {
     const analyticsEvent: AnalyticsEvent = {
       event,
       properties,

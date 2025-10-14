@@ -311,6 +311,40 @@ export default function ChatWindow() {
 
   return (
     <div className={`flex flex-col h-screen transition-all duration-700 ${themeClasses.bg} ${themeClasses.font}`}>
+      {/* Free Tier Upgrade Banner */}
+      {userTier === 'free' && (
+        <div className={`border-b px-6 py-3 transition-colors ${
+          theme === 'light'
+            ? 'bg-purple-50 border-purple-200'
+            : theme === 'dark'
+              ? 'bg-purple-900/20 border-purple-500/30'
+              : 'bg-amber-50 border-amber-200'
+        }`}>
+          <div className="flex items-center justify-between max-w-5xl mx-auto">
+            <div className="flex items-center gap-3">
+              <div className="w-2 h-2 rounded-full bg-purple-500 animate-pulse" />
+              <p className={`text-sm ${
+                theme === 'light' ? 'text-purple-700' : theme === 'dark' ? 'text-purple-300' : 'text-amber-800'
+              }`}>
+                {messageCount}/{MESSAGE_LIMIT} messages • {promptCount}/{PROMPT_LIMIT} prompts used today
+              </p>
+            </div>
+            <button
+              onClick={() => setShowUpgrade(true)}
+              className={`text-sm font-medium px-4 py-1.5 rounded-lg transition-all ${
+                theme === 'light'
+                  ? 'bg-purple-600 hover:bg-purple-700 text-white'
+                  : theme === 'dark'
+                    ? 'bg-purple-500 hover:bg-purple-600 text-white'
+                    : 'bg-amber-600 hover:bg-amber-700 text-white'
+              }`}
+            >
+              Upgrade for Unlimited
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className={`backdrop-blur-xl border-b px-6 py-4 shadow-sm transition-all duration-500 ${themeClasses.header}`}>
         <div className="flex items-center justify-between max-w-5xl mx-auto">

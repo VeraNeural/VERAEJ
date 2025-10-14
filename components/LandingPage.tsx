@@ -100,21 +100,18 @@ export default function LandingPage() {
               </p>
             </div>
 
-            {/* VERA's Living Orb - Beautiful */}
+            {/* VERA's Living Orb */}
             <div className="relative flex items-center justify-center">
-              <div className="orb-wrapper">
+              <div className="central-orb-container">
                 <div 
                   ref={orbRef}
-                  className="vera-orb"
+                  className="central-orb"
+                  id="veraOrb"
                 >
-                  {/* Outer rings - nervous system pathways */}
-                  <div className="orb-ring ring-1"></div>
-                  <div className="orb-ring ring-2"></div>
-                  <div className="orb-ring ring-3"></div>
-                  {/* Core glow */}
-                  <div className="orb-core"></div>
-                  {/* Inner light */}
-                  <div className="orb-light"></div>
+                  <div className="inner-glow"></div>
+                  <div className="orbital-ring ring1"></div>
+                  <div className="orbital-ring ring2"></div>
+                  <div className="orbital-ring ring3"></div>
                 </div>
               </div>
             </div>
@@ -359,140 +356,135 @@ export default function LandingPage() {
         </div>
       </footer>
 
-      {/* VERA's Orb Styles - Beautiful & Ethereal */}
+      {/* VERA's Orb Styles - Your Exact Code */}
       <style jsx>{`
-        .orb-wrapper {
-          width: 450px;
-          height: 450px;
-          max-width: 85vw;
-          max-height: 85vw;
+        .central-orb-container {
+          width: 650px;
+          height: 650px;
+          max-width: 90vw;
+          max-height: 90vh;
           position: relative;
           display: flex;
           align-items: center;
           justify-content: center;
         }
 
-        .vera-orb {
-          width: 350px;
-          height: 350px;
-          max-width: 75vw;
-          max-height: 75vw;
+        .central-orb {
+          width: 550px;
+          height: 550px;
+          max-width: 85vw;
+          max-height: 85vw;
           border-radius: 50%;
+          background: radial-gradient(circle at 35% 35%, 
+            #93C5FD 0%, 
+            #A78BFA 25%, 
+            #8B5CF6 50%, 
+            #4C1D95 75%),
+            radial-gradient(circle at 70% 70%, 
+            #EC4899 0%, 
+            transparent 50%);
           position: relative;
-          background: radial-gradient(
-            circle at var(--mouse-x, 40%) var(--mouse-y, 40%),
-            rgba(196, 181, 253, 0.8) 0%,
-            rgba(167, 139, 250, 0.6) 30%,
-            rgba(139, 92, 246, 0.4) 60%,
-            rgba(124, 58, 237, 0.2) 100%
-          );
+          animation: orbBreathe 8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
           box-shadow: 
-            inset 0 0 80px rgba(255, 255, 255, 0.5),
-            0 0 100px rgba(167, 139, 250, 0.4),
-            0 20px 80px rgba(139, 92, 246, 0.3);
-          animation: vera-breathe 6s ease-in-out infinite;
+            inset 0 0 150px rgba(255, 255, 255, 0.9),
+            0 0 300px rgba(167, 139, 250, 0.7),
+            0 0 250px rgba(139, 92, 246, 0.6),
+            0 0 200px rgba(236, 72, 153, 0.3),
+            0 60px 120px rgba(0, 0, 0, 0.4);
+          cursor: pointer;
+          transition: filter 0.3s ease;
         }
 
-        @keyframes vera-breathe {
-          0%, 100% {
-            transform: scale(1);
-            opacity: 0.9;
+        @keyframes orbBreathe {
+          0%, 100% { 
+            transform: scale(1) rotate(0deg); 
+            filter: brightness(1);
           }
-          50% {
-            transform: scale(1.08);
-            opacity: 1;
+          50% { 
+            transform: scale(1.12) rotate(5deg); 
+            filter: brightness(1.15);
           }
         }
 
-        .orb-ring {
+        .orbital-ring {
           position: absolute;
+          inset: -50px;
+          border: 2px solid;
           border-radius: 50%;
-          border: 1px solid rgba(167, 139, 250, 0.3);
+          animation: ringPulse 4s ease-in-out infinite;
           pointer-events: none;
         }
 
-        .ring-1 {
-          inset: -30px;
-          animation: ring-pulse 6s ease-in-out infinite;
+        .ring1 {
+          border-color: rgba(184, 167, 232, 0.3);
+          animation-delay: 0s;
         }
 
-        .ring-2 {
-          inset: -60px;
-          animation: ring-pulse 6s ease-in-out infinite 2s;
+        .ring2 {
+          inset: -100px;
+          border-color: rgba(232, 155, 155, 0.2);
+          animation-delay: 2s;
         }
 
-        .ring-3 {
-          inset: -90px;
-          animation: ring-pulse 6s ease-in-out infinite 4s;
+        .ring3 {
+          inset: -150px;
+          border-color: rgba(232, 180, 208, 0.15);
+          animation-delay: 4s;
         }
 
-        @keyframes ring-pulse {
-          0%, 100% {
-            opacity: 0.2;
-            transform: scale(1);
+        @keyframes ringPulse {
+          0%, 100% { 
+            opacity: 0.3; 
+            transform: scale(1); 
           }
-          50% {
-            opacity: 0.5;
-            transform: scale(1.05);
+          50% { 
+            opacity: 0.6; 
+            transform: scale(1.05); 
           }
         }
 
-        .orb-core {
+        .inner-glow {
           position: absolute;
-          inset: 25%;
+          inset: 20%;
           border-radius: 50%;
-          background: radial-gradient(
-            circle at center,
-            rgba(255, 255, 255, 0.9) 0%,
-            rgba(196, 181, 253, 0.6) 40%,
-            transparent 70%
-          );
-          animation: core-glow 4s ease-in-out infinite;
-        }
-
-        @keyframes core-glow {
-          0%, 100% {
-            opacity: 0.6;
-            transform: scale(1);
-          }
-          50% {
-            opacity: 0.9;
-            transform: scale(1.1);
-          }
-        }
-
-        .orb-light {
-          position: absolute;
-          inset: 35%;
-          border-radius: 50%;
-          background: radial-gradient(
-            circle at center,
+          background: radial-gradient(circle at center,
             rgba(255, 255, 255, 0.8) 0%,
-            rgba(255, 255, 255, 0.3) 50%,
-            transparent 100%
-          );
-          filter: blur(15px);
-          animation: light-pulse 3s ease-in-out infinite;
+            rgba(255, 255, 255, 0.4) 30%,
+            transparent 70%);
+          animation: innerPulse 6s ease-in-out infinite;
+          pointer-events: none;
         }
 
-        @keyframes light-pulse {
-          0%, 100% {
-            opacity: 0.5;
-          }
-          50% {
-            opacity: 0.8;
-          }
+        @keyframes innerPulse {
+          0%, 100% { opacity: 0.5; }
+          50% { opacity: 0.8; }
+        }
+
+        .central-orb:hover {
+          filter: brightness(1.2) saturate(1.2);
         }
 
         @media (max-width: 768px) {
-          .orb-wrapper {
+          .central-orb-container {
+            width: 400px;
+            height: 400px;
+          }
+
+          .central-orb {
+            width: 320px;
+            height: 320px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .central-orb-container {
             width: 320px;
             height: 320px;
           }
 
-          .vera-orb {
-            width: 260px;
-            height: 260px;
+          .central-orb {
+            width: 280px;
+            height: 280px;
           }
         }
       `}</style>

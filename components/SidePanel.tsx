@@ -55,7 +55,7 @@ export default function SidePanel({ isOpen, onClose, darkMode }: SidePanelProps)
                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-blue-500" />
                   <div className="absolute inset-0 w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 animate-pulse opacity-30" />
                 </div>
-                <h2 className="text-xl font-semibold">VERA</h2>
+                <h2 className="text-xl font-normal">VERA</h2>
               </div>
               <button 
                 onClick={onClose}

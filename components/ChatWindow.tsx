@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Send, Menu, Volume2, VolumeX, AlertCircle, X, Heart, Compass, Wind, Loader2, Sparkles, Zap } from 'lucide-react';
+import { Send, Menu, Volume2, VolumeX, X, Heart, Compass, Wind, Loader2, Sparkles, Zap } from 'lucide-react';
 import SidePanel from './SidePanel';
 
 interface Message {
@@ -27,16 +27,10 @@ export default function ChatWindow() {
   const [voiceUsageToday, setVoiceUsageToday] = useState(0);
   const [isTyping, setIsTyping] = useState(false);
   const [theme, setTheme] = useState<ThemeMode>('dark');
-  const [messageCount, setMessageCount] = useState(0);
-  const [promptCount, setPromptCount] = useState(0);
-  const [showUpgrade, setShowUpgrade] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-
-  const MESSAGE_LIMIT = userTier === 'free' ? 10 : Infinity;
-  const PROMPT_LIMIT = userTier === 'free' ? 5 : Infinity;
 
   const voiceAvailable = ['explorer', 'regulator', 'integrator', 'test'].includes(userTier);
   const getVoiceLimit = (tier: string) => {
@@ -194,11 +188,6 @@ export default function ChatWindow() {
     const messageToSend = customMessage || input.trim();
     if (!messageToSend || isLoading) return;
 
-    if (userTier === 'free' && messageCount >= MESSAGE_LIMIT) {
-      setShowUpgrade(true);
-      return;
-    }
-
     if (!customMessage) setInput('');
     setIsLoading(true);
     setIsTyping(true);
@@ -211,7 +200,6 @@ export default function ChatWindow() {
     };
 
     setMessages((prev) => [...prev, newUserMessage]);
-    setMessageCount(prev => prev + 1);
 
     try {
       const conversationHistory = [...messages, newUserMessage].map(msg => ({
@@ -286,12 +274,6 @@ export default function ChatWindow() {
   };
 
   const handleQuickAction = (action: keyof typeof quickMessages) => {
-    if (userTier === 'free' && promptCount >= PROMPT_LIMIT) {
-      setShowUpgrade(true);
-      return;
-    }
-    
-    setPromptCount(prev => prev + 1);
     sendMessage(quickMessages[action]);
   };
 
@@ -315,56 +297,18 @@ export default function ChatWindow() {
   };
 
   const formatTime = (date: Date) => {
-    return date.toLocaleTimeString('en-US', { 
-      hour: '2-digit', 
-      minute: '2-digit' 
-    });
+    if (date instanceof Date && !isNaN(date.getTime())) {
+      return date.toLocaleTimeString('en-US', { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      });
+    }
+    return '';
   };
 
   return (
     <div className={`flex flex-col h-screen transition-all duration-700 ${themeClasses.bg} ${themeClasses.font}`}>
-     {userTier === 'free' && (
-  <div className={`border-b px-6 py-3 transition-colors ${
-    theme === 'light'
-      ? 'bg-purple-50 border-purple-200'
-      : theme === 'dark'
-        ? 'bg-purple-900/20 border-purple-500/30'
-        : theme === 'night'
-          ? 'bg-zinc-900/50 border-zinc-700'
-          : 'bg-amber-50 border-amber-200'
-  }`}>
-    <div className="flex items-center justify-between max-w-5xl mx-auto">
-      <div className="flex items-center gap-3">
-        <div className="w-2 h-2 rounded-full bg-purple-500 animate-pulse" />
-        <p className={`text-sm ${
-          theme === 'light' ? 'text-purple-700' : theme === 'dark' ? 'text-purple-300' : theme === 'night' ? 'text-zinc-300' : 'text-amber-800'
-        }`}>
-          {messageCount}/{MESSAGE_LIMIT} messages • {promptCount}/{PROMPT_LIMIT} prompts used today
-        </p>
-      </div>
-      
-        href={process.env.NEXT_PUBLIC_STRIPE_EXPLORER_MONTHLY}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={`text-sm font-medium px-4 py-1.5 rounded-lg transition-all ${
-          theme === 'light'
-            ? 'bg-purple-600 hover:bg-purple-700 text-white'
-            : theme === 'dark'
-              ? 'bg-purple-500 hover:bg-purple-600 text-white'
-              : theme === 'night'
-                ? 'bg-zinc-700 hover:bg-zinc-600 text-white'
-                : 'bg-amber-600 hover:bg-amber-700 text-white'
-        }`}
-        Upgrade for Unlimited
-      </a>
-    </div>
-  </div>
-)}
-  Upgrade for Unlimited
-</a>
-          </div>
-        </div>
-      )}
+
       <div className={`backdrop-blur-xl border-b px-6 py-4 shadow-sm transition-all duration-500 ${themeClasses.header}`}>
         <div className="flex items-center justify-between max-w-5xl mx-auto">
           <div className="flex items-center gap-3">
@@ -417,7 +361,9 @@ export default function ChatWindow() {
               onClick={() => setShowCrisisModal(true)}
               className="w-10 h-10 rounded-full transition-all bg-red-900 hover:bg-red-800 shadow-lg"
               title="Crisis support"
-            />
+            >
+              <AlertCircle size={24} className="mx-auto text-white" />
+            </button>
           </div>
         </div>
       </div>
@@ -501,11 +447,6 @@ export default function ChatWindow() {
                 <p className={`max-w-md text-lg ${theme === 'dark' || theme === 'night' ? 'text-slate-300' : theme === 'neuro' ? 'text-slate-700' : 'text-slate-600'}`}>
                   Share what's happening in your body. Let's decode it together.
                 </p>
-                {userTier === 'free' && (
-                  <div className={`mt-4 text-sm ${theme === 'dark' || theme === 'night' ? 'text-slate-400' : 'text-slate-500'}`}>
-                    <p>Today: {messageCount}/{MESSAGE_LIMIT} messages • {promptCount}/{PROMPT_LIMIT} prompts</p>
-                  </div>
-                )}
               </div>
             </div>
           )}
@@ -683,16 +624,9 @@ export default function ChatWindow() {
               </span>
             </button>
 
-            <div className="flex items-center gap-4">
-              {userTier === 'free' && (
-                <span className={`text-xs ${theme === 'dark' || theme === 'night' ? 'text-slate-400' : 'text-slate-500'}`}>
-                  {messageCount}/{MESSAGE_LIMIT} messages • {promptCount}/{PROMPT_LIMIT} prompts
-                </span>
-              )}
-              <p className={`text-xs ${theme === 'dark' || theme === 'night' ? 'text-slate-400' : theme === 'neuro' ? 'text-slate-600' : 'text-slate-500'}`}>
-                Press Enter to send
-              </p>
-            </div>
+            <p className={`text-xs ${theme === 'dark' || theme === 'night' ? 'text-slate-400' : theme === 'neuro' ? 'text-slate-600' : 'text-slate-500'}`}>
+              Press Enter to send
+            </p>
           </div>
         </div>
       </div>

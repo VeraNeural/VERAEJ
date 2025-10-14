@@ -1,175 +1,208 @@
 'use client';
 
-// 'use client';
-import React, { useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Mail, Lock, User, ArrowRight, AlertCircle } from 'lucide-react';
+import { Check, X } from 'lucide-react';
 
-function SignupForm() {
+export default function SignUpPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const [formData, setFormData] = useState({
-    name: '',
-    email: searchParams.get('email') || '',
-    password: '',
-    confirmPassword: ''
-  });
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Password validation
+  const passwordRequirements = {
+    length: password.length >= 8,
+    lowercase: /[a-z]/.test(password),
+    uppercase: /[A-Z]/.test(password),
+    number: /[0-9]/.test(password),
+  };
+
+  const passwordsMatch = password === confirmPassword && confirmPassword.length > 0;
+  const allRequirementsMet = Object.values(passwordRequirements).every(req => req);
+
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
 
-    if (formData.password !== formData.confirmPassword) {
+    if (!email || !password || !confirmPassword) {
+      setError('All fields are required');
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError('Please enter a valid email address');
+      return;
+    }
+
+    if (!allRequirementsMet) {
+      setError('Password does not meet requirements');
+      return;
+    }
+
+    if (password !== confirmPassword) {
       setError('Passwords do not match');
       return;
     }
 
-    if (formData.password.length < 8) {
-      setError('Password must be at least 8 characters');
+    if (!acceptedTerms) {
+      setError('You must accept the terms and understand VERA\'s limitations');
       return;
     }
 
-    setLoading(true);
+    setIsLoading(true);
 
     try {
-      const response = await fetch('/api/auth/signup', {
+      const res = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          password: formData.password
-        })
+        body: JSON.stringify({ email, password }),
       });
 
-      const data = await response.json();
+      const data = await res.json();
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to sign up');
+      if (!res.ok) {
+        throw new Error(data.error || 'Signup failed');
       }
 
-      // Success! Redirect to chat
-      router.push('/chat');
-    } catch (err: any) {
-      setError(err.message);
+      // Redirect to orientation
+      router.push('/orientation');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
-  };
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-rose-50/30 to-blue-50/20 flex items-center justify-center p-6">
-      <div className="w-full max-w-md">
-        {/* Header */}
-        <div className="text-center mb-8">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 flex items-center justify-center p-4 py-12">
+      <div className="w-full max-w-md space-y-6">
+        <div className="text-center">
           <Link href="/">
-            <span className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-rose-500 via-purple-500 to-blue-500 cursor-pointer hover:opacity-80 transition-opacity">
+            <h1 className="text-3xl font-normal bg-gradient-to-r from-rose-400 via-purple-400 to-blue-400 text-transparent bg-clip-text">
               VERA
-            </span>
+            </h1>
           </Link>
-          <h1 className="text-3xl font-bold text-slate-900 mt-4 mb-2">Start Your Journey</h1>
-          <p className="text-slate-600">7-day free trial, no credit card required</p>
+          <p className="text-slate-600 mt-2">Begin your journey with me</p>
         </div>
 
-        {/* Form Card */}
-        <div className="bg-white rounded-3xl shadow-xl border border-slate-200/50 p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Error Message */}
-            {error && (
-              <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3">
-                <AlertCircle className="text-red-500 flex-shrink-0 mt-0.5" size={20} />
-                <p className="text-red-700 text-sm">{error}</p>
-              </div>
-            )}
+        <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-purple-100 p-8">
+          <h2 className="text-2xl font-light text-slate-900 mb-6">Create Your Account</h2>
 
-            {/* Name Field */}
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Full Name
-              </label>
-              <div className="relative">
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full pl-12 pr-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-slate-800"
-                  placeholder="Enter your name"
-                  required
-                />
-              </div>
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
+              <p className="text-sm text-red-800">{error}</p>
             </div>
+          )}
 
-            {/* Email Field */}
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Email */}
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">
                 Email Address
               </label>
-              <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-                <input
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full pl-12 pr-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-slate-800"
-                  placeholder="you@example.com"
-                  required
-                />
-              </div>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
+                placeholder="your@email.com"
+                disabled={isLoading}
+              />
             </div>
 
-            {/* Password Field */}
+            {/* Password */}
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">
                 Password
               </label>
-              <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-                <input
-                  type="password"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="w-full pl-12 pr-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-slate-800"
-                  placeholder="At least 8 characters"
-                  required
-                />
-              </div>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
+                placeholder="Create a strong password"
+                disabled={isLoading}
+              />
+
+              {/* Password Requirements */}
+              {password && (
+                <div className="mt-3 space-y-2">
+                  <p className="text-xs font-medium text-slate-600">Password must contain:</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className={`flex items-center gap-2 text-xs ${passwordRequirements.length ? 'text-green-600' : 'text-slate-400'}`}>
+                      {passwordRequirements.length ? <Check size={14} /> : <X size={14} />}
+                      <span>8+ characters</span>
+                    </div>
+                    <div className={`flex items-center gap-2 text-xs ${passwordRequirements.uppercase ? 'text-green-600' : 'text-slate-400'}`}>
+                      {passwordRequirements.uppercase ? <Check size={14} /> : <X size={14} />}
+                      <span>Uppercase</span>
+                    </div>
+                    <div className={`flex items-center gap-2 text-xs ${passwordRequirements.lowercase ? 'text-green-600' : 'text-slate-400'}`}>
+                      {passwordRequirements.lowercase ? <Check size={14} /> : <X size={14} />}
+                      <span>Lowercase</span>
+                    </div>
+                    <div className={`flex items-center gap-2 text-xs ${passwordRequirements.number ? 'text-green-600' : 'text-slate-400'}`}>
+                      {passwordRequirements.number ? <Check size={14} /> : <X size={14} />}
+                      <span>Number</span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
-            {/* Confirm Password Field */}
+            {/* Confirm Password */}
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">
                 Confirm Password
               </label>
-              <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-                <input
-                  type="password"
-                  value={formData.confirmPassword}
-                  onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                  className="w-full pl-12 pr-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-slate-800"
-                  placeholder="Confirm your password"
-                  required
-                />
-              </div>
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
+                placeholder="Confirm your password"
+                disabled={isLoading}
+              />
+              {confirmPassword && (
+                <div className={`mt-2 flex items-center gap-2 text-xs ${passwordsMatch ? 'text-green-600' : 'text-red-600'}`}>
+                  {passwordsMatch ? <Check size={14} /> : <X size={14} />}
+                  <span>{passwordsMatch ? 'Passwords match' : 'Passwords do not match'}</span>
+                </div>
+              )}
             </div>
 
-            {/* Submit Button */}
+            {/* Terms */}
+            <div className="flex items-start gap-3 p-4 bg-purple-50 rounded-xl border border-purple-100">
+              <input
+                type="checkbox"
+                checked={acceptedTerms}
+                onChange={(e) => setAcceptedTerms(e.target.checked)}
+                className="mt-1 w-4 h-4 text-purple-600 border-purple-300 rounded focus:ring-purple-500"
+                disabled={isLoading}
+              />
+              <label className="text-xs text-slate-700 leading-relaxed">
+                I understand that VERA is <strong>NOT a medical device, therapist, or crisis intervention service</strong>. 
+                VERA complements professional care but does not replace it. I will seek professional help when needed 
+                and call 988 or 911 in emergencies.
+              </label>
+            </div>
+
+            {/* Submit */}
             <button
               type="submit"
-              disabled={loading}
-              className="w-full py-3 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white rounded-xl font-medium transition-all shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isLoading || !allRequirementsMet || !passwordsMatch || !acceptedTerms}
+              className="w-full py-3 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white rounded-xl font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
             >
-              {loading ? 'Creating account...' : 'Start Free Trial'}
-              {!loading && <ArrowRight size={20} />}
+              {isLoading ? 'Creating Account...' : 'Start Free'}
             </button>
           </form>
 
-          {/* Sign In Link */}
-          <p className="text-center text-sm text-slate-600 mt-6">
+          <p className="mt-6 text-center text-sm text-slate-600">
             Already have an account?{' '}
             <Link href="/auth/signin" className="text-purple-600 hover:text-purple-700 font-medium">
               Sign in
@@ -177,23 +210,30 @@ function SignupForm() {
           </p>
         </div>
 
-        {/* Terms */}
-        <p className="text-center text-xs text-slate-500 mt-6">
-          By signing up, you agree to our{' '}
-          <Link href="/terms" className="underline hover:text-slate-700">Terms</Link> and{' '}
-          <Link href="/privacy" className="underline hover:text-slate-700">Privacy Policy</Link>
-        </p>
+        {/* Disclaimer */}
+        <div className="p-4 bg-slate-100 rounded-xl border border-slate-200">
+          <p className="text-xs text-slate-600 leading-relaxed">
+            <strong className="text-slate-900">⚠️ Important:</strong> VERA is an AI companion for nervous system regulation. 
+            She is <strong>NOT</strong> a substitute for medical advice, diagnosis, treatment, or professional mental health care. 
+            In crisis, call 988 or 911 immediately.
+          </p>
+        </div>
+
+        {/* Pricing Info */}
+        <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg border border-purple-100 p-6">
+          <h3 className="text-sm font-semibold text-slate-900 mb-4">Start Free, Upgrade Anytime</h3>
+          <div className="space-y-3">
+            <div className="flex items-start gap-3">
+              <div className="w-2 h-2 rounded-full bg-purple-400 mt-1.5" />
+              <p className="text-xs text-slate-600"><strong>Free:</strong> 10 messages/day, 5 quick prompts</p>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="w-2 h-2 rounded-full bg-blue-400 mt-1.5" />
+              <p className="text-xs text-slate-600"><strong>Explorer ($29/mo):</strong> Unlimited conversations, voice responses, full pattern analysis</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-  );
-}
-
-// Main export: wraps client SignupForm in Suspense
-import { Suspense } from 'react';
-export default function SignupPage() {
-  return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
-      <SignupForm />
-    </Suspense>
   );
 }

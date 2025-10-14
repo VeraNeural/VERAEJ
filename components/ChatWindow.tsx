@@ -13,7 +13,7 @@ interface Message {
   pattern?: string; // Nervous system pattern detected
 }
 
-type ThemeMode = 'light' | 'dark' | 'neuro';
+type ThemeMode = 'light' | 'dark' | 'neuro' | 'night';
 
 export default function ChatWindow() {
   // State
@@ -483,7 +483,7 @@ export default function ChatWindow() {
             </p>
             <div className="space-y-3">
               <a
-                href="/pricing"
+                href={process.env.NEXT_PUBLIC_STRIPE_EXPLORER_MONTHLY || '/pricing'}
                 className="block w-full py-3 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white rounded-xl font-medium transition-all text-center"
               >
                 Upgrade to Explorer - $29/mo

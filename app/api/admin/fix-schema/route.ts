@@ -3,27 +3,22 @@ import { query } from '@/lib/db';
 
 export async function GET() {
   try {
-    // Step 1: Check current schema
-    const columnsCheck = await query(
-      `SELECT column_name, data_type 
-       FROM information_schema.columns 
-       WHERE table_name = 'users'
-       ORDER BY ordinal_position`
-    );
+    console.log('Starting schema fix...');
     
-    console.log('Current columns:', columnsCheck.rows);
-    
-    // Step 2: Add password column if it doesn't exist
+    // Add all missing columns
     await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS password VARCHAR(255)`);
+    await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS orientation_completed BOOLEAN DEFAULT FALSE`);
+    await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS orientation_data JSONB`);
+    await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS test_mode BOOLEAN DEFAULT FALSE`);
+    await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS stripe_customer_id VARCHAR(255)`);
     
-    // Step 3: Copy data from password_hash to password if password_hash exists
-    const hasPasswordHash = columnsCheck.rows.some(row => row.column_name === 'password_hash');
+    // Copy password_hash to password if needed
+    await query(`UPDATE users SET password = password_hash WHERE password IS NULL OR password = ''`);
     
-    if (hasPasswordHash) {
-      await query(`UPDATE users SET password = password_hash WHERE password IS NULL OR password = ''`);
-    }
+    // Set default values for orientation_completed if NULL
+    await query(`UPDATE users SET orientation_completed = FALSE WHERE orientation_completed IS NULL`);
     
-    // Step 4: Verify the fix
+    // Verify the fix
     const afterCheck = await query(
       `SELECT column_name, data_type 
        FROM information_schema.columns 
@@ -33,9 +28,8 @@ export async function GET() {
     
     return NextResponse.json({
       success: true,
-      message: 'Database schema fixed!',
-      before: columnsCheck.rows,
-      after: afterCheck.rows
+      message: 'All columns added!',
+      columns: afterCheck.rows
     });
     
   } catch (error) {

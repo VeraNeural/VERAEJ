@@ -479,7 +479,7 @@ export default function ChatWindow() {
       {showUpgrade && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className={`rounded-3xl p-8 max-w-md shadow-2xl ${
-            theme === 'light' ? 'bg-white' : theme === 'dark' ? 'bg-slate-900' : theme === 'night' ? 'bg-zinc-950' : 'bg-white border-2 border-amber-300'
+            theme === 'light' ? 'bg-white' : theme === 'da   href={process.rk' ? 'bg-slate-900' : theme === 'night' ? 'bg-zinc-950' : 'bg-white border-2 border-amber-300'
           }`}>
             <button 
               onClick={() => setShowUpgrade(false)}
@@ -495,8 +495,7 @@ export default function ChatWindow() {
               You've reached your daily limit. Upgrade to Explorer for unlimited conversations and full nervous system analysis.
             </p>
             <div className="space-y-3">
-              
-                href={process.env.NEXT_PUBLIC_STRIPE_EXPLORER_MONTHLY || '/pricing'}
+              href={process.env.NEXT_PUBLIC_STRIPE_EXPLORER_MONTHLY || '/pricing'}
                 className="block w-full py-3 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white rounded-xl font-medium transition-all text-center"
               >
                 Upgrade to Explorer - $29/mo

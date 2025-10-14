@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
-import { verifyPassword, generateToken, isValidEmail } from '@/lib/auth';
-import { trackEvent } from '@/lib/analytics';
+import { query } from '@/lib/db';
+import { verifyPassword, generateToken, setAuthCookie } from '@/lib/auth';
 
-export async function POST(req: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
-    const { email, password } = await req.json();
+    const { email, password } = await request.json();
 
-    // Validation
+    // Validate input
     if (!email || !password) {
       return NextResponse.json(
         { error: 'Email and password are required' },
@@ -15,63 +14,78 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Validate email format
-    if (!isValidEmail(email)) {
-      return NextResponse.json(
-        { error: 'Invalid email format' },
-        { status: 400 }
-      );
-    }
+    // Find user
+    const result = await query(
+      `SELECT id, email, password, subscription_status, subscription_tier, 
+              trial_ends_at, orientation_completed, test_mode
+       FROM users 
+       WHERE email = $1`,
+      [email.toLowerCase()]
+    );
 
-    // Find user by email - FIXED!
-    const user = await db.getUserByEmail(email);
-    if (!user) {
+    if (result.rows.length === 0) {
       return NextResponse.json(
         { error: 'Invalid email or password' },
         { status: 401 }
       );
     }
+
+    const user = result.rows[0];
 
     // Verify password
-    const isPasswordValid = await verifyPassword(password, user.password_hash);
-    if (!isPasswordValid) {
+    const isValidPassword = await verifyPassword(password, user.password);
+
+    if (!isValidPassword) {
       return NextResponse.json(
         { error: 'Invalid email or password' },
         { status: 401 }
       );
     }
 
-    // Generate JWT token
-    const token = generateToken(user.id, user.email);
-    trackEvent.signin('email');
+    // Generate token and set cookie
+    const token = generateToken(user.id, user.email, user.test_mode);
+    await setAuthCookie(token);
 
-    // Create response with required structure
-    const response = NextResponse.json({ 
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        subscription_tier: user.subscription_tier,
-        subscription_status: user.subscription_status
-      },
-      message: 'Signed in successfully' 
-    }, { status: 200 });
+    console.log('✅ User signed in:', user.email);
 
-    // Set auth cookie with correct name and settings
-    response.cookies.set('auth_token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7, // 7 days
-      path: '/', // THIS IS CRITICAL - makes cookie available everywhere
-    });
-
-    return response;
-  } catch (error) {
-    console.error('Signin error:', error);
     return NextResponse.json(
-      { error: 'Failed to sign in. Please try again.' },
+      {
+        success: true,
+        message: 'Signed in successfully',
+        user: {
+          id: user.id,
+          email: user.email,
+          subscription_status: user.subscription_status,
+          subscription_tier: user.subscription_tier,
+          trial_ends_at: user.trial_ends_at,
+          orientation_completed: user.orientation_completed,
+        },
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error('❌ Signin error:', error);
+    return NextResponse.json(
+      {
+        error: 'Failed to sign in. Please try again.',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      },
       { status: 500 }
     );
   }
 }
+```
+
+---
+
+**Your folder structure should look like:**
+```
+app/
+├── api/
+│   └── auth/
+│       ├── signup/
+│       │   └── route.ts  ← CREATE THIS
+│       ├── signin/
+│       │   └── route.ts  ← CREATE THIS
+│       └── signout/
+│           └── route.ts  ← YOU HAVE THIS ✅

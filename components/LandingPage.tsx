@@ -298,17 +298,37 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Partners Section */}
-      <section className="py-16 px-6 bg-white/50 border-y border-slate-100">
+      {/* Partners Section - Enhanced */}
+      <section className="py-20 px-6 bg-gradient-to-br from-purple-50/30 via-white to-blue-50/30 border-y border-purple-100">
         <div className="max-w-7xl mx-auto">
-          <p className="text-center text-slate-600 text-base mb-8 font-light">
+          <p className="text-center text-slate-700 text-lg mb-12 font-normal">
             Trusted by therapists and trauma specialists
           </p>
-          <div className="flex flex-wrap justify-center items-center gap-12">
-            <div className="text-slate-700 font-normal text-lg">Vision Design Studio</div>
-            <div className="text-slate-700 font-normal text-lg">Regulate to Elevate</div>
-            <div className="text-slate-700 font-normal text-lg">Board Certified Neuroscientists</div>
-            <div className="text-slate-700 font-normal text-lg">Board Certified Neurologists</div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="bg-white rounded-2xl p-6 border border-purple-100 hover:border-purple-300 transition-all shadow-sm hover:shadow-md text-center">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-100 to-blue-100 flex items-center justify-center mx-auto mb-4">
+                <div className="w-3 h-3 rounded-full bg-gradient-to-br from-purple-400 to-blue-400" />
+              </div>
+              <p className="text-slate-800 font-normal">Vision Design Studio</p>
+            </div>
+            <div className="bg-white rounded-2xl p-6 border border-purple-100 hover:border-purple-300 transition-all shadow-sm hover:shadow-md text-center">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-rose-100 to-pink-100 flex items-center justify-center mx-auto mb-4">
+                <div className="w-3 h-3 rounded-full bg-gradient-to-br from-rose-400 to-pink-400" />
+              </div>
+              <p className="text-slate-800 font-normal">Regulate to Elevate</p>
+            </div>
+            <div className="bg-white rounded-2xl p-6 border border-purple-100 hover:border-purple-300 transition-all shadow-sm hover:shadow-md text-center">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-100 to-cyan-100 flex items-center justify-center mx-auto mb-4">
+                <div className="w-3 h-3 rounded-full bg-gradient-to-br from-blue-400 to-cyan-400" />
+              </div>
+              <p className="text-slate-800 font-normal">Board Certified Neuroscientists</p>
+            </div>
+            <div className="bg-white rounded-2xl p-6 border border-purple-100 hover:border-purple-300 transition-all shadow-sm hover:shadow-md text-center">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center mx-auto mb-4">
+                <div className="w-3 h-3 rounded-full bg-gradient-to-br from-indigo-400 to-purple-400" />
+              </div>
+              <p className="text-slate-800 font-normal">Board Certified Neurologists</p>
+            </div>
           </div>
         </div>
       </section>

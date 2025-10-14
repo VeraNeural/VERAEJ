@@ -1,5 +1,5 @@
 
-import { Suspense } from 'react';
+// 'use client';
 import React, { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
@@ -187,6 +187,8 @@ function SignupForm() {
   );
 }
 
+// Main export: wraps client SignupForm in Suspense
+import { Suspense } from 'react';
 export default function SignupPage() {
   return (
     <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>

@@ -4,12 +4,22 @@ import { hashPassword, generateToken, setAuthCookie } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password } = await request.json();
+    // Debug: Log that we received a request
+    console.log('📨 Signup request received');
+    
+    const body = await request.json();
+    console.log('📦 Request body:', body);
+    
+    const { email, password } = body;
+    
+    console.log('📧 Email:', email);
+    console.log('🔑 Password length:', password?.length);
 
     // Validate input
     if (!email || !password) {
+      console.log('❌ Validation failed: missing fields');
       return NextResponse.json(
-        { error: 'Email and password are required' },
+        { error: 'Missing required fields', received: { email: !!email, password: !!password } },
         { status: 400 }
       );
     }

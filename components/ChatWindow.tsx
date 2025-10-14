@@ -343,7 +343,7 @@ export default function ChatWindow() {
               </p>
             </div>
             
-              href={process.env.NEXT_PUBLIC_STRIPE_EXPLORER_MONTHLY}
+  href={process.env.NEXT_PUBLIC_STRIPE_EXPLORER_MONTHLY}
   target="_blank"
   rel="noopener noreferrer"
   className={`text-sm font-medium px-4 py-1.5 rounded-lg transition-all ${
@@ -355,6 +355,7 @@ export default function ChatWindow() {
           ? 'bg-zinc-700 hover:bg-zinc-600 text-white'
           : 'bg-amber-600 hover:bg-amber-700 text-white'
   }`}
+>
   Upgrade for Unlimited
 </a>
           </div>

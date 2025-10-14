@@ -320,7 +320,7 @@ export default function ChatWindow() {
               <div className="w-3 h-3 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 animate-pulse" />
               <div className="absolute inset-0 w-3 h-3 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 animate-ping opacity-30" />
             </div>
-            <h1 className={`text-2xl font-bold bg-gradient-to-r from-rose-500 via-purple-500 to-blue-500 text-transparent bg-clip-text`}>
+            <h1 className={`text-2xl font-normal bg-gradient-to-r from-rose-400 via-purple-400 to-blue-400 text-transparent bg-clip-text tracking-wide`}>
               VERA
             </h1>
             <span className={`text-xs px-2 py-1 rounded-full ${theme === 'neuro' ? 'bg-amber-200 text-amber-900' : 'bg-purple-100 text-purple-700'}`}>
@@ -332,7 +332,7 @@ export default function ChatWindow() {
             {/* Theme Switcher */}
             <button
               onClick={cycleTheme}
-              className={`px-3 py-2 rounded-xl transition-all border text-sm ${
+              className={`px-3 py-2 rounded-xl transition-all border text-xs font-medium ${
                 theme === 'light' 
                   ? 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
                   : theme === 'dark'
@@ -341,7 +341,7 @@ export default function ChatWindow() {
               }`}
               title="Switch theme"
             >
-              {theme === 'light' ? '☀️' : theme === 'dark' ? '🌙' : '🧠'}
+              {theme === 'light' ? 'Light' : theme === 'dark' ? 'Dark' : 'Neuro'}
             </button>
 
             <button
@@ -358,14 +358,13 @@ export default function ChatWindow() {
               <Menu size={20} />
             </button>
 
-            {/* CRISIS BUTTON - RED with info inside */}
+            {/* CRISIS BUTTON - RED for emergency */}
             <button
               onClick={() => setShowCrisisModal(true)}
-              className="px-4 py-2 rounded-xl transition-all border-2 border-red-600 bg-red-600 hover:bg-red-700 text-white font-bold shadow-lg flex items-center gap-2"
-              title="Crisis Resources"
+              className="px-4 py-2 rounded-xl transition-all border-2 border-red-600 bg-red-600 hover:bg-red-700 text-white font-bold shadow-lg"
+              title="Emergency Resources"
             >
-              <AlertCircle size={20} className="animate-pulse" />
-              <span className="text-sm">CRISIS • 988</span>
+              <span className="text-sm">EMERGENCY</span>
             </button>
           </div>
         </div>
@@ -476,18 +475,35 @@ export default function ChatWindow() {
           {messages.length === 0 && (
             <div className="flex flex-col items-center justify-center h-full py-16">
               <div className="text-center space-y-6">
-                {/* Living breathing orb */}
-                <div className="relative w-32 h-32 mx-auto mb-8">
-                  <div className={`absolute inset-0 rounded-full animate-pulse ${
-                    theme === 'light' ? 'bg-gradient-to-br from-blue-200 to-purple-200' :
-                    theme === 'dark' ? 'bg-gradient-to-br from-purple-500 to-blue-500' :
-                    'bg-gradient-to-br from-amber-300 to-yellow-300'
-                  }`} style={{ animation: 'pulse 3s ease-in-out infinite' }} />
-                  <div className={`absolute inset-4 rounded-full ${
+                {/* Living breathing orb - Enhanced */}
+                <div className="relative w-40 h-40 mx-auto mb-8">
+                  {/* Outer glow */}
+                  <div className={`absolute inset-0 rounded-full blur-2xl opacity-40 ${
                     theme === 'light' ? 'bg-gradient-to-br from-blue-300 to-purple-300' :
-                    theme === 'dark' ? 'bg-gradient-to-br from-purple-600 to-blue-600' :
+                    theme === 'dark' ? 'bg-gradient-to-br from-purple-400 to-blue-400' :
                     'bg-gradient-to-br from-amber-400 to-yellow-400'
-                  }`} style={{ animation: 'pulse 3s ease-in-out infinite 0.5s' }} />
+                  }`} style={{ animation: 'pulse 4s ease-in-out infinite' }} />
+                  
+                  {/* Main orb */}
+                  <div className={`absolute inset-4 rounded-full ${
+                    theme === 'light' ? 'bg-gradient-to-br from-blue-400 to-purple-400' :
+                    theme === 'dark' ? 'bg-gradient-to-br from-purple-500 to-blue-500' :
+                    'bg-gradient-to-br from-amber-500 to-yellow-500'
+                  } shadow-2xl`} style={{ animation: 'pulse 4s ease-in-out infinite 0.5s' }}>
+                    {/* Inner light */}
+                    <div className={`absolute inset-6 rounded-full blur-md ${
+                      theme === 'light' ? 'bg-blue-200' :
+                      theme === 'dark' ? 'bg-white' :
+                      'bg-yellow-200'
+                    } opacity-60`} style={{ animation: 'pulse 4s ease-in-out infinite 1s' }} />
+                  </div>
+                  
+                  {/* Core */}
+                  <div className={`absolute inset-12 rounded-full ${
+                    theme === 'light' ? 'bg-gradient-to-br from-blue-300 to-purple-200' :
+                    theme === 'dark' ? 'bg-gradient-to-br from-purple-400 to-blue-300' :
+                    'bg-gradient-to-br from-amber-300 to-yellow-200'
+                  }`} style={{ animation: 'pulse 4s ease-in-out infinite 1.5s' }} />
                 </div>
                 
                 <h2 className={`text-3xl font-bold ${themeClasses.text}`}>

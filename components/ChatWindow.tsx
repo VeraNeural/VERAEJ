@@ -474,43 +474,6 @@ export default function ChatWindow() {
         </div>
       )}
 
-      {showUpgrade && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className={`rounded-3xl p-8 max-w-md shadow-2xl ${
-            theme === 'light' ? 'bg-white' : theme === 'dark' ? 'bg-slate-900' : theme === 'night' ? 'bg-zinc-950' : 'bg-white border-2 border-amber-300'
-          }`}>
-            <button 
-              onClick={() => setShowUpgrade(false)}
-              className="float-right"
-            >
-              <X size={24} />
-            </button>
-            <Sparkles className="w-16 h-16 text-purple-500 mb-4" />
-            <h2 className={`text-2xl font-bold mb-4 ${theme === 'dark' || theme === 'night' ? 'text-white' : 'text-slate-900'}`}>
-              Continue Growing with VERA
-            </h2>
-            <p className={`mb-6 ${theme === 'dark' || theme === 'night' ? 'text-slate-300' : 'text-slate-700'}`}>
-              You've reached your daily limit. Upgrade to Explorer for unlimited conversations and full nervous system analysis.
-            </p>
-            <div className="space-y-3">
-              
-                href={process.env.NEXT_PUBLIC_STRIPE_EXPLORER_MONTHLY || '/pricing'}
-                className="block w-full py-3 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white rounded-xl font-medium transition-all text-center"
-              >
-                Upgrade to Explorer - $29/mo
-              </a>
-              <button
-                onClick={() => setShowUpgrade(false)}
-                className={`block w-full py-3 rounded-xl font-medium transition-all text-center ${
-                  theme === 'dark' || theme === 'night' ? 'bg-slate-800 hover:bg-slate-700 text-slate-300' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-                }`}
-              >
-                Maybe Later
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
       <div className="flex-1 overflow-y-auto px-4 py-6">
         <div className="max-w-4xl mx-auto space-y-6">
           {messages.length === 0 && (

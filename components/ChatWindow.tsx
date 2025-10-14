@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Send, Menu, Volume2, VolumeX, X, Heart, Compass, Wind, Loader2, Sparkles, Zap } from 'lucide-react';
+import { Send, Menu, Volume2, VolumeX, AlertCircle, X, Heart, Compass, Wind, Loader2, Sparkles, Zap } from 'lucide-react';
 import SidePanel from './SidePanel';
 
 interface Message {
@@ -297,19 +297,16 @@ export default function ChatWindow() {
   };
 
   const formatTime = (date: Date) => {
-    if (date instanceof Date && !isNaN(date.getTime())) {
-      return date.toLocaleTimeString('en-US', { 
-        hour: '2-digit', 
-        minute: '2-digit' 
-      });
-    }
-    return '';
+    return date.toLocaleTimeString('en-US', { 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    });
   };
 
   return (
     <div className={`flex flex-col h-screen transition-all duration-700 ${themeClasses.bg} ${themeClasses.font}`}>
 
-      <div className={`backdrop-blur-xl border-b px-6 py-4 shadow-sm transition-all duration-500 ${themeClasses.header}`}>
+  <div className={`backdrop-blur-xl border-b px-6 py-4 shadow-sm transition-all duration-500 ${themeClasses.header}`}>
         <div className="flex items-center justify-between max-w-5xl mx-auto">
           <div className="flex items-center gap-3">
             <div className="relative">
@@ -361,9 +358,7 @@ export default function ChatWindow() {
               onClick={() => setShowCrisisModal(true)}
               className="w-10 h-10 rounded-full transition-all bg-red-900 hover:bg-red-800 shadow-lg"
               title="Crisis support"
-            >
-              <AlertCircle size={24} className="mx-auto text-white" />
-            </button>
+            />
           </div>
         </div>
       </div>

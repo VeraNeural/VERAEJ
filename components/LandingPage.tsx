@@ -6,6 +6,7 @@ import Link from 'next/link';
 
 export default function LandingPage() {
   const [email, setEmail] = useState('');
+  const [showAnnouncement, setShowAnnouncement] = useState(true);
   const orbRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -302,7 +303,7 @@ export default function LandingPage() {
               </ul>
 
               <Link
-                href="/auth/signup"
+                href={process.env.NEXT_PUBLIC_STRIPE_EXPLORER_MONTHLY || '/auth/signup'}
                 className="block w-full py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-normal transition-all text-center"
               >
                 Start Free Trial
@@ -311,7 +312,7 @@ export default function LandingPage() {
           </div>
 
           <p className="text-center text-slate-500 mt-8 text-sm font-light">
-            No credit card required to start. Cancel anytime.
+            Start free, upgrade anytime. Cancel anytime.
           </p>
         </div>
       </section>

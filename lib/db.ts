@@ -112,6 +112,32 @@ export const db = {
     return result.rows[0];
   },
 
+ async updateChatSession(sessionId: string, data: { messages?: any[], title?: string }) {
+    const updates: string[] = [];
+    const values: any[] = [];
+    let paramCounter = 1;
+
+    if (data.messages !== undefined) {
+      updates.push(`messages = $${paramCounter}`);
+      values.push(JSON.stringify(data.messages));
+      paramCounter++;
+    }
+
+    if (data.title !== undefined) {
+      updates.push(`title = $${paramCounter}`);
+      values.push(data.title);
+      paramCounter++;
+    }
+
+    updates.push(`updated_at = NOW()`);
+    values.push(sessionId);
+
+    await pool.query(
+      `UPDATE chat_sessions SET ${updates.join(', ')} WHERE id = $${paramCounter}`,
+      values
+    );
+  }, 
+
   async getUserSessions(userId: string, limit: number = 20) {
     const result = await pool.query(
       `SELECT s.*, 

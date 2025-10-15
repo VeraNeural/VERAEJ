@@ -1,62 +1,57 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, RefreshCw, Download, TrendingUp } from 'lucide-react';
+import { Sparkles, RefreshCw, Download, TrendingUp, Check, Plus } from 'lucide-react';
 
 interface PersonalProtocolProps {
   darkMode: boolean;
   userId: string;
 }
 
-interface ProtocolData {
-  generated: string;
-  insights: {
-    title: string;
-    description: string;
-    confidence: number;
-  }[];
-  recommendations: {
-    category: string;
-    actions: string[];
-  }[];
+interface Protocol {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  frequency: string;
+  completion_count: number;
+  last_completed: string | null;
 }
 
 const PersonalProtocol: React.FC<PersonalProtocolProps> = ({ darkMode, userId }) => {
-  const [protocol, setProtocol] = useState<ProtocolData | null>(null);
+  const [protocols, setProtocols] = useState<Protocol[]>([]);
   const [loading, setLoading] = useState(false);
-  const [generating, setGenerating] = useState(false);
 
   useEffect(() => {
-    fetchProtocol();
-  }, []);
+    fetchProtocols();
+  }, [userId]);
 
-  const fetchProtocol = async () => {
+  const fetchProtocols = async () => {
     setLoading(true);
     try {
       const response = await fetch(`/api/protocol/${userId}`);
       if (response.ok) {
         const data = await response.json();
-        setProtocol(data);
+        setProtocols(data.protocols || []);
       }
     } catch (error) {
-      console.error('Failed to fetch protocol:', error);
+      console.error('Failed to fetch protocols:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const generateProtocol = async () => {
-    setGenerating(true);
+  const handleComplete = async (protocolId: string) => {
     try {
-      const response = await fetch(`/api/protocol/${userId}/generate`, {
+      const response = await fetch(`/api/protocol/${userId}/complete`, {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ protocolId })
       });
+
       if (response.ok) {
-        const data = await response.json();
-        setProtocol(data);
+        fetchProtocols();
       }
     } catch (error) {
-      console.error('Failed to generate protocol:', error);
-    } finally {
-      setGenerating(false);
+      console.error('Failed to complete protocol:', error);
     }
   };
 
@@ -72,7 +67,7 @@ const PersonalProtocol: React.FC<PersonalProtocolProps> = ({ darkMode, userId })
     );
   }
 
-  if (!protocol) {
+  if (protocols.length === 0) {
     return (
       <div className={`text-center py-12 px-6 rounded-2xl border ${
         darkMode 
@@ -85,42 +80,21 @@ const PersonalProtocol: React.FC<PersonalProtocolProps> = ({ darkMode, userId })
         <h3 className={`text-xl font-bold mb-2 ${
           darkMode ? 'text-white' : 'text-slate-800'
         }`}>
-          No Protocol Yet
+          No Protocol Items Yet
         </h3>
         <p className={`text-sm mb-6 ${
           darkMode ? 'text-slate-400' : 'text-slate-600'
         }`}>
-          VERA will analyze your conversations and generate a personalized wellness protocol
+          Your personalized wellness protocol will appear here as VERA learns from your interactions
         </p>
-        <button
-          onClick={generateProtocol}
-          disabled={generating}
-          className={`flex items-center gap-2 mx-auto px-6 py-3 rounded-xl font-semibold transition-all ${
-            darkMode
-              ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:shadow-lg hover:shadow-purple-500/30'
-              : 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:shadow-lg hover:shadow-purple-500/30'
-          } disabled:opacity-50`}
-        >
-          {generating ? (
-            <>
-              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              Generating...
-            </>
-          ) : (
-            <>
-              <Sparkles size={18} />
-              Generate My Protocol
-            </>
-          )}
-        </button>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className={`text-lg font-bold ${
             darkMode ? 'text-white' : 'text-slate-800'
@@ -130,111 +104,82 @@ const PersonalProtocol: React.FC<PersonalProtocolProps> = ({ darkMode, userId })
           <p className={`text-xs mt-1 ${
             darkMode ? 'text-slate-400' : 'text-slate-600'
           }`}>
-            Generated {new Date(protocol.generated).toLocaleDateString()}
+            {protocols.length} active items
           </p>
         </div>
-        <div className="flex gap-2">
-          <button
-            onClick={generateProtocol}
-            disabled={generating}
-            className={`p-2.5 rounded-lg transition-colors ${
-              darkMode 
-                ? 'bg-slate-800 hover:bg-slate-700 text-slate-400' 
-                : 'bg-white hover:bg-slate-50 text-slate-600 border border-slate-200'
-            }`}
-            title="Regenerate"
-          >
-            <RefreshCw size={16} className={generating ? 'animate-spin' : ''} />
-          </button>
-          <button
-            className={`p-2.5 rounded-lg transition-colors ${
-              darkMode 
-                ? 'bg-slate-800 hover:bg-slate-700 text-slate-400' 
-                : 'bg-white hover:bg-slate-50 text-slate-600 border border-slate-200'
-            }`}
-            title="Download"
-          >
-            <Download size={16} />
-          </button>
-        </div>
+        <button
+          onClick={fetchProtocols}
+          className={`p-2.5 rounded-lg transition-colors ${
+            darkMode 
+              ? 'bg-slate-800 hover:bg-slate-700 text-slate-400' 
+              : 'bg-white hover:bg-slate-50 text-slate-600 border border-slate-200'
+          }`}
+          title="Refresh"
+        >
+          <RefreshCw size={16} />
+        </button>
       </div>
 
-      {/* Insights */}
+      {/* Protocol Items */}
       <div className="space-y-3">
-        <h4 className={`text-sm font-semibold uppercase tracking-wide ${
-          darkMode ? 'text-purple-400' : 'text-purple-600'
-        }`}>
-          Key Insights
-        </h4>
-        {protocol.insights.map((insight, index) => (
+        {protocols.map((protocol) => (
           <div
-            key={index}
+            key={protocol.id}
             className={`p-4 rounded-xl border ${
               darkMode 
-                ? 'bg-slate-800/50 border-slate-700/50' 
-                : 'bg-white border-slate-200'
-            }`}
+                ? 'bg-slate-800/50 border-slate-700/50 hover:border-purple-500/50' 
+                : 'bg-white border-slate-200 hover:border-purple-300'
+            } transition-colors`}
           >
-            <div className="flex items-start justify-between mb-2">
-              <h5 className={`font-semibold ${
-                darkMode ? 'text-white' : 'text-slate-800'
-              }`}>
-                {insight.title}
-              </h5>
-              <div className={`flex items-center gap-1 text-xs ${
-                darkMode ? 'text-purple-400' : 'text-purple-600'
-              }`}>
-                <TrendingUp size={12} />
-                {insight.confidence}%
-              </div>
-            </div>
-            <p className={`text-sm ${
-              darkMode ? 'text-slate-400' : 'text-slate-600'
-            }`}>
-              {insight.description}
-            </p>
-          </div>
-        ))}
-      </div>
-
-      {/* Recommendations */}
-      <div className="space-y-4">
-        <h4 className={`text-sm font-semibold uppercase tracking-wide ${
-          darkMode ? 'text-purple-400' : 'text-purple-600'
-        }`}>
-          Recommended Actions
-        </h4>
-        {protocol.recommendations.map((rec, index) => (
-          <div
-            key={index}
-            className={`p-4 rounded-xl border ${
-              darkMode 
-                ? 'bg-slate-800/50 border-slate-700/50' 
-                : 'bg-white border-slate-200'
-            }`}
-          >
-            <h5 className={`font-semibold mb-3 ${
-              darkMode ? 'text-white' : 'text-slate-800'
-            }`}>
-              {rec.category}
-            </h5>
-            <ul className="space-y-2">
-              {rec.actions.map((action, actionIndex) => (
-                <li
-                  key={actionIndex}
-                  className={`flex items-start gap-2 text-sm ${
-                    darkMode ? 'text-slate-400' : 'text-slate-600'
-                  }`}
-                >
-                  <span className={`mt-1 ${
-                    darkMode ? 'text-purple-400' : 'text-purple-600'
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <h5 className={`font-semibold ${
+                    darkMode ? 'text-white' : 'text-slate-800'
                   }`}>
-                    •
+                    {protocol.title}
+                  </h5>
+                  <span className={`px-2 py-0.5 text-xs rounded ${
+                    darkMode 
+                      ? 'bg-purple-900/50 text-purple-300' 
+                      : 'bg-purple-100 text-purple-700'
+                  }`}>
+                    {protocol.frequency}
                   </span>
-                  {action}
-                </li>
-              ))}
-            </ul>
+                </div>
+                {protocol.description && (
+                  <p className={`text-sm mb-2 ${
+                    darkMode ? 'text-slate-400' : 'text-slate-600'
+                  }`}>
+                    {protocol.description}
+                  </p>
+                )}
+                <div className={`flex items-center gap-3 text-xs ${
+                  darkMode ? 'text-slate-500' : 'text-slate-500'
+                }`}>
+                  <span className="flex items-center gap-1">
+                    <TrendingUp size={12} />
+                    {protocol.completion_count} completions
+                  </span>
+                  {protocol.last_completed && (
+                    <span>
+                      Last: {new Date(protocol.last_completed).toLocaleDateString()}
+                    </span>
+                  )}
+                </div>
+              </div>
+              <button
+                onClick={() => handleComplete(protocol.id)}
+                className={`ml-3 p-2 rounded-lg transition-colors ${
+                  darkMode 
+                    ? 'bg-purple-600 hover:bg-purple-700 text-white' 
+                    : 'bg-purple-600 hover:bg-purple-700 text-white'
+                }`}
+                title="Mark as complete"
+              >
+                <Check size={16} />
+              </button>
+            </div>
           </div>
         ))}
       </div>

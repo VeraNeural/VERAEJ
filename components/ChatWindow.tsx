@@ -1,4 +1,4 @@
-S'use client';
+'use client';
 
 import { useState, useEffect, useRef } from 'react';
 import { Send, Menu, Volume2, VolumeX, AlertCircle, X, Heart, Compass, Wind, Loader2, Sparkles, Zap } from 'lucide-react';

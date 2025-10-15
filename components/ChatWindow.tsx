@@ -387,7 +387,7 @@ export default function ChatWindow() {
               evolving
             </span>
           </div>
-          <div className="flex items-center gap-2">
+<div className="flex items-center gap-2">
             <button
               onClick={cycleTheme}
               className={`px-3 py-2 rounded-xl transition-all border text-xs font-medium ${
@@ -403,6 +403,23 @@ export default function ChatWindow() {
             >
               {theme === 'light' ? 'Light' : theme === 'dark' ? 'Dark' : theme === 'night' ? 'Night' : 'Neuro'}
             </button>
+
+            <button
+              onClick={() => setShowWellnessHub(true)}
+              className={`p-2 rounded-xl transition-all border ${
+                theme === 'light'
+                  ? 'bg-purple-100 text-purple-700 border-purple-200 hover:bg-purple-200'
+                  : theme === 'dark' 
+                    ? 'bg-purple-900/50 text-purple-300 border-purple-500/30 hover:bg-purple-900/70'
+                    : theme === 'night'
+                      ? 'bg-purple-900 text-purple-300 border-purple-800 hover:bg-purple-800'
+                      : 'bg-purple-100 text-purple-800 border-purple-300 hover:bg-purple-200'
+              }`}
+              title="Wellness Hub"
+            >
+              <Sparkles size={20} />
+            </button>
+
             <button
               onClick={() => setSidePanelOpen(!sidePanelOpen)}
               className={`p-2 rounded-xl transition-all border ${

@@ -74,10 +74,10 @@ export async function POST(request: NextRequest) {
     // 5. Generate audio if enabled
     let audioUrl = null;
     console.log('🔍 Debug - audioEnabled:', audioEnabled);
-    console.log('🔍 Debug - Has API Key:', !!process.env.ELEVENLABS_API_KEY_LABS_API_KEY);
-    console.log('🔍 Debug - Has Voice ID:', !!process.env.ELEVENLABS_API_KEY_LABS_VOICE_ID);
+    console.log('🔍 Debug - Has API Key:', !!process.env.ELEVENLABS_API_KEY);
+    console.log('🔍 Debug - Has Voice ID:', !!process.env.ELEVENLABS_VOICE_ID);
 
-  if (audioEnabled && process.env.ELEVENLABS_API_KEY && process.env.ELEVENLABS_VOICE_ID) {
+    if (audioEnabled && process.env.ELEVENLABS_API_KEY && process.env.ELEVENLABS_VOICE_ID) {
       try {
         console.log('🎙️ Generating audio...');
         const audioResponse = await fetch(
@@ -115,10 +115,20 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // 6. Create or use existing session
+    let finalSessionId = sessionId;
+    if (!finalSessionId) {
+      // Create new session in database
+      const { db } = await import('@/lib/db');
+      const session = await db.createChatSession(payload.userId, 'New conversation');
+      finalSessionId = session.id;
+      console.log('✅ Created new session:', finalSessionId);
+    }
+
     return NextResponse.json({
       response: responseText,
       audioUrl,
-      sessionId: sessionId || Date.now().toString(),
+      sessionId: finalSessionId,
     }, { status: 200 });
   } catch (error) {
     console.error('❌ Chat API Error:', error);

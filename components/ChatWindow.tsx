@@ -1,4 +1,4 @@
-'use client';
+S'use client';
 
 import { useState, useEffect, useRef } from 'react';
 import { Send, Menu, Volume2, VolumeX, AlertCircle, X, Heart, Compass, Wind, Loader2, Sparkles, Zap } from 'lucide-react';
@@ -345,9 +345,6 @@ export default function ChatWindow() {
     }
   };
 
-  return (
-    <div className={`flex flex-col h-screen transition-all duration-700 ${themeClasses.bg} ${themeClasses.font}`}>
-  
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString('en-US', { 
       hour: '2-digit', 

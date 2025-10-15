@@ -1,17 +1,72 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { X } from 'lucide-react';
+import { X, Plus, MessageSquare, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 interface SidePanelProps {
   isOpen: boolean;
   onClose: () => void;
   darkMode: boolean;
+  currentSessionId?: string | null;
+  onNewChat?: () => void;
+  onLoadChat?: (sessionId: string) => void;
 }
 
-export default function SidePanel({ isOpen, onClose, darkMode }: SidePanelProps) {
+interface ChatSession {
+  id: string;
+  title: string;
+  updated_at: string;
+  message_count?: number;
+}
+
+export default function SidePanel({ isOpen, onClose, darkMode, currentSessionId, onNewChat, onLoadChat }: SidePanelProps) {
   const router = useRouter();
+  const [sessions, setSessions] = useState<ChatSession[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      loadSessions();
+    }
+  }, [isOpen]);
+
+  const loadSessions = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/sessions');
+      if (response.ok) {
+        const data = await response.json();
+        setSessions(data.sessions || []);
+      }
+    } catch (error) {
+      console.error('Failed to load sessions:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDeleteSession = async (sessionId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    if (!confirm('Delete this conversation?')) return;
+
+    try {
+      const response = await fetch(`/api/sessions?id=${sessionId}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        setSessions(sessions.filter(s => s.id !== sessionId));
+        if (currentSessionId === sessionId && onNewChat) {
+          onNewChat();
+        }
+      }
+    } catch (error) {
+      console.error('Failed to delete session:', error);
+    }
+  };
 
   const handleSignOut = async () => {
     try {
@@ -25,6 +80,21 @@ export default function SidePanel({ isOpen, onClose, darkMode }: SidePanelProps)
     } catch (error) {
       console.error('Sign out error:', error);
     }
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return date.toLocaleDateString();
   };
 
   if (!isOpen) return null;
@@ -50,7 +120,6 @@ export default function SidePanel({ isOpen, onClose, darkMode }: SidePanelProps)
           <div className="p-6 border-b border-slate-200 dark:border-slate-800">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                {/* Neural orb */}
                 <div className="relative">
                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-blue-500" />
                   <div className="absolute inset-0 w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 animate-pulse opacity-30" />
@@ -66,79 +135,129 @@ export default function SidePanel({ isOpen, onClose, darkMode }: SidePanelProps)
                 <X size={20} />
               </button>
             </div>
+
+            {/* New Chat Button */}
+            <button
+              onClick={() => {
+                if (onNewChat) onNewChat();
+                onClose();
+              }}
+              className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium transition-all ${
+                darkMode
+                  ? 'bg-purple-600 hover:bg-purple-700 text-white'
+                  : 'bg-purple-500 hover:bg-purple-600 text-white'
+              }`}
+            >
+              <Plus size={18} />
+              New Chat
+            </button>
+          </div>
+
+          {/* Chat History */}
+          <div className="flex-1 overflow-y-auto p-4">
+            <h3 className={`text-xs font-semibold uppercase tracking-wider mb-3 px-2 ${
+              darkMode ? 'text-slate-400' : 'text-slate-500'
+            }`}>
+              Recent Chats
+            </h3>
+
+            {isLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500" />
+              </div>
+            ) : sessions.length === 0 ? (
+              <div className={`text-center py-8 px-4 ${
+                darkMode ? 'text-slate-400' : 'text-slate-500'
+              }`}>
+                <MessageSquare size={32} className="mx-auto mb-2 opacity-50" />
+                <p className="text-sm">No conversations yet</p>
+              </div>
+            ) : (
+              <div className="space-y-1">
+                {sessions.map((session) => (
+                  <div
+                    key={session.id}
+                    onClick={() => {
+                      if (onLoadChat) onLoadChat(session.id);
+                      onClose();
+                    }}
+                    className={`group flex items-center justify-between px-3 py-3 rounded-lg cursor-pointer transition-all ${
+                      currentSessionId === session.id
+                        ? darkMode
+                          ? 'bg-purple-900/50 border border-purple-500/30'
+                          : 'bg-purple-50 border border-purple-200'
+                        : darkMode
+                          ? 'hover:bg-slate-800'
+                          : 'hover:bg-slate-100'
+                    }`}
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className={`text-sm font-medium truncate ${
+                        darkMode ? 'text-slate-200' : 'text-slate-900'
+                      }`}>
+                        {session.title}
+                      </p>
+                      <p className={`text-xs ${
+                        darkMode ? 'text-slate-400' : 'text-slate-500'
+                      }`}>
+                        {formatDate(session.updated_at)}
+                      </p>
+                    </div>
+                    <button
+                      onClick={(e) => handleDeleteSession(session.id, e)}
+                      className={`opacity-0 group-hover:opacity-100 p-1.5 rounded transition-all ${
+                        darkMode
+                          ? 'hover:bg-red-900/50 text-red-400'
+                          : 'hover:bg-red-50 text-red-600'
+                      }`}
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Navigation Links */}
-          <nav className="flex-1 p-6 space-y-2">
-            <Link 
-              href="/chat"
-              onClick={onClose}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${
-                darkMode 
-                  ? 'hover:bg-slate-800 text-slate-200' 
-                  : 'hover:bg-slate-100 text-slate-700'
-              }`}
-            >
-              <div className="w-2 h-2 rounded-full bg-purple-500" />
-              Chat
-            </Link>
-            
+          <nav className={`p-4 border-t space-y-1 ${
+            darkMode ? 'border-slate-800' : 'border-slate-200'
+          }`}>
             <Link 
               href="/dashboard"
               onClick={onClose}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${
+              className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 darkMode 
-                  ? 'hover:bg-slate-800 text-slate-200' 
+                  ? 'hover:bg-slate-800 text-slate-300' 
                   : 'hover:bg-slate-100 text-slate-700'
               }`}
             >
-              <div className="w-2 h-2 rounded-full bg-blue-500" />
               Dashboard
             </Link>
             
             <Link 
-              href="/settings"
-              onClick={onClose}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${
-                darkMode 
-                  ? 'hover:bg-slate-800 text-slate-200' 
-                  : 'hover:bg-slate-100 text-slate-700'
-              }`}
-            >
-              <div className="w-2 h-2 rounded-full bg-indigo-500" />
-              Settings
-            </Link>
-
-            <Link 
               href="/pricing"
               onClick={onClose}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${
+              className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 darkMode 
-                  ? 'hover:bg-slate-800 text-slate-200' 
+                  ? 'hover:bg-slate-800 text-slate-300' 
                   : 'hover:bg-slate-100 text-slate-700'
               }`}
             >
-              <div className="w-2 h-2 rounded-full bg-pink-500" />
               Upgrade
             </Link>
-          </nav>
 
-          {/* Footer Actions */}
-          <div className={`p-6 border-t ${
-            darkMode ? 'border-slate-800' : 'border-slate-200'
-          }`}>
             <button
               onClick={handleSignOut}
-              className={`flex items-center gap-3 w-full px-4 py-3 rounded-lg font-medium transition-colors ${
+              className={`flex items-center gap-3 w-full px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 darkMode 
-                  ? 'hover:bg-slate-800 text-slate-400 hover:text-slate-200' 
-                  : 'hover:bg-slate-100 text-slate-600 hover:text-slate-900'
+                  ? 'hover:bg-slate-800 text-slate-400' 
+                  : 'hover:bg-slate-100 text-slate-600'
               }`}
             >
-              <div className="w-2 h-2 rounded-full bg-slate-500" />
               Sign Out
             </button>
-          </div>
+          </nav>
         </div>
       </div>
     </>

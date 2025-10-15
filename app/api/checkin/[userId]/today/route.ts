@@ -8,7 +8,7 @@ export async function GET(
   try {
     const { userId } = params;
     const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-
+    
     // Check if user has checked in today
     const result = await query(
       `SELECT * FROM daily_checkins 
@@ -18,20 +18,19 @@ export async function GET(
        LIMIT 1`,
       [userId, today]
     );
-
+    
     if (result.rows.length > 0) {
       const checkin = result.rows[0];
       
-      // Get streak
+      // Get streak - FIXED QUERY
       const streakResult = await query(
         `SELECT COUNT(DISTINCT DATE(created_at)) as streak
          FROM daily_checkins
          WHERE user_id = $1
-         AND created_at >= NOW() - INTERVAL '30 days'
-         ORDER BY created_at DESC`,
+         AND created_at >= NOW() - INTERVAL '30 days'`,
         [userId]
       );
-
+      
       return NextResponse.json({
         checkedIn: true,
         data: {
@@ -44,8 +43,8 @@ export async function GET(
         streak: parseInt(streakResult.rows[0]?.streak || '0')
       });
     }
-
-    // Get streak even if not checked in today
+    
+    // Get streak even if not checked in today - FIXED QUERY
     const streakResult = await query(
       `SELECT COUNT(DISTINCT DATE(created_at)) as streak
        FROM daily_checkins
@@ -53,12 +52,12 @@ export async function GET(
        AND created_at >= NOW() - INTERVAL '30 days'`,
       [userId]
     );
-
+    
     return NextResponse.json({
       checkedIn: false,
       streak: parseInt(streakResult.rows[0]?.streak || '0')
     });
-
+    
   } catch (error) {
     console.error('Check-in status error:', error);
     return NextResponse.json(

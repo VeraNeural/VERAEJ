@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { X, User, Sparkles, BookOpen, CheckSquare, FileText } from 'lucide-react';
+import { X, User, Sparkles, BookOpen, CheckSquare, FileText, ExternalLink } from 'lucide-react';
+import Link from 'next/link';
 import PersonalProtocol from './chat/PersonalProtocol';
 import JournalPrompts from './chat/JournalPrompts';
 import DailyCheckIn from './chat/DailyCheckIn';
@@ -148,7 +149,27 @@ export default function WellnessHubModal({ isOpen, onClose, darkMode, userId }: 
             )}
             
             {activeTab === 'protocol' && (
-              <PersonalProtocol darkMode={darkMode} userId={userId} />
+              <div>
+                {/* View Full Protocol Button */}
+                <div className="mb-6 flex items-center justify-between">
+                  <p className={darkMode ? 'text-slate-400' : 'text-slate-600'}>
+                    Your personalized wellness protocol
+                  </p>
+                  <Link
+                    href="/protocol"
+                    onClick={onClose}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all text-sm font-medium ${
+                      darkMode
+                        ? 'bg-purple-900/30 hover:bg-purple-900/50 text-purple-300 border border-purple-500/30'
+                        : 'bg-purple-100 hover:bg-purple-200 text-purple-700 border border-purple-200'
+                    }`}
+                  >
+                    View Full Protocol
+                    <ExternalLink size={16} />
+                  </Link>
+                </div>
+                <PersonalProtocol darkMode={darkMode} userId={userId} />
+              </div>
             )}
             
             {activeTab === 'journal' && (

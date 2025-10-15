@@ -1,9 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
-import { Plus, Check, Calendar, TrendingUp, Edit2, Trash2, BarChart3, Download } from 'lucide-react';
+import { Plus, Check, Calendar, TrendingUp, BarChart3, Loader2 } from 'lucide-react';
 
 interface Protocol {
   id: string;
@@ -16,10 +15,10 @@ interface Protocol {
 }
 
 export default function ProtocolPage() {
-  const { user } = useAuth();
   const router = useRouter();
-  const [protocols, setProtocols] = useState<Protocol[]>([]);
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<any>(null);
+  const [protocols, setProtocols] = useState<Protocol[]>([]);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newProtocol, setNewProtocol] = useState({
     title: '',
@@ -29,31 +28,43 @@ export default function ProtocolPage() {
   });
 
   useEffect(() => {
-    if (!user) {
-      router.push('/auth/signin');
-      return;
-    }
-    fetchProtocols();
-  }, [user]);
+    checkAuth();
+  }, []);
 
-  const fetchProtocols = async () => {
+  const checkAuth = async () => {
     try {
-      setLoading(true);
-      const response = await fetch(`/api/protocol/${user?.id}`);
+      const response = await fetch('/api/auth/me');
+      
+      if (!response.ok) {
+        router.push('/auth/signin');
+        return;
+      }
+      
+      const data = await response.json();
+      setUser(data.user);
+      setLoading(false);
+      fetchProtocols(data.user.id);
+    } catch (error) {
+      console.error('Auth check error:', error);
+      router.push('/auth/signin');
+    }
+  };
+
+  const fetchProtocols = async (userId: string) => {
+    try {
+      const response = await fetch(`/api/protocol/${userId}`);
       const data = await response.json();
       setProtocols(data.protocols || []);
     } catch (error) {
       console.error('Failed to fetch protocols:', error);
-    } finally {
-      setLoading(false);
     }
   };
 
   const handleAddProtocol = async () => {
-    if (!newProtocol.title.trim()) return;
+    if (!newProtocol.title.trim() || !user) return;
 
     try {
-      const response = await fetch(`/api/protocol/${user?.id}`, {
+      const response = await fetch(`/api/protocol/${user.id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newProtocol)
@@ -62,7 +73,7 @@ export default function ProtocolPage() {
       if (response.ok) {
         setNewProtocol({ title: '', description: '', category: 'mindfulness', frequency: 'daily' });
         setShowAddForm(false);
-        fetchProtocols();
+        fetchProtocols(user.id);
       }
     } catch (error) {
       console.error('Failed to add protocol:', error);
@@ -70,15 +81,17 @@ export default function ProtocolPage() {
   };
 
   const handleComplete = async (protocolId: string) => {
+    if (!user) return;
+    
     try {
-      const response = await fetch(`/api/protocol/${user?.id}/complete`, {
+      const response = await fetch(`/api/protocol/${user.id}/complete`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ protocolId })
       });
 
       if (response.ok) {
-        fetchProtocols();
+        fetchProtocols(user.id);
       }
     } catch (error) {
       console.error('Failed to complete protocol:', error);
@@ -87,10 +100,17 @@ export default function ProtocolPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950">
-        <div className="text-gray-400">Loading your protocol...</div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 text-purple-500 animate-spin mx-auto mb-4" />
+          <p className="text-gray-400">Loading your protocol...</p>
+        </div>
       </div>
     );
+  }
+
+  if (!user) {
+    return null;
   }
 
   return (

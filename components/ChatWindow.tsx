@@ -28,6 +28,7 @@ export default function ChatWindow() {
   const [userTier, setUserTier] = useState<string>('free');
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [showCrisisModal, setShowCrisisModal] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
   const [voiceUsageToday, setVoiceUsageToday] = useState(0);
   const [isTyping, setIsTyping] = useState(false);
   const [theme, setTheme] = useState<ThemeMode>('dark');
@@ -149,6 +150,7 @@ export default function ChatWindow() {
         }
         if (user.test_mode) tier = 'test';
         setUserTier(tier);
+        setUserId(user.id);
       } catch (error) {
         console.error('Failed to fetch user data:', error);
         setUserTier('free');
@@ -690,17 +692,19 @@ export default function ChatWindow() {
         </div>
       </div>
 
- <SidePanel 
-  isOpen={sidePanelOpen} 
-  onClose={() => setSidePanelOpen(false)} 
-  darkMode={theme === 'dark' || theme === 'night'}
-  userId={currentSessionId || 'temp-user'}
-  onJournalClick={(prompt) => {
-    setSidePanelOpen(false);
-    setInput(prompt);
-    setTimeout(() => inputRef.current?.focus(), 100);
-  }}
-/>
+{userId && (
+  <SidePanel 
+    isOpen={sidePanelOpen} 
+    onClose={() => setSidePanelOpen(false)} 
+    darkMode={theme === 'dark' || theme === 'night'}
+    userId={userId}
+    onJournalClick={(prompt) => {
+      setSidePanelOpen(false);
+      setInput(prompt);
+      setTimeout(() => inputRef.current?.focus(), 100);
+    }}
+  />
+)}
 
       <audio ref={audioRef} className="hidden" />
 

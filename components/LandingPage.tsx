@@ -350,8 +350,7 @@ export default function LandingPage() {
                   'Unlimited conversations — talk to me anytime',
                   'Unlimited quick prompts — regulate whenever you need',
                   'Save all chats — never lose our work together',
-                  'Full pattern analysis — understand your nervous system',
-                  'Unlimited voice responses — hear me speak to you',
+                  'Deep pattern analysis — understand your nervous system',
                   'Priority email support — get help within 24 hours'
                 ].map((feature, idx) => (
                   <li key={idx} className="flex items-start gap-3">

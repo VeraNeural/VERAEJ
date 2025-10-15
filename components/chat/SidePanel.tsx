@@ -11,11 +11,12 @@ interface SidePanelProps {
   onClose: () => void;
   darkMode: boolean;
   userId: string;
+  onJournalClick?: (prompt: string) => void;
 }
 
 type TabType = 'profile' | 'protocol' | 'journal' | 'checkin' | 'files';
 
-const SidePanel: React.FC<SidePanelProps> = ({ isOpen, onClose, darkMode, userId }) => {
+const SidePanel: React.FC<SidePanelProps> = ({ isOpen, onClose, darkMode, userId, onJournalClick }) => {
   const [activeTab, setActiveTab] = useState<TabType>('profile');
 
   const tabs: Array<{ id: TabType; label: string; icon: React.ComponentType<{ size?: number }> }> = [
@@ -97,7 +98,18 @@ const SidePanel: React.FC<SidePanelProps> = ({ isOpen, onClose, darkMode, userId
           {activeTab === 'profile' && <ProfileSettings darkMode={darkMode} userId={userId} />}
           {activeTab === 'protocol' && <PersonalProtocol darkMode={darkMode} userId={userId} />}
           {activeTab === 'journal' && <JournalPrompts darkMode={darkMode} userId={userId} />}
-          {activeTab === 'checkin' && <DailyCheckIn darkMode={darkMode} userId={userId} />}
+          {activeTab === 'checkin' && (
+            <DailyCheckIn 
+              darkMode={darkMode} 
+              userId={userId}
+              onJournalClick={(prompt) => {
+                if (onJournalClick) {
+                  onJournalClick(prompt);
+                  onClose();
+                }
+              }}
+            />
+          )}
           {activeTab === 'files' && <FileAttachments darkMode={darkMode} userId={userId} />}
         </div>
       </div>

@@ -46,8 +46,3 @@ export async function GET() {
     );
   }
 }
-```
-
-**Replace the entire create-all-tables file with this**, push to GitHub, then visit:
-```
-https://www.veraneural.com/api/create-all-tables

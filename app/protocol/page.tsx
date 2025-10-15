@@ -297,8 +297,3 @@ export default function ProtocolPage() {
     </div>
   );
 }
-```
-
-**Create this file, push to GitHub, and then you can access it at:**
-```
-https://www.veraneural.com/protocol

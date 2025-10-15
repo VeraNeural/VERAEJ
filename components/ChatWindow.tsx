@@ -315,17 +315,30 @@ export default function ChatWindow() {
   };
 
   const handleLoadChat = async (sessionId: string) => {
-    try {
-      const response = await fetch(`/api/sessions/${sessionId}/messages`);
-      if (response.ok) {
-        const data = await response.json();
-        setMessages(data.messages || []);
-        setCurrentSessionId(sessionId);
-      }
-    } catch (error) {
-      console.error('Failed to load chat:', error);
+  console.log('🔵 Loading chat:', sessionId);
+  
+  try {
+    const response = await fetch(`/api/sessions/${sessionId}/messages`);
+    console.log('🔵 Response status:', response.status);
+    
+    if (response.ok) {
+      const data = await response.json();
+      console.log('🔵 Loaded messages:', data.messages);
+      
+      // Convert timestamp strings to Date objects
+      const loadedMessages = (data.messages || []).map((msg: any) => ({
+        ...msg,
+        timestamp: new Date(msg.timestamp)
+      }));
+      
+      setMessages(loadedMessages);
+      setCurrentSessionId(sessionId);
+      console.log('✅ Messages loaded successfully');
     }
-  };
+  } catch (error) {
+    console.error('❌ Failed to load chat:', error);
+  }
+};
 
   const handleSaveSession = async () => {
     if (!currentSessionId || messages.length === 0) return;
@@ -345,12 +358,13 @@ export default function ChatWindow() {
     }
   };
 
-  const formatTime = (date: Date) => {
-    return date.toLocaleTimeString('en-US', { 
-      hour: '2-digit', 
-      minute: '2-digit' 
-    });
-  };
+  const formatTime = (date: Date | string) => {
+  const dateObj = date instanceof Date ? date : new Date(date);
+  return dateObj.toLocaleTimeString('en-US', { 
+    hour: '2-digit', 
+    minute: '2-digit' 
+  });
+};
 
   return (
     <div className={`flex flex-col h-screen transition-all duration-700 ${themeClasses.bg} ${themeClasses.font}`}>

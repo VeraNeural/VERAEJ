@@ -4,8 +4,6 @@ import { useState } from 'react';
 import { X, User, Sparkles, BookOpen, CheckSquare, FileText } from 'lucide-react';
 import PersonalProtocol from './chat/PersonalProtocol';
 import JournalPrompts from './chat/JournalPrompts';
-import DailyCheckin from './chat/DailyCheckin';
-import UserProfile from './chat/UserProfile';
 
 interface WellnessHubModalProps {
   isOpen: boolean;
@@ -17,7 +15,7 @@ interface WellnessHubModalProps {
 type Tab = 'profile' | 'protocol' | 'journal' | 'checkin' | 'files';
 
 export default function WellnessHubModal({ isOpen, onClose, darkMode, userId }: WellnessHubModalProps) {
-  const [activeTab, setActiveTab] = useState<Tab>('profile');
+  const [activeTab, setActiveTab] = useState<Tab>('protocol');
 
   if (!isOpen) return null;
 
@@ -143,7 +141,12 @@ export default function WellnessHubModal({ isOpen, onClose, darkMode, userId }: 
           {/* Content */}
           <div className="flex-1 overflow-y-auto p-6">
             {activeTab === 'profile' && (
-              <UserProfile darkMode={darkMode} userId={userId} />
+              <div className={`text-center py-12 ${
+                darkMode ? 'text-slate-400' : 'text-slate-600'
+              }`}>
+                <User size={48} className="mx-auto mb-4 opacity-50" />
+                <p>Profile settings coming soon...</p>
+              </div>
             )}
             
             {activeTab === 'protocol' && (
@@ -155,7 +158,12 @@ export default function WellnessHubModal({ isOpen, onClose, darkMode, userId }: 
             )}
             
             {activeTab === 'checkin' && (
-              <DailyCheckin darkMode={darkMode} userId={userId} />
+              <div className={`text-center py-12 ${
+                darkMode ? 'text-slate-400' : 'text-slate-600'
+              }`}>
+                <CheckSquare size={48} className="mx-auto mb-4 opacity-50" />
+                <p>Daily check-in coming soon...</p>
+              </div>
             )}
             
             {activeTab === 'files' && (

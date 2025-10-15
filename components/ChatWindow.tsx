@@ -31,11 +31,14 @@ export default function ChatWindow() {
   const [voiceUsageToday, setVoiceUsageToday] = useState(0);
   const [isTyping, setIsTyping] = useState(false);
   const [theme, setTheme] = useState<ThemeMode>('dark');
+  const [messageCount, setMessageCount] = useState(0);
+  const [promptCount, setPromptCount] = useState(0);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-
+  const MESSAGE_LIMIT = userTier === 'free' ? 10 : Infinity; 
+  const PROMPT_LIMIT = userTier === 'free' ? 5 : Infinity; 
   const voiceAvailable = ['explorer', 'regulator', 'integrator', 'test'].includes(userTier);
   const getVoiceLimit = (tier: string) => {
     switch(tier) {
@@ -182,6 +185,11 @@ export default function ChatWindow() {
     const messageToSend = customMessage || input.trim();
     if (!messageToSend || isLoading) return;
 
+    if (userTier === 'free' && messageCount >= MESSAGE_LIMIT) {
+    alert('You\'ve reached your daily limit of 10 messages. Upgrade to Explorer ($29/month) for unlimited conversations!\n\nVisit veraneural.com/pricing to upgrade.');
+    return;
+  }
+
     if (!customMessage) setInput('');
     setIsLoading(true);
     setIsTyping(true);
@@ -193,6 +201,7 @@ export default function ChatWindow() {
       timestamp: new Date(),
     };
     setMessages((prev) => [...prev, newUserMessage]);
+    setMessageCount(prev => prev + 1);
 
     try {
       const conversationHistory = [...messages, newUserMessage].map(msg => ({
@@ -265,8 +274,14 @@ export default function ChatWindow() {
   };
 
   const handleQuickAction = (action: keyof typeof quickMessages) => {
-    sendMessage(quickMessages[action]);
-  };
+  if (userTier === 'free' && promptCount >= PROMPT_LIMIT) {
+    alert('You\'ve reached your daily limit of 5 quick prompts. Upgrade to Explorer ($29/month) for unlimited prompts!\n\nVisit veraneural.com/pricing to upgrade.');
+    return;
+  }
+  
+  setPromptCount(prev => prev + 1);
+  sendMessage(quickMessages[action]);
+};
 
   const handleVoiceToggle = () => {
     if (!voiceAvailable) {
@@ -274,7 +289,7 @@ export default function ChatWindow() {
       return;
     }
     if (!canUseVoice) {
-      alert(`Voice limit reached for today. Upgrade to Integrator for unlimited voice!`);
+      alert(`Voice limit reached for today. Upgrade to Integrator for unlimited voice!`);S
       return;
     }
     setAudioEnabled(!audioEnabled);

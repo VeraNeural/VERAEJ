@@ -308,27 +308,26 @@ export default function ProtocolPage() {
                   >
                     <Check size={20} />
                   </button>
-                </div>
-              </div>
-            ))}
+        </div>
           </div>
-
-           {protocols.length > 0 && (
-          <div className="mt-6 text-center">
-            <button
-              onClick={() => window.location.href = '/protocol'}
-              className={`inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all ${
-                darkMode
-                  ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:shadow-lg hover:shadow-purple-500/30'
-                  : 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:shadow-lg hover:shadow-purple-500/30'
-              }`}
-            >
-              View Full Protocol
-              <TrendingUp size={18} />
-            </button>
-          </div>
-        )}
+        ))}
       </div>
+
+      {protocols.length > 0 && (
+        <div className="mt-6 text-center">
+          <button
+            onClick={() => window.location.href = '/protocol'}
+            className={`inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all ${
+              darkMode
+                ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:shadow-lg hover:shadow-purple-500/30'
+                : 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:shadow-lg hover:shadow-purple-500/30'
+            }`}
+          >
+            View Full Protocol
+            <TrendingUp size={18} />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

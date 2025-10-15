@@ -112,7 +112,8 @@ export const db = {
     return result.rows[0];
   },
 
- async updateChatSession(sessionId: string, data: { messages?: any[], title?: string }) {
+  // ✅ FIXED: Update chat session with proper parameter handling
+  async updateChatSession(sessionId: string, data: { messages?: any[], title?: string, updated_at?: Date }) {
     const updates: string[] = [];
     const values: any[] = [];
     let paramCounter = 1;
@@ -129,13 +130,20 @@ export const db = {
       paramCounter++;
     }
 
+    // Always update the timestamp
     updates.push(`updated_at = NOW()`);
+
+    // Add sessionId as the last parameter
     values.push(sessionId);
 
-    await pool.query(
-      `UPDATE chat_sessions SET ${updates.join(', ')} WHERE id = $${paramCounter}`,
-      values
-    );
+    const query = `UPDATE chat_sessions SET ${updates.join(', ')} WHERE id = $${paramCounter}`;
+    
+    console.log('🔧 Update query:', query);
+    console.log('🔧 Values:', values);
+
+    await pool.query(query, values);
+    
+    console.log('✅ Session updated successfully');
   }, 
 
   async getUserSessions(userId: string, limit: number = 20) {
@@ -340,7 +348,7 @@ export const db = {
     
     return total > 0 ? ((paid / total) * 100).toFixed(1) : '0';
   },
-}; // ✅ Fixed: Moved closing brace here
+};
 
 // Create test user (for staff)
 export async function createTestUser(params: { name: string; email: string; password: string }) {
@@ -361,7 +369,7 @@ export async function createTestUser(params: { name: string; email: string; pass
     );
     return { user: result.rows[0] };
   } catch (error) {
-    const err = error as { code?: string }; // ✅ Fixed: Proper type assertion
+    const err = error as { code?: string };
     if (err.code === '23505') {
       return { error: 'Test user already exists' };
     }

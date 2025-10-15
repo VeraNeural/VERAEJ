@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { query } from '@/lib/db';
 
 export async function GET(req: NextRequest) {
   try {
@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
     const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / 1000 / 60 / 60 / 24);
     
     // Get all prompts
-    const prompts = await db.query('SELECT * FROM journal_prompts ORDER BY created_at');
+    const prompts = await query('SELECT * FROM journal_prompts ORDER BY created_at');
     
     if (!prompts.rows || prompts.rows.length === 0) {
       return NextResponse.json(

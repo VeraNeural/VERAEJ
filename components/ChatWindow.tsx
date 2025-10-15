@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Send, Menu, Volume2, VolumeX, AlertCircle, X, Heart, Compass, Wind, Loader2, Sparkles, Zap } from 'lucide-react';
-import SidePanel from './chat/SidePanel';
+import SidePanel from './SidePanel';
 
 interface Message {
   id: string;
@@ -690,26 +690,21 @@ export default function ChatWindow() {
             </p>
           </div>
         </div>
-      </div>
+    </div>
 
-{userId && (
-  <SidePanel 
-    isOpen={sidePanelOpen} 
-    onClose={() => setSidePanelOpen(false)} 
-    darkMode={theme === 'dark' || theme === 'night'}
-    userId={userId}
-    onJournalClick={(prompt) => {
-      setSidePanelOpen(false);
-      setInput(prompt);
-      setTimeout(() => inputRef.current?.focus(), 100);
-    }}
-  />
-)}
+    <SidePanel 
+      isOpen={sidePanelOpen} 
+      onClose={() => setSidePanelOpen(false)} 
+      darkMode={theme === 'dark' || theme === 'night'}
+      currentSessionId={currentSessionId}
+      onNewChat={handleNewChat}
+      onLoadChat={handleLoadChat}
+    />
 
-      <audio ref={audioRef} className="hidden" />
-
-      <style jsx>{`
-        @keyframes fade-in {
+    <audio ref={audioRef} className="hidden" />
+    
+    <style jsx>{`
+      @keyframes fade-in {
           from {
             opacity: 0;
             transform: translateY(10px);

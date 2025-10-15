@@ -67,29 +67,53 @@ const PersonalProtocol: React.FC<PersonalProtocolProps> = ({ darkMode, userId })
     );
   }
 
-  if (protocols.length === 0) {
-    return (
-      <div className={`text-center py-12 px-6 rounded-2xl border ${
-        darkMode 
-          ? 'bg-slate-800/50 border-slate-700/50' 
-          : 'bg-white border-slate-200'
+if (protocols.length === 0) {
+  return (
+    <div className={`text-center py-12 px-6 rounded-2xl border ${
+      darkMode 
+        ? 'bg-slate-800/50 border-slate-700/50' 
+        : 'bg-white border-slate-200'
+    }`}>
+      <Sparkles size={48} className={`mx-auto mb-4 ${
+        darkMode ? 'text-purple-400' : 'text-purple-600'
+      }`} />
+      <h3 className={`text-xl font-bold mb-2 ${
+        darkMode ? 'text-white' : 'text-slate-800'
       }`}>
-        <Sparkles size={48} className={`mx-auto mb-4 ${
-          darkMode ? 'text-purple-400' : 'text-purple-600'
-        }`} />
-        <h3 className={`text-xl font-bold mb-2 ${
-          darkMode ? 'text-white' : 'text-slate-800'
-        }`}>
-          No Protocol Items Yet
-        </h3>
-        <p className={`text-sm mb-6 ${
-          darkMode ? 'text-slate-400' : 'text-slate-600'
-        }`}>
-          Your personalized wellness protocol will appear here as VERA learns from your interactions
-        </p>
-      </div>
-    );
-  }
+        No Protocol Items Yet
+      </h3>
+      <p className={`text-sm mb-6 ${
+        darkMode ? 'text-slate-400' : 'text-slate-600'
+      }`}>
+        Your personalized wellness protocol will appear here as VERA learns from your interactions
+      </p>
+      <button
+        onClick={() => {
+          // For now, let's add a sample protocol item
+          const sampleProtocol = {
+            title: 'Morning Mindfulness',
+            description: 'Start your day with 5 minutes of mindful breathing',
+            category: 'mindfulness',
+            frequency: 'daily'
+          };
+          fetch(`/api/protocol/${userId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(sampleProtocol)
+          }).then(() => fetchProtocols());
+        }}
+        className={`px-6 py-3 rounded-xl font-semibold transition-all ${
+          darkMode
+            ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:shadow-lg hover:shadow-purple-500/30'
+            : 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:shadow-lg hover:shadow-purple-500/30'
+        }`}
+      >
+        <Plus size={18} className="inline mr-2" />
+        Add Sample Protocol Item
+      </button>
+    </div>
+  );
+}
 
   return (
     <div className="space-y-4">

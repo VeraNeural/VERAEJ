@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
 import { Send, Menu, Volume2, VolumeX, AlertCircle, X, Heart, Compass, Wind, Loader2, Sparkles, Zap } from 'lucide-react';
 import SidePanel from './SidePanel';
+import WellnessHubModal from './WellnessHubModal'; // ADD THIS
 
 interface Message {
   id: string;
@@ -34,6 +34,7 @@ export default function ChatWindow() {
   const [theme, setTheme] = useState<ThemeMode>('dark');
   const [messageCount, setMessageCount] = useState(0);
   const [promptCount, setPromptCount] = useState(0);
+  const [showWellnessHub, setShowWellnessHub] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);

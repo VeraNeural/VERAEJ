@@ -181,6 +181,12 @@ export default function ChatWindow() {
     inputRef.current?.focus();
   }, []);
 
+  useEffect(() => {
+    if (messages.length > 0 && currentSessionId) {
+      handleSaveSession();
+    }
+  }, [messages]);
+
   const sendMessage = async (customMessage?: string) => {
     const messageToSend = customMessage || input.trim();
     if (!messageToSend || isLoading) return;
@@ -302,6 +308,46 @@ export default function ChatWindow() {
     }
   };
 
+  const handleNewChat = () => {
+    setMessages([]);
+    setCurrentSessionId(null);
+    setInput('');
+  };
+
+  const handleLoadChat = async (sessionId: string) => {
+    try {
+      const response = await fetch(`/api/sessions/${sessionId}/messages`);
+      if (response.ok) {
+        const data = await response.json();
+        setMessages(data.messages || []);
+        setCurrentSessionId(sessionId);
+      }
+    } catch (error) {
+      console.error('Failed to load chat:', error);
+    }
+  };
+
+  const handleSaveSession = async () => {
+    if (!currentSessionId || messages.length === 0) return;
+
+    try {
+      await fetch('/api/sessions/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId: currentSessionId,
+          messages: messages,
+          title: messages[0]?.content.slice(0, 50) || 'Untitled Chat',
+        }),
+      });
+    } catch (error) {
+      console.error('Failed to save session:', error);
+    }
+  };
+
+  return (
+    <div className={`flex flex-col h-screen transition-all duration-700 ${themeClasses.bg} ${themeClasses.font}`}>
+  
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString('en-US', { 
       hour: '2-digit', 
@@ -633,11 +679,14 @@ export default function ChatWindow() {
         </div>
       </div>
 
-      <SidePanel 
-        isOpen={sidePanelOpen} 
-        onClose={() => setSidePanelOpen(false)} 
-        darkMode={theme === 'dark' || theme === 'night'} 
-      />
+     <SidePanel 
+  isOpen={sidePanelOpen} 
+  onClose={() => setSidePanelOpen(false)} 
+  darkMode={theme === 'dark' || theme === 'night'}
+  currentSessionId={currentSessionId}
+  onNewChat={handleNewChat}
+  onLoadChat={handleLoadChat}
+/>
 
       <audio ref={audioRef} className="hidden" />
 

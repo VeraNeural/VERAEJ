@@ -720,6 +720,17 @@ export default function ChatWindow() {
       onLoadChat={handleLoadChat}
     />
 
+    {userId && (
+      <WellnessHubModal
+        isOpen={showWellnessHub}
+        onClose={() => setShowWellnessHub(false)}
+        darkMode={theme === 'dark' || theme === 'night'}
+        userId={userId}
+      />
+    )}
+
+    <audio ref={audioRef} className="hidden" />
+
     <audio ref={audioRef} className="hidden" />
     
     <style jsx>{`

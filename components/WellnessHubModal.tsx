@@ -4,6 +4,9 @@ import { useState } from 'react';
 import { X, User, Sparkles, BookOpen, CheckSquare, FileText } from 'lucide-react';
 import PersonalProtocol from './chat/PersonalProtocol';
 import JournalPrompts from './chat/JournalPrompts';
+import DailyCheckIn from './chat/DailyCheckIn';
+import FileAttachments from './chat/FileAttachments';
+import ProfileSettings from './chat/ProfileSettings';
 
 interface WellnessHubModalProps {
   isOpen: boolean;
@@ -141,12 +144,7 @@ export default function WellnessHubModal({ isOpen, onClose, darkMode, userId }: 
           {/* Content */}
           <div className="flex-1 overflow-y-auto p-6">
             {activeTab === 'profile' && (
-              <div className={`text-center py-12 ${
-                darkMode ? 'text-slate-400' : 'text-slate-600'
-              }`}>
-                <User size={48} className="mx-auto mb-4 opacity-50" />
-                <p>Profile settings coming soon...</p>
-              </div>
+              <ProfileSettings darkMode={darkMode} userId={userId} />
             )}
             
             {activeTab === 'protocol' && (
@@ -158,21 +156,11 @@ export default function WellnessHubModal({ isOpen, onClose, darkMode, userId }: 
             )}
             
             {activeTab === 'checkin' && (
-              <div className={`text-center py-12 ${
-                darkMode ? 'text-slate-400' : 'text-slate-600'
-              }`}>
-                <CheckSquare size={48} className="mx-auto mb-4 opacity-50" />
-                <p>Daily check-in coming soon...</p>
-              </div>
+              <DailyCheckIn darkMode={darkMode} userId={userId} />
             )}
             
             {activeTab === 'files' && (
-              <div className={`text-center py-12 ${
-                darkMode ? 'text-slate-400' : 'text-slate-600'
-              }`}>
-                <FileText size={48} className="mx-auto mb-4 opacity-50" />
-                <p>Files feature coming soon...</p>
-              </div>
+              <FileAttachments darkMode={darkMode} userId={userId} />
             )}
           </div>
         </div>

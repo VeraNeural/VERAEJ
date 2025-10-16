@@ -275,6 +275,111 @@ export default function LandingPage() {
           box-shadow: 0 10px 40px rgba(155, 89, 182, 0.4);
         }
 
+        /* Desktop menu - hide on mobile */
+        .desktop-only {
+          display: flex;
+        }
+
+        /* Mobile hamburger button */
+        .mobile-menu-btn {
+          display: none;
+          background: none;
+          border: none;
+          cursor: pointer;
+          padding: 0.5rem;
+          z-index: 1001;
+        }
+
+        .hamburger {
+          width: 24px;
+          height: 20px;
+          position: relative;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+        }
+
+        .hamburger span {
+          display: block;
+          height: 2px;
+          width: 100%;
+          background: var(--vera-lavender);
+          border-radius: 2px;
+          transition: all 0.3s ease;
+        }
+
+        .hamburger.open span:nth-child(1) {
+          transform: rotate(45deg) translate(5px, 5px);
+        }
+
+        .hamburger.open span:nth-child(2) {
+          opacity: 0;
+        }
+
+        .hamburger.open span:nth-child(3) {
+          transform: rotate(-45deg) translate(7px, -6px);
+        }
+
+        /* Mobile menu dropdown */
+        .mobile-menu {
+          display: flex;
+          position: fixed;
+          top: 80px;
+          left: 0;
+          right: 0;
+          background: rgba(10, 14, 39, 0.98);
+          backdrop-filter: blur(20px);
+          padding: 2rem;
+          border-bottom: 1px solid var(--glass-border);
+          flex-direction: column;
+          gap: 1.5rem;
+          z-index: 999;
+          animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+          from {
+            opacity: 0;
+            transform: translateY(-20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .mobile-nav-link {
+          color: var(--text-soft);
+          text-decoration: none;
+          font-size: 1.2rem;
+          padding: 0.8rem 0;
+          cursor: pointer;
+          transition: color 0.3s;
+          border-bottom: 1px solid var(--glass-border);
+        }
+
+        .mobile-nav-link:hover {
+          color: var(--vera-lavender);
+        }
+
+        .mobile-nav-cta {
+          width: 100%;
+          padding: 1rem;
+          background: linear-gradient(135deg, var(--vera-lavender), var(--vera-neural-blue));
+          border: none;
+          border-radius: 50px;
+          color: white;
+          font-weight: 500;
+          font-size: 1.1rem;
+          cursor: pointer;
+          transition: all 0.3s;
+        }
+
+        .mobile-nav-cta:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 10px 30px rgba(155, 89, 182, 0.4);
+        }
+
         .hero {
           min-height: 100vh;
           display: flex;
@@ -989,7 +1094,16 @@ export default function LandingPage() {
           .hero-title { font-size: 2.5rem; }
           .hero-presence { width: 300px; height: 300px; }
           .pricing-grid { grid-template-columns: 1fr; }
-          .nav-menu { display: none; }
+          
+          /* Hide desktop menu, show mobile */
+          .desktop-only {
+            display: none !important;
+          }
+          
+          .mobile-menu-btn {
+            display: block;
+          }
+          
           .testimonials-grid { grid-template-columns: 1fr; }
           .footer-grid { grid-template-columns: 1fr; text-align: center; }
           .footer-bottom { flex-direction: column; gap: 1rem; text-align: center; }
@@ -1002,11 +1116,43 @@ export default function LandingPage() {
 
       <nav className={isScrolled ? 'scrolled' : ''}>
         <div className="logo" onClick={scrollToTop}>VERA</div>
-        <div className="nav-menu">
+        
+        {/* Desktop Menu */}
+        <div className="nav-menu desktop-only">
           <a className="nav-link" onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}>Features</a>
           <a className="nav-link" onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}>Pricing</a>
-          <button className="nav-cta" onClick={() => router.push('/auth/signin')}>Try VERA - 7 Days Free</button>
+          <button className="nav-cta" onClick={() => router.push('/auth/signup?plan=explorer')}>Try VERA - 7 Days Free</button>
         </div>
+
+        {/* Mobile Hamburger */}
+        <button 
+          className="mobile-menu-btn"
+          onClick={() => setShowMobileMenu(!showMobileMenu)}
+          aria-label="Toggle menu"
+        >
+          <div className={`hamburger ${showMobileMenu ? 'open' : ''}`}>
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </button>
+
+        {/* Mobile Menu Dropdown */}
+        {showMobileMenu && (
+          <div className="mobile-menu">
+            <a className="mobile-nav-link" onClick={() => {
+              document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
+              setShowMobileMenu(false);
+            }}>Features</a>
+            <a className="mobile-nav-link" onClick={() => {
+              document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
+              setShowMobileMenu(false);
+            }}>Pricing</a>
+            <button className="mobile-nav-cta" onClick={() => router.push('/auth/signup?plan=explorer')}>
+              Try VERA - 7 Days Free
+            </button>
+          </div>
+        )}
       </nav>
 
       <section className="hero" id="vera">
@@ -1048,7 +1194,7 @@ export default function LandingPage() {
           </div>
 
           <center>
-            <button className="try-vera-btn" onClick={() => router.push('/auth/signin')}>Experience VERA Now</button>
+            <button className="try-vera-btn" onClick={() => router.push('/auth/signup?plan=explorer')}>Experience VERA Now</button>
           </center>
         </div>
       </section>
@@ -1250,7 +1396,7 @@ export default function LandingPage() {
                 <li><span className="feature-neuron"></span> Pattern insights</li>
                 <li><span className="feature-neuron"></span> Dashboard analytics</li>
               </ul>
-              <button className="plan-cta" onClick={() => router.push('/auth/signin')}>Start 7-Day Free Trial</button>
+              <button className="plan-cta" onClick={() => router.push('/auth/signup?plan=explorer')}>Start 7-Day Free Trial</button>
             </div>
 
             <div className="pricing-card featured">
@@ -1264,7 +1410,7 @@ export default function LandingPage() {
                 <li><span className="feature-neuron"></span> Advanced dashboard</li>
                 <li><span className="feature-neuron"></span> Deep pattern analysis</li>
               </ul>
-              <button className="plan-cta" onClick={() => router.push('/auth/signin')}>Start 7-Day Free Trial</button>
+              <button className="plan-cta" onClick={() => router.push('/auth/signup?plan=regulator')}>Start 7-Day Free Trial</button>
             </div>
 
             <div className="pricing-card">
@@ -1278,7 +1424,7 @@ export default function LandingPage() {
                 <li><span className="feature-neuron"></span> White-label options</li>
                 <li><span className="feature-neuron"></span> Priority support</li>
               </ul>
-              <button className="plan-cta" onClick={() => router.push('/auth/signin')}>Join Waitlist</button>
+              <button className="plan-cta" onClick={() => router.push('/auth/signup?plan=explorer')}>Join Waitlist</button>
             </div>
           </div>
         </div>
@@ -1303,7 +1449,7 @@ export default function LandingPage() {
             <div className="footer-section">
               <h4>Product</h4>
               <ul className="footer-links">
-                <li><a onClick={() => router.push('/auth/signin')}>Chat with VERA</a></li>
+                <li><a onClick={() => router.push('/auth/signup?plan=explorer')}>Chat with VERA</a></li>
                 <li><a onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}>Features</a></li>
                 <li><a onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}>Pricing</a></li>
               </ul>

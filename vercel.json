@@ -1,8 +1,20 @@
 {
   "crons": [
     {
-      "path": "/api/community/auto-generate",
+      "path": "/api/cron/weekly-poll",
       "schedule": "0 9 * * 1"
+    },
+    {
+      "path": "/api/cron/protocol-post",
+      "schedule": "0 14 * * 3"
+    },
+    {
+      "path": "/api/cron/reflection-prompt",
+      "schedule": "0 18 * * 5"
+    },
+    {
+      "path": "/api/cron/monthly-summary",
+      "schedule": "0 10 1 * *"
     }
   ]
 }

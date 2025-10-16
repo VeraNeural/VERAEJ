@@ -25,10 +25,12 @@ export default function SidePanel({ isOpen, onClose, darkMode, currentSessionId,
   const router = useRouter();
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [userTier, setUserTier] = useState<string>('explorer');
 
   useEffect(() => {
     if (isOpen) {
       loadSessions();
+      loadUserTier();
     }
   }, [isOpen]);
 
@@ -44,6 +46,18 @@ export default function SidePanel({ isOpen, onClose, darkMode, currentSessionId,
       console.error('Failed to load sessions:', error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const loadUserTier = async () => {
+    try {
+      const response = await fetch('/api/auth/me');
+      if (response.ok) {
+        const data = await response.json();
+        setUserTier(data.user.subscription_tier);
+      }
+    } catch (error) {
+      console.error('Failed to load user tier:', error);
     }
   };
 
@@ -68,22 +82,20 @@ export default function SidePanel({ isOpen, onClose, darkMode, currentSessionId,
     }
   };
 
- const handleSignOut = async () => {
-  try {
-    const response = await fetch('/api/auth/me', {
-      method: 'DELETE',
-    });
-    
-    if (response.ok) {
-      // Clear local storage
-      localStorage.clear();
-      // Redirect to home page
-      window.location.href = '/';
+  const handleSignOut = async () => {
+    try {
+      const response = await fetch('/api/auth/me', {
+        method: 'DELETE',
+      });
+      
+      if (response.ok) {
+        localStorage.clear();
+        window.location.href = '/';
+      }
+    } catch (error) {
+      console.error('Sign out error:', error);
     }
-  } catch (error) {
-    console.error('Sign out error:', error);
-  }
-};
+  };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -238,18 +250,37 @@ export default function SidePanel({ isOpen, onClose, darkMode, currentSessionId,
               Dashboard
             </Link>
             
-            <a 
-  href="https://buy.stripe.com/5kQ00j6N93z9dIZ26N8bS0s"
-  target="_blank"
-  rel="noopener noreferrer"
-  className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-    darkMode 
-      ? 'hover:bg-slate-800 text-slate-300' 
-      : 'hover:bg-slate-100 text-slate-700'
-  }`}
->
-  Upgrade to Regulator
-</a>
+            {/* Dynamic Upgrade Link Based on Tier */}
+            {userTier === 'explorer' && (
+              <a 
+                href="https://buy.stripe.com/5kQ00j6N93z9dIZ26N8bS0s"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  darkMode 
+                    ? 'hover:bg-slate-800 text-slate-300' 
+                    : 'hover:bg-slate-100 text-slate-700'
+                }`}
+              >
+                Upgrade to Regulator
+              </a>
+            )}
+            
+            {userTier === 'regulator' && (
+              <div className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm ${
+                darkMode ? 'text-slate-500' : 'text-slate-400'
+              }`}>
+                <span>Integrator Coming Q1 2026</span>
+              </div>
+            )}
+
+            {userTier === 'integrator' && (
+              <div className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm ${
+                darkMode ? 'text-green-400' : 'text-green-600'
+              }`}>
+                <span>✨ Integrator Plan Active</span>
+              </div>
+            )}
 
             <button
               onClick={handleSignOut}
@@ -267,5 +298,3 @@ export default function SidePanel({ isOpen, onClose, darkMode, currentSessionId,
     </>
   );
 }
-
-

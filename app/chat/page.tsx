@@ -55,11 +55,51 @@ export default function ChatPage() {
 
   useEffect(() => {
     checkAuth();
+    createSlowNeurons();
   }, []);
 
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  const createSlowNeurons = () => {
+    const container = document.getElementById('slowNeurons');
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    // Create slow-moving neurons (fewer, slower)
+    for (let i = 0; i < 30; i++) {
+      const neuron = document.createElement('div');
+      neuron.className = 'slow-neuron';
+      neuron.style.left = Math.random() * 100 + '%';
+      neuron.style.top = Math.random() * 100 + '%';
+      neuron.style.animationDelay = Math.random() * 60 + 's';
+      neuron.style.animationDuration = (80 + Math.random() * 40) + 's'; // Very slow
+      
+      const colors = [
+        'rgba(155, 89, 182, 0.4)',
+        'rgba(100, 181, 246, 0.4)',
+        'rgba(177, 156, 217, 0.4)',
+        'rgba(248, 187, 208, 0.3)'
+      ];
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      neuron.style.background = `radial-gradient(circle, ${color} 0%, transparent 70%)`;
+      
+      container.appendChild(neuron);
+    }
+
+    // Add consciousness waves (very slow)
+    for (let i = 0; i < 3; i++) {
+      const wave = document.createElement('div');
+      wave.className = 'slow-consciousness-wave';
+      wave.style.left = Math.random() * 100 + '%';
+      wave.style.top = Math.random() * 100 + '%';
+      wave.style.animationDelay = i * 20 + 's';
+      wave.style.animationDuration = (90 + Math.random() * 30) + 's';
+      container.appendChild(wave);
+    }
+  };
 
   const checkAuth = async () => {
     try {
@@ -188,189 +228,263 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gradient-to-br from-indigo-200 via-purple-200 to-blue-200">
-      {/* Header */}
-      <header className="bg-slate-800/80 backdrop-blur-xl border-b border-slate-700/50 px-6 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => setShowSidePanel(true)}
-              className="p-2 hover:bg-slate-700/60 rounded-lg transition-colors"
-            >
-              <Menu size={24} className="text-slate-200" />
-            </button>
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-blue-400" />
-                <div className="absolute inset-0 w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-blue-400 animate-pulse opacity-50" />
-              </div>
-              <div>
-                <h1 className="text-xl font-normal text-white">VERA</h1>
-                <p className="text-xs text-slate-300">I'm here, listening</p>
-              </div>
-            </div>
-          </div>
+    <>
+      <style jsx global>{`
+        .slow-neurons-container {
+          position: fixed;
+          width: 100%;
+          height: 100%;
+          top: 0;
+          left: 0;
+          pointer-events: none;
+          z-index: 0;
+          overflow: hidden;
+        }
 
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setShowWellnessHub(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-slate-700/60 hover:bg-slate-600/60 rounded-xl transition-all text-slate-200 border border-slate-600/50 shadow-sm"
-            >
-              <span className="text-sm font-medium">Wellness Hub</span>
-            </button>
-          </div>
-        </div>
-      </header>
+        .slow-neuron {
+          position: absolute;
+          width: 3px;
+          height: 3px;
+          background: radial-gradient(circle, rgba(155, 89, 182, 0.4) 0%, transparent 70%);
+          border-radius: 50%;
+          animation: slowNeuronFloat 100s infinite ease-in-out;
+        }
 
-      {/* Chat Area */}
-      <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6">
-        {messages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full max-w-2xl mx-auto text-center px-4">
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-400 to-blue-400 flex items-center justify-center mb-6 shadow-xl" />
-            <h2 className="text-3xl font-light text-slate-800 mb-3">
-              I'm VERA. I'm here for you.
-            </h2>
-            <p className="text-lg text-slate-700 mb-8 leading-relaxed">
-              Share what's happening in your body, and we'll explore it together. There's no rush, no judgment - just presence.
-            </p>
+        @keyframes slowNeuronFloat {
+          0%, 100% {
+            transform: translate(0, 0) scale(0.8);
+            opacity: 0.3;
+          }
+          25% {
+            transform: translate(40px, -30px) scale(1.2);
+            opacity: 0.6;
+          }
+          50% {
+            transform: translate(-30px, 40px) scale(1);
+            opacity: 0.5;
+          }
+          75% {
+            transform: translate(50px, 20px) scale(0.9);
+            opacity: 0.4;
+          }
+        }
 
-            {/* Quick Prompts */}
-            <div className="w-full max-w-xl">
-              <p className="text-sm text-slate-700 mb-4">Not sure where to start? Try one of these:</p>
-              <div className="flex gap-2 flex-wrap justify-center">
-                {quickPrompts.map((prompt, index) => (
-                  <button
-                    key={index}
-                    onClick={() => handleQuickPrompt(prompt.text)}
-                    className="px-4 py-2.5 rounded-xl bg-white/70 hover:bg-slate-100 border border-slate-300 transition-all text-slate-800 text-sm shadow-sm hover:shadow-md"
-                  >
-                    {prompt.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        ) : (
-          <>
-            {messages.map((message, index) => (
-              <div
-                key={index}
-                className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+        .slow-consciousness-wave {
+          position: absolute;
+          width: 400px;
+          height: 400px;
+          background: radial-gradient(circle,
+            rgba(155, 89, 182, 0.04) 0%,
+            rgba(100, 181, 246, 0.02) 30%,
+            transparent 70%);
+          border-radius: 50%;
+          filter: blur(80px);
+          animation: slowWaveBreath 100s infinite ease-in-out;
+        }
+
+        @keyframes slowWaveBreath {
+          0%, 100% {
+            transform: translate(0, 0) scale(1);
+            opacity: 0.2;
+          }
+          33% {
+            transform: translate(-100px, 80px) scale(1.3);
+            opacity: 0.4;
+          }
+          66% {
+            transform: translate(80px, -50px) scale(1.1);
+            opacity: 0.3;
+          }
+        }
+      `}</style>
+
+      {/* Slow-Moving Neurons Background */}
+      <div className="slow-neurons-container" id="slowNeurons"></div>
+
+      <div className="flex flex-col h-screen bg-gradient-to-br from-indigo-200 via-purple-200 to-blue-200 relative">
+        {/* Header */}
+        <header className="bg-slate-800/80 backdrop-blur-xl border-b border-slate-700/50 px-6 py-4 relative z-10">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => setShowSidePanel(true)}
+                className="p-2 hover:bg-slate-700/60 rounded-lg transition-colors"
               >
-                <div
-                  className={`max-w-[80%] rounded-2xl px-5 py-4 ${
-                    message.role === 'user'
-                      ? 'bg-gradient-to-br from-indigo-500 to-purple-500 text-white shadow-lg'
-                      : 'bg-gradient-to-br from-slate-700 to-slate-800 text-slate-100 shadow-lg border border-slate-600'
-                  }`}
-                >
-                  <div className="text-[15px] leading-relaxed whitespace-pre-wrap">
-                    {message.content}
-                  </div>
-                  {message.audioUrl && (
-                    <audio 
-                      controls 
-                      className="mt-3 w-full opacity-90"
-                      src={message.audioUrl}
-                      autoPlay
-                    />
-                  )}
+                <Menu size={24} className="text-slate-200" />
+              </button>
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-blue-400" />
+                  <div className="absolute inset-0 w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-blue-400 animate-pulse opacity-50" />
+                </div>
+                <div>
+                  <h1 className="text-xl font-normal text-white">VERA</h1>
+                  <p className="text-xs text-slate-300">I'm here, listening</p>
                 </div>
               </div>
-            ))}
-            <div ref={messagesEndRef} />
-          </>
-        )}
-      </div>
-
-      {/* Input Area */}
-      <div className="border-t border-slate-700/50 bg-slate-800/80 backdrop-blur-xl px-6 py-4">
-        <div className="max-w-4xl mx-auto">
-          <div className="flex gap-3 items-end">
-            {/* Voice Toggle */}
-            <button
-              onClick={handleVoiceToggle}
-              disabled={!voiceAvailable}
-              className={`p-3 rounded-xl transition-all ${
-                audioEnabled
-                  ? 'bg-gradient-to-br from-purple-500 to-blue-500 text-white shadow-lg'
-                  : voiceAvailable
-                  ? 'bg-slate-700 text-purple-300 hover:bg-slate-600 border border-slate-600'
-                  : 'bg-gray-700 text-gray-500 cursor-not-allowed'
-              }`}
-              title={
-                !voiceAvailable
-                  ? 'Voice available with Regulator plan'
-                  : !canUseVoice
-                  ? `Voice limit reached (${voiceUsageToday}/20) - Upgrade to Integrator for unlimited`
-                  : audioEnabled
-                  ? `Voice On (${voiceUsageToday}/20 used today)`
-                  : `Voice Off (${voiceUsageToday}/20 used today)`
-              }
-            >
-              <Volume2 size={20} />
-            </button>
-
-            {/* Input Field */}
-            <div className="flex-1 relative">
-              <textarea
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Share what's happening in your body..."
-                className="w-full px-5 py-3 bg-slate-700/70 border border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent resize-none text-slate-100 placeholder-slate-400 shadow-sm"
-                rows={1}
-                style={{
-                  minHeight: '50px',
-                  maxHeight: '150px',
-                }}
-              />
             </div>
 
-            {/* Send Button */}
-            <button
-              onClick={handleSendMessage}
-              disabled={!input.trim() || isLoading}
-              className="px-6 py-3 bg-gradient-to-br from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 disabled:bg-gray-600 text-white rounded-xl transition-all disabled:cursor-not-allowed shadow-lg flex items-center gap-2"
-            >
-              {isLoading ? (
-                <Loader2 size={20} className="animate-spin" />
-              ) : (
-                <Send size={20} />
-              )}
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setShowWellnessHub(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-slate-700/60 hover:bg-slate-600/60 rounded-xl transition-all text-slate-200 border border-slate-600/50 shadow-sm"
+              >
+                <span className="text-sm font-medium">Wellness Hub</span>
+              </button>
+            </div>
           </div>
+        </header>
 
-          {/* Voice Usage Indicator */}
-          {voiceAvailable && (
-            <div className="mt-2 text-xs text-slate-300 text-center">
-              {audioEnabled ? '🎙️ Voice responses enabled' : 'Voice responses off'} 
-              {userTier === 'regulator' && ` • ${voiceUsageToday}/20 used today`}
-              {userTier === 'integrator' && ' • Unlimited voice'}
-              {userTier === 'test' && ' • Unlimited voice (test)'}
+        {/* Chat Area */}
+        <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6 relative z-10">
+          {messages.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full max-w-2xl mx-auto text-center px-4">
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-400 to-blue-400 flex items-center justify-center mb-6 shadow-xl" />
+              <h2 className="text-3xl font-light text-slate-800 mb-3">
+                I'm VERA. I'm here for you.
+              </h2>
+              <p className="text-lg text-slate-800 mb-8 leading-relaxed">
+                Share what's happening in your body, and we'll explore it together. There's no rush, no judgment - just presence.
+              </p>
+
+              {/* Quick Prompts */}
+              <div className="w-full max-w-xl">
+                <p className="text-sm text-slate-700 mb-4">Not sure where to start? Try one of these:</p>
+                <div className="flex gap-2 flex-wrap justify-center">
+                  {quickPrompts.map((prompt, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleQuickPrompt(prompt.text)}
+                      className="px-4 py-2.5 rounded-xl bg-white/60 hover:bg-purple-100 border border-purple-300/70 transition-all text-slate-800 text-sm shadow-sm hover:shadow-md"
+                    >
+                      {prompt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
+          ) : (
+            <>
+              {messages.map((message, index) => (
+                <div
+                  key={index}
+                  className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div
+                    className={`max-w-[80%] rounded-2xl px-5 py-4 ${
+                      message.role === 'user'
+                        ? 'bg-gradient-to-br from-indigo-500 to-purple-500 text-white shadow-lg'
+                        : 'bg-gradient-to-br from-slate-700 to-slate-800 text-slate-100 shadow-lg border border-slate-600'
+                    }`}
+                  >
+                    <div className="text-[15px] leading-relaxed whitespace-pre-wrap">
+                      {message.content}
+                    </div>
+                    {message.audioUrl && (
+                      <audio 
+                        controls 
+                        className="mt-3 w-full opacity-90"
+                        src={message.audioUrl}
+                        autoPlay
+                      />
+                    )}
+                  </div>
+                </div>
+              ))}
+              <div ref={messagesEndRef} />
+            </>
           )}
         </div>
-      </div>
 
-      {/* Wellness Hub Modal */}
-      {showWellnessHub && (
-        <WellnessHub
-          isOpen={showWellnessHub}
-          onClose={() => setShowWellnessHub(false)}
-          userTier={userTier}
+        {/* Input Area */}
+        <div className="border-t border-slate-700/50 bg-slate-800/80 backdrop-blur-xl px-6 py-4 relative z-10">
+          <div className="max-w-4xl mx-auto">
+            <div className="flex gap-3 items-end">
+              {/* Voice Toggle */}
+              <button
+                onClick={handleVoiceToggle}
+                disabled={!voiceAvailable}
+                className={`p-3 rounded-xl transition-all ${
+                  audioEnabled
+                    ? 'bg-gradient-to-br from-purple-500 to-blue-500 text-white shadow-lg'
+                    : voiceAvailable
+                    ? 'bg-slate-700 text-purple-300 hover:bg-slate-600 border border-slate-600'
+                    : 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                }`}
+                title={
+                  !voiceAvailable
+                    ? 'Voice available with Regulator plan'
+                    : !canUseVoice
+                    ? `Voice limit reached (${voiceUsageToday}/20) - Upgrade to Integrator for unlimited`
+                    : audioEnabled
+                    ? `Voice On (${voiceUsageToday}/20 used today)`
+                    : `Voice Off (${voiceUsageToday}/20 used today)`
+                }
+              >
+                <Volume2 size={20} />
+              </button>
+
+              {/* Input Field */}
+              <div className="flex-1 relative">
+                <textarea
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder="Share what's happening in your body..."
+                  className="w-full px-5 py-3 bg-slate-700/70 border border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent resize-none text-slate-100 placeholder-slate-400 shadow-sm"
+                  rows={1}
+                  style={{
+                    minHeight: '50px',
+                    maxHeight: '150px',
+                  }}
+                />
+              </div>
+
+              {/* Send Button */}
+              <button
+                onClick={handleSendMessage}
+                disabled={!input.trim() || isLoading}
+                className="px-6 py-3 bg-gradient-to-br from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 disabled:bg-gray-600 text-white rounded-xl transition-all disabled:cursor-not-allowed shadow-lg flex items-center gap-2"
+              >
+                {isLoading ? (
+                  <Loader2 size={20} className="animate-spin" />
+                ) : (
+                  <Send size={20} />
+                )}
+              </button>
+            </div>
+
+            {/* Voice Usage Indicator */}
+            {voiceAvailable && (
+              <div className="mt-2 text-xs text-slate-300 text-center">
+                {audioEnabled ? '🎙️ Voice responses enabled' : 'Voice responses off'} 
+                {userTier === 'regulator' && ` • ${voiceUsageToday}/20 used today`}
+                {userTier === 'integrator' && ' • Unlimited voice'}
+                {userTier === 'test' && ' • Unlimited voice (test)'}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Wellness Hub Modal */}
+        {showWellnessHub && (
+          <WellnessHub
+            isOpen={showWellnessHub}
+            onClose={() => setShowWellnessHub(false)}
+            userTier={userTier}
+          />
+        )}
+
+        {/* Side Panel */}
+        <SidePanel
+          isOpen={showSidePanel}
+          onClose={() => setShowSidePanel(false)}
+          darkMode={darkMode}
+          currentSessionId={currentSessionId}
+          onNewChat={handleNewChat}
+          onLoadChat={handleLoadChat}
         />
-      )}
-
-      {/* Side Panel */}
-      <SidePanel
-        isOpen={showSidePanel}
-        onClose={() => setShowSidePanel(false)}
-        darkMode={darkMode}
-        currentSessionId={currentSessionId}
-        onNewChat={handleNewChat}
-        onLoadChat={handleLoadChat}
-      />
-    </div>
+      </div>
+    </>
   );
 }

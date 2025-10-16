@@ -1,61 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 
-// GET - Fetch user's protocols (latest or all active)
+// GET - Fetch user's protocol items
 export async function GET(
   req: NextRequest,
   { params }: { params: { userId: string } }
 ) {
   try {
     const { userId } = params;
-    const url = new URL(req.url);
-    const latestOnly = url.searchParams.get('latest') === 'true';
     
-    console.log('🔍 Fetching protocols for user:', userId);
+    console.log('🔍 Fetching protocol items for user:', userId);
     
-    if (latestOnly) {
-      // Get only the most recent protocol (for backward compatibility)
-      const result = await query(
-        `SELECT p.*, 
-                COUNT(pc.id) as completion_count,
-                MAX(pc.completed_at) as last_completed
-         FROM protocols p
-         LEFT JOIN protocol_completions pc ON p.id = pc.protocol_id
-         WHERE p.user_id = $1 AND p.is_active = true
-         GROUP BY p.id
-         ORDER BY p.created_at DESC
-         LIMIT 1`,
-        [userId]
-      );
-      
-      if (result.rows.length === 0) {
-        return NextResponse.json({ protocol: null });
-      }
-      
-      return NextResponse.json(result.rows[0]);
-    }
-    
-    // Get all active protocols
-    const protocols = await query(
-      `SELECT p.*, 
-              COUNT(pc.id) as completion_count,
-              MAX(pc.completed_at) as last_completed
-       FROM protocols p
-       LEFT JOIN protocol_completions pc ON p.id = pc.protocol_id
-       WHERE p.user_id = $1 AND p.is_active = true
-       GROUP BY p.id
-       ORDER BY p.created_at DESC`,
+    // Get all active protocol items for this user
+    const result = await query(
+      `SELECT * FROM protocol_items
+       WHERE user_id = $1 AND is_active = true
+       ORDER BY category, created_at ASC`,
       [userId]
     );
     
-    console.log('✅ Found protocols:', protocols.rows.length);
+    console.log('✅ Found protocol items:', result.rows.length);
     
-    return NextResponse.json({ protocols: protocols.rows });
+    return NextResponse.json(result.rows);
     
   } catch (error) {
-    console.error('❌ Error fetching protocols:', error);
+    console.error('❌ Error fetching protocol items:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch protocols' },
+      { error: 'Failed to fetch protocol items' },
       { status: 500 }
     );
   }
@@ -71,16 +42,24 @@ export async function POST(
     const body = await req.json();
     const { title, description, category, frequency } = body;
     
-    console.log('💾 Creating protocol for user:', userId);
+    console.log('💾 Creating protocol item for user:', userId);
+    
+    // Validate required fields
+    if (!title || !category) {
+      return NextResponse.json(
+        { error: 'Title and category are required' },
+        { status: 400 }
+      );
+    }
     
     const result = await query(
-      `INSERT INTO protocols (user_id, title, description, category, frequency)
+      `INSERT INTO protocol_items (user_id, title, description, category, frequency)
        VALUES ($1, $2, $3, $4, $5)
        RETURNING *`,
-      [userId, title, description, category, frequency]
+      [userId, title, description || '', category, frequency || 'daily']
     );
     
-    console.log('✅ Protocol created:', result.rows[0].id);
+    console.log('✅ Protocol item created:', result.rows[0].id);
     
     return NextResponse.json({
       success: true,
@@ -88,9 +67,9 @@ export async function POST(
     });
     
   } catch (error) {
-    console.error('❌ Error creating protocol:', error);
+    console.error('❌ Error creating protocol item:', error);
     return NextResponse.json(
-      { error: 'Failed to create protocol' },
+      { error: 'Failed to create protocol item' },
       { status: 500 }
     );
   }

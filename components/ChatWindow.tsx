@@ -345,6 +345,9 @@ if (!canUseVoice) {
   }
   return;
 }
+    setAudioEnabled(!audioEnabled);
+
+  };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {

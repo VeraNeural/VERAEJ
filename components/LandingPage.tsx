@@ -284,8 +284,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-{/* Replace your Pricing section with this */}
-
 {/* Pricing - 3 Tiers */}
 <section className="py-24 px-6">
   <div className="max-w-7xl mx-auto">
@@ -330,12 +328,12 @@ export default function LandingPage() {
           ))}
         </ul>
 
-        <Link
-          href="https://buy.stripe.com/test_YOUR_ACTUAL_EXPLORER_LINK_HERE"
+        
+          href="https://buy.stripe.com/14AcN50oL7PpgVbdPv8bS0r"
           className="block w-full py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-normal transition-all text-center"
         >
           Start 7-Day Free Trial
-        </Link>
+        </a>
         <p className="text-xs text-slate-500 text-center mt-3">
           Then $19/month • Cancel anytime
         </p>
@@ -360,7 +358,7 @@ export default function LandingPage() {
           {[
             { text: 'Everything in Explorer, plus:', bold: true },
             { text: 'Full Protocol feature — create & track wellness routines', bold: false },
-            { text: 'Voice responses with Voice responses', bold: false, badge: 'NEW' },
+            { text: 'Voice responses', bold: false, badge: 'NEW' },
             { text: 'Dashboard analytics & insights', bold: false },
             { text: 'Deep pattern analysis', bold: false },
             { text: 'Priority email support (24h)', bold: false },
@@ -381,12 +379,12 @@ export default function LandingPage() {
           ))}
         </ul>
 
-        <Link
-          href={process.env.NEXT_PUBLIC_STRIPE_REGULATOR_LINK || '/auth/signup?plan=regulator'}
+        
+          href="https://buy.stripe.com/5kQ00j6N93z9dIZ26N8bS0s"
           className="block w-full py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-xl font-normal transition-all text-center shadow-lg"
         >
           Start 7-Day Free Trial
-        </Link>
+        </a>
         <p className="text-xs text-slate-600 text-center mt-3">
           Then $39/month • Cancel anytime
         </p>
@@ -437,6 +435,17 @@ export default function LandingPage() {
         </p>
       </div>
     </div>
+
+    <div className="mt-12 text-center">
+      <p className="text-slate-600 mb-2">
+        ✨ All plans include end-to-end encryption & HIPAA-compliant infrastructure
+      </p>
+      <p className="text-sm text-slate-500">
+        Questions? Email <a href="mailto:support@veraneural.com" className="text-purple-600 hover:text-purple-700 underline">support@veraneural.com</a>
+      </p>
+    </div>
+  </div>
+</section>
 
     <div className="mt-12 text-center">
       <p className="text-slate-600 mb-2">

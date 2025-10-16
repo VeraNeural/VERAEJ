@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Send, ArrowLeft } from 'lucide-react';
 
 interface Conversation {
-  conversation_id: string;
+  id: string;
   other_user_id: string;
   other_user_name: string;
   last_message: string;
@@ -19,26 +19,35 @@ interface Message {
   sender_name: string;
   content: string;
   created_at: string;
-  is_read: boolean;
 }
 
 export default function MessagesPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [currentUserId, setCurrentUserId] = useState<string>('');
-  const [isLoading, setIsLoading] = useState(true);
+  const [recipientName, setRecipientName] = useState<string>('');
+  const [showConversationsList, setShowConversationsList] = useState(true);
 
   useEffect(() => {
-    loadConversations();
     loadCurrentUser();
-  }, []);
+    loadConversations();
+
+    const conversationId = searchParams.get('conversation');
+    if (conversationId) {
+      setSelectedConversation(conversationId);
+      setShowConversationsList(false);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (selectedConversation) {
       loadMessages(selectedConversation);
+      const interval = setInterval(() => loadMessages(selectedConversation), 3000);
+      return () => clearInterval(interval);
     }
   }, [selectedConversation]);
 
@@ -63,8 +72,6 @@ export default function MessagesPage() {
       }
     } catch (error) {
       console.error('Failed to load conversations:', error);
-    } finally {
-      setIsLoading(false);
     }
   }
 
@@ -74,24 +81,16 @@ export default function MessagesPage() {
       if (res.ok) {
         const data = await res.json();
         setMessages(data.messages);
-        markAsRead(conversationId);
+        
+        if (data.messages.length > 0) {
+          const otherUser = data.messages.find((m: Message) => m.sender_id !== currentUserId);
+          if (otherUser) {
+            setRecipientName(otherUser.sender_name);
+          }
+        }
       }
     } catch (error) {
       console.error('Failed to load messages:', error);
-    }
-  }
-
-  async function markAsRead(conversationId: string) {
-    try {
-      await fetch('/api/messages/read', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ conversationId }),
-      });
-      // Refresh conversations to update unread count
-      loadConversations();
-    } catch (error) {
-      console.error('Failed to mark as read:', error);
     }
   }
 
@@ -119,157 +118,151 @@ export default function MessagesPage() {
     }
   }
 
-  const formatTime = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
+  function selectConversation(conv: Conversation) {
+    setSelectedConversation(conv.id);
+    setRecipientName(conv.other_user_name);
+    setShowConversationsList(false);
+  }
 
-    if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffMins < 1440) return `${Math.floor(diffMins / 60)}h ago`;
-    return date.toLocaleDateString();
-  };
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 flex items-center justify-center">
-        <div className="text-purple-600">Loading messages...</div>
-      </div>
-    );
+  function backToConversations() {
+    setShowConversationsList(true);
+    setSelectedConversation(null);
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50">
       {/* Header */}
       <div className="bg-white/90 backdrop-blur-xl border-b border-purple-100 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => router.push('/community')}
-              className="text-purple-600 hover:text-purple-700"
-            >
-              Back to Community
-            </button>
-            <h1 className="text-2xl font-normal bg-gradient-to-r from-rose-400 via-purple-400 to-blue-400 text-transparent bg-clip-text">
-              Messages
-            </h1>
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              {!showConversationsList && (
+                <button
+                  onClick={backToConversations}
+                  className="lg:hidden text-purple-600 hover:text-purple-700"
+                >
+                  <ArrowLeft size={20} />
+                </button>
+              )}
+              <button
+                onClick={() => router.push('/community')}
+                className={`text-purple-600 hover:text-purple-700 text-sm md:text-base ${!showConversationsList ? 'hidden lg:block' : ''}`}
+              >
+                Back to Community
+              </button>
+              <h1 className="text-xl md:text-2xl font-normal bg-gradient-to-r from-rose-400 via-purple-400 to-blue-400 text-transparent bg-clip-text">
+                {showConversationsList ? 'Messages' : recipientName || 'Messages'}
+              </h1>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        <div className="grid grid-cols-12 gap-6 h-[calc(100vh-200px)]">
+      <div className="max-w-7xl mx-auto px-4 py-4 md:py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Conversations List */}
-          <div className="col-span-4">
-            <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-lg border border-purple-100 h-full overflow-hidden flex flex-col">
-              <div className="p-6 border-b border-slate-200">
-                <h2 className="text-lg font-medium text-slate-900">Conversations</h2>
-              </div>
-              <div className="flex-1 overflow-y-auto">
+          <div className={`lg:col-span-4 ${showConversationsList ? 'block' : 'hidden lg:block'}`}>
+            <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-lg border border-purple-100 p-4 md:p-6">
+              <h2 className="text-lg font-medium text-slate-900 mb-4">Conversations</h2>
+              <div className="space-y-2">
                 {conversations.length === 0 ? (
-                  <div className="p-8 text-center text-slate-500">
-                    <p>No messages yet</p>
-                    <p className="text-sm mt-2">Start a conversation from the Community</p>
-                  </div>
+                  <p className="text-slate-500 text-center py-8 text-sm">No conversations yet</p>
                 ) : (
-                  <div className="divide-y divide-slate-100">
-                    {conversations.map((conv) => (
-                      <button
-                        key={conv.conversation_id}
-                        onClick={() => setSelectedConversation(conv.conversation_id)}
-                        className={`w-full text-left p-4 hover:bg-slate-50 transition-colors ${
-                          selectedConversation === conv.conversation_id ? 'bg-purple-50' : ''
-                        }`}
-                      >
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <p className="font-medium text-slate-900 truncate">
-                                {conv.other_user_name}
-                              </p>
-                              {conv.unread_count > 0 && (
-                                <span className="bg-purple-500 text-white text-xs px-2 py-0.5 rounded-full">
-                                  {conv.unread_count}
-                                </span>
-                              )}
-                            </div>
-                            <p className="text-sm text-slate-600 truncate">{conv.last_message}</p>
-                            <p className="text-xs text-slate-400 mt-1">
-                              {formatTime(conv.last_message_time)}
-                            </p>
-                          </div>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
+                  conversations.map((conv) => (
+                    <button
+                      key={conv.id}
+                      onClick={() => selectConversation(conv)}
+                      className={`w-full text-left p-3 md:p-4 rounded-xl transition-all ${
+                        selectedConversation === conv.id
+                          ? 'bg-purple-100 border-2 border-purple-300'
+                          : 'hover:bg-slate-50 border border-transparent'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="font-medium text-slate-900 text-sm md:text-base">
+                          {conv.other_user_name}
+                        </span>
+                        {conv.unread_count > 0 && (
+                          <span className="bg-purple-500 text-white text-xs px-2 py-0.5 rounded-full">
+                            {conv.unread_count}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs md:text-sm text-slate-500 truncate">{conv.last_message}</p>
+                    </button>
+                  ))
                 )}
               </div>
             </div>
           </div>
 
           {/* Messages Area */}
-          <div className="col-span-8">
+          <div className={`lg:col-span-8 ${!showConversationsList ? 'block' : 'hidden lg:block'}`}>
             {selectedConversation ? (
-              <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-lg border border-purple-100 h-full flex flex-col">
-                {/* Messages */}
-                <div className="flex-1 overflow-y-auto p-6 space-y-4">
-                  {messages.map((msg) => {
-                    const isOwn = msg.sender_id === currentUserId;
-                    return (
-                      <div
-                        key={msg.id}
-                        className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
-                      >
+              <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-lg border border-purple-100 flex flex-col h-[calc(100vh-180px)] md:h-[600px]">
+                {/* Messages List */}
+                <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4">
+                  {messages.length === 0 ? (
+                    <div className="flex items-center justify-center h-full">
+                      <p className="text-slate-500 text-sm">No messages yet. Start the conversation!</p>
+                    </div>
+                  ) : (
+                    messages.map((message) => {
+                      const isCurrentUser = message.sender_id === currentUserId;
+                      return (
                         <div
-                          className={`max-w-[70%] rounded-2xl px-4 py-3 ${
-                            isOwn
-                              ? 'bg-purple-500 text-white'
-                              : 'bg-slate-100 text-slate-900'
-                          }`}
+                          key={message.id}
+                          className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'}`}
                         >
-                          {!isOwn && (
-                            <p className="text-xs font-medium mb-1 opacity-70">
-                              {msg.sender_name}
-                            </p>
-                          )}
-                          <p className="whitespace-pre-wrap">{msg.content}</p>
-                          <p
-                            className={`text-xs mt-1 ${
-                              isOwn ? 'text-purple-200' : 'text-slate-500'
+                          <div
+                            className={`max-w-[85%] md:max-w-[70%] px-4 py-2 rounded-2xl ${
+                              isCurrentUser
+                                ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white'
+                                : 'bg-slate-100 text-slate-900'
                             }`}
                           >
-                            {formatTime(msg.created_at)}
-                          </p>
+                            <p className="text-sm md:text-base break-words whitespace-pre-wrap">{message.content}</p>
+                            <p
+                              className={`text-xs mt-1 ${
+                                isCurrentUser ? 'text-purple-100' : 'text-slate-500'
+                              }`}
+                            >
+                              {new Date(message.created_at).toLocaleTimeString([], {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              })}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })
+                  )}
                 </div>
 
-                {/* Input */}
-                <div className="p-4 border-t border-slate-200">
+                {/* Message Input */}
+                <div className="border-t border-slate-200 p-4">
                   <form onSubmit={handleSendMessage} className="flex gap-2">
                     <input
                       type="text"
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
                       placeholder="Type a message..."
-                      className="flex-1 px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-slate-900"
+                      className="flex-1 px-4 py-2 md:py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-slate-900 placeholder:text-slate-400 text-sm md:text-base"
                     />
                     <button
                       type="submit"
                       disabled={!newMessage.trim()}
-                      className="px-6 py-3 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white rounded-xl font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-4 md:px-6 py-2 md:py-3 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white rounded-xl font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                     >
-                      Send
+                      <Send size={18} />
+                      <span className="hidden md:inline">Send</span>
                     </button>
                   </form>
                 </div>
               </div>
             ) : (
-              <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-lg border border-purple-100 h-full flex items-center justify-center">
+              <div className="hidden lg:flex bg-white/90 backdrop-blur-xl rounded-3xl shadow-lg border border-purple-100 h-[600px] items-center justify-center">
                 <p className="text-slate-500">Select a conversation to start messaging</p>
               </div>
             )}

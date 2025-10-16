@@ -20,6 +20,14 @@ const quickPrompts = [
   { label: 'Numb', text: 'I feel disconnected and numb' },
 ];
 
+// Utility function to strip markdown formatting
+const stripMarkdown = (text: string) => {
+  return text
+    .replace(/\*\*(.*?)\*\*/g, '$1')  // Remove bold **text**
+    .replace(/\*(.*?)\*/g, '$1')      // Remove italic *text*
+    .replace(/`(.*?)`/g, '$1');       // Remove code `text`
+};
+
 export default function ChatPage() {
   const router = useRouter();
   const [messages, setMessages] = useState<Message[]>([]);
@@ -377,7 +385,7 @@ export default function ChatPage() {
                     }`}
                   >
                     <div className="text-[15px] leading-relaxed whitespace-pre-wrap">
-                      {message.content}
+                      {message.role === 'assistant' ? stripMarkdown(message.content) : message.content}
                     </div>
                     {message.audioUrl && (
                       <audio 
@@ -399,28 +407,28 @@ export default function ChatPage() {
         <div className="border-t border-slate-700/50 bg-slate-800/80 backdrop-blur-xl px-6 py-4 relative z-10">
           <div className="max-w-4xl mx-auto">
             <div className="flex gap-3 items-end">
-              {/* Voice Toggle */}
+              {/* Voice Toggle - Smaller and cleaner */}
               <button
                 onClick={handleVoiceToggle}
                 disabled={!voiceAvailable}
-                className={`p-3 rounded-xl transition-all ${
+                className={`p-2.5 rounded-lg transition-all ${
                   audioEnabled
-                    ? 'bg-gradient-to-br from-purple-500 to-blue-500 text-white shadow-lg'
+                    ? 'bg-purple-500/20 text-purple-300 border border-purple-400/30'
                     : voiceAvailable
-                    ? 'bg-slate-700 text-purple-300 hover:bg-slate-600 border border-slate-600'
-                    : 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                    ? 'bg-slate-700/50 text-slate-400 hover:text-slate-300 border border-slate-600/50'
+                    : 'bg-slate-700/30 text-slate-600 cursor-not-allowed'
                 }`}
                 title={
                   !voiceAvailable
                     ? 'Voice available with Regulator plan'
                     : !canUseVoice
-                    ? `Voice limit reached (${voiceUsageToday}/20) - Upgrade to Integrator for unlimited`
+                    ? `Voice limit reached (${voiceUsageToday}/20)`
                     : audioEnabled
-                    ? `Voice On (${voiceUsageToday}/20 used today)`
-                    : `Voice Off (${voiceUsageToday}/20 used today)`
+                    ? 'Voice responses on'
+                    : 'Voice responses off'
                 }
               >
-                <Volume2 size={20} />
+                <Volume2 size={18} />
               </button>
 
               {/* Input Field */}
@@ -453,13 +461,11 @@ export default function ChatPage() {
               </button>
             </div>
 
-            {/* Voice Usage Indicator */}
-            {voiceAvailable && (
-              <div className="mt-2 text-xs text-slate-300 text-center">
-                {audioEnabled ? '🎙️ Voice responses enabled' : 'Voice responses off'} 
-                {userTier === 'regulator' && ` • ${voiceUsageToday}/20 used today`}
-                {userTier === 'integrator' && ' • Unlimited voice'}
-                {userTier === 'test' && ' • Unlimited voice (test)'}
+            {/* Voice Usage Indicator - Smaller */}
+            {voiceAvailable && audioEnabled && (
+              <div className="mt-2 text-xs text-slate-400 text-center">
+                🎙️ Voice enabled
+                {userTier === 'regulator' && ` • ${voiceUsageToday}/20 today`}
               </div>
             )}
           </div>

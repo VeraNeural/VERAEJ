@@ -12,8 +12,8 @@ import ProfileSettings from './chat/ProfileSettings';
 interface WellnessHubModalProps {
   isOpen: boolean;
   onClose: () => void;
+  userId: string;  // ← This
   darkMode: boolean;
-  userId: string;
 }
 
 type Tab = 'profile' | 'protocol' | 'journal' | 'checkin' | 'files' | 'dashboard';

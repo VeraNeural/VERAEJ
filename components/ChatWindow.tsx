@@ -139,49 +139,49 @@ export default function ChatWindow() {
   };
 
   useEffect(() => {
-  const fetchUserData = async () => {
-    try {
-      const response = await fetch('/api/auth/me');
-      if (!response.ok) throw new Error('Not authenticated');
-      
-      const data = await response.json();
-      const user = data.user;
-      
-      let tier = 'free';
-      let expired = false;
-      
-      // Check trial status
-      if (user.subscription_status === 'trial') {
-        const trialEndsAt = new Date(user.trial_ends_at);
-        const now = new Date();
+    const fetchUserData = async () => {
+      try {
+        const response = await fetch('/api/auth/me');
+        if (!response.ok) throw new Error('Not authenticated');
         
-        if (now < trialEndsAt) {
-          // Trial still active - determine which tier they're trialing
+        const data = await response.json();
+        const user = data.user;
+        
+        let tier = 'free';
+        let expired = false;
+        
+        // Check trial status
+        if (user.subscription_status === 'trial') {
+          const trialEndsAt = new Date(user.trial_ends_at);
+          const now = new Date();
+          
+          if (now < trialEndsAt) {
+            // Trial still active - determine which tier they're trialing
+            tier = user.subscription_tier || 'explorer';
+          } else {
+            // Trial expired
+            expired = true;
+            setTrialExpired(true);
+            setShowUpgradeModal(true);
+          }
+        } else if (user.subscription_status === 'active') {
+          // Paid subscription
           tier = user.subscription_tier || 'explorer';
-        } else {
-          // Trial expired
-          expired = true;
-          setTrialExpired(true);
-          setShowUpgradeModal(true);
         }
-      } else if (user.subscription_status === 'active') {
-        // Paid subscription
-        tier = user.subscription_tier || 'explorer';
+        
+        if (user.test_mode) tier = 'test';
+        
+        setUserTier(tier);
+        setUserId(user.id);
+        
+      } catch (error) {
+        console.error('Failed to fetch user data:', error);
+        setUserTier('free');
       }
-      
-      if (user.test_mode) tier = 'test';
-      
-      setUserTier(tier);
-      setUserId(user.id);
-      
-    } catch (error) {
-      console.error('Failed to fetch user data:', error);
-      setUserTier('free');
-    }
-  };
-  
-  fetchUserData();
-}, []);
+    };
+    
+    fetchUserData();
+  }, []);
 
   useEffect(() => {
     const fetchVoiceUsage = async () => {
@@ -218,9 +218,9 @@ export default function ChatWindow() {
     if (!messageToSend || isLoading) return;
 
     if (userTier === 'free' && messageCount >= MESSAGE_LIMIT) {
-    alert('You\'ve reached your daily limit of 10 messages. Upgrade to Explorer ($29/month) for unlimited conversations!\n\nVisit veraneural.com/pricing to upgrade.');
-    return;
-  }
+      alert('You\'ve reached your daily limit of 10 messages. Upgrade to Explorer ($29/month) for unlimited conversations!\n\nVisit veraneural.com/pricing to upgrade.');
+      return;
+    }
 
     if (!customMessage) setInput('');
     setIsLoading(true);
@@ -306,14 +306,14 @@ export default function ChatWindow() {
   };
 
   const handleQuickAction = (action: keyof typeof quickMessages) => {
-  if (userTier === 'free' && promptCount >= PROMPT_LIMIT) {
-    alert('You\'ve reached your daily limit of 5 quick prompts. Upgrade to Explorer ($29/month) for unlimited prompts!\n\nVisit veraneural.com/pricing to upgrade.');
-    return;
-  }
-  
-  setPromptCount(prev => prev + 1);
-  sendMessage(quickMessages[action]);
-};
+    if (userTier === 'free' && promptCount >= PROMPT_LIMIT) {
+      alert('You\'ve reached your daily limit of 5 quick prompts. Upgrade to Explorer ($29/month) for unlimited prompts!\n\nVisit veraneural.com/pricing to upgrade.');
+      return;
+    }
+    
+    setPromptCount(prev => prev + 1);
+    sendMessage(quickMessages[action]);
+  };
 
   const handleVoiceToggle = () => {
     if (!voiceAvailable) {
@@ -321,7 +321,7 @@ export default function ChatWindow() {
       return;
     }
     if (!canUseVoice) {
-      alert(`Voice limit reached for today. Upgrade to Integrator for unlimited voice!`);S
+      alert(`Voice limit reached for today. Upgrade to Integrator for unlimited voice!`);
       return;
     }
     setAudioEnabled(!audioEnabled);
@@ -341,30 +341,30 @@ export default function ChatWindow() {
   };
 
   const handleLoadChat = async (sessionId: string) => {
-  console.log('🔵 Loading chat:', sessionId);
-  
-  try {
-    const response = await fetch(`/api/sessions/${sessionId}/messages`);
-    console.log('🔵 Response status:', response.status);
+    console.log('🔵 Loading chat:', sessionId);
     
-    if (response.ok) {
-      const data = await response.json();
-      console.log('🔵 Loaded messages:', data.messages);
+    try {
+      const response = await fetch(`/api/sessions/${sessionId}/messages`);
+      console.log('🔵 Response status:', response.status);
       
-      // Convert timestamp strings to Date objects
-      const loadedMessages = (data.messages || []).map((msg: any) => ({
-        ...msg,
-        timestamp: new Date(msg.timestamp)
-      }));
-      
-      setMessages(loadedMessages);
-      setCurrentSessionId(sessionId);
-      console.log('✅ Messages loaded successfully');
+      if (response.ok) {
+        const data = await response.json();
+        console.log('🔵 Loaded messages:', data.messages);
+        
+        // Convert timestamp strings to Date objects
+        const loadedMessages = (data.messages || []).map((msg: any) => ({
+          ...msg,
+          timestamp: new Date(msg.timestamp)
+        }));
+        
+        setMessages(loadedMessages);
+        setCurrentSessionId(sessionId);
+        console.log('✅ Messages loaded successfully');
+      }
+    } catch (error) {
+      console.error('❌ Failed to load chat:', error);
     }
-  } catch (error) {
-    console.error('❌ Failed to load chat:', error);
-  }
-};
+  };
 
   const handleSaveSession = async () => {
     if (!currentSessionId || messages.length === 0) return;
@@ -385,18 +385,16 @@ export default function ChatWindow() {
   };
 
   const formatTime = (date: Date | string) => {
-  const dateObj = date instanceof Date ? date : new Date(date);
-  return dateObj.toLocaleTimeString('en-US', { 
-    hour: '2-digit', 
-    minute: '2-digit' 
-  });
-};
+    const dateObj = date instanceof Date ? date : new Date(date);
+    return dateObj.toLocaleTimeString('en-US', { 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    });
+  };
 
-   const UpgradeModal = () => (
+  const UpgradeModal = () => (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className={`rounded-3xl p-8 max-w-2xl shadow-2xl ${
-        theme === 'dark' || theme === 'night' ? 'bg-slate-900 border border-purple-500/30' : 'bg-white'
-      }`}>
+      <div className={`rounded-3xl p-8 max-w-2xl shadow-2xl ${theme === 'dark' || theme === 'night' ? 'bg-slate-900 border border-purple-500/30' : 'bg-white'}`}>
         <div className="text-center mb-6">
           <div className="w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
             <Sparkles className="w-8 h-8 text-purple-600 dark:text-purple-400" />
@@ -430,7 +428,6 @@ export default function ChatWindow() {
               Choose Explorer
             </Link>
           </div>
-
           <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-xl p-6 border-2 border-blue-300 dark:border-blue-700">
             <div className="text-xs bg-blue-600 text-white px-2 py-1 rounded-full inline-block mb-2">
               RECOMMENDED
@@ -455,20 +452,15 @@ export default function ChatWindow() {
             </Link>
           </div>
         </div>
-
         <p className="text-center text-sm text-slate-500 dark:text-slate-400">
           Need help deciding? Email <a href="mailto:support@veraneural.com" className="text-purple-600 hover:text-purple-700 underline">support@veraneural.com</a>
         </p>
       </div>
     </div>
   );
-  // ⬆️⬆️⬆️ END OF UPGRADE MODAL ⬆️⬆️⬆️
 
-  return (  // ← Your existing return statement
+  return (
     <div className={`flex flex-col h-screen transition-all duration-700 ${themeClasses.bg} ${themeClasses.font}`}>
-    </div>
-  );
-  
       {/* HEADER */}
       <div className={`backdrop-blur-xl border-b px-6 py-4 shadow-sm transition-all duration-500 ${themeClasses.header}`}>
         <div className="flex items-center justify-between max-w-5xl mx-auto">
@@ -484,7 +476,7 @@ export default function ChatWindow() {
               evolving
             </span>
           </div>
-<div className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
             <button
               onClick={cycleTheme}
               className={`px-3 py-2 rounded-xl transition-all border text-xs font-medium ${
@@ -500,7 +492,6 @@ export default function ChatWindow() {
             >
               {theme === 'light' ? 'Light' : theme === 'dark' ? 'Dark' : theme === 'night' ? 'Night' : 'Neuro'}
             </button>
-
             <button
               onClick={() => setShowWellnessHub(true)}
               className={`p-2 rounded-xl transition-all border ${
@@ -516,7 +507,6 @@ export default function ChatWindow() {
             >
               <Sparkles size={20} />
             </button>
-
             <button
               onClick={() => setSidePanelOpen(!sidePanelOpen)}
               className={`p-2 rounded-xl transition-all border ${
@@ -545,7 +535,7 @@ export default function ChatWindow() {
       {showCrisisModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className={`rounded-3xl p-8 max-w-2xl shadow-2xl ${
-            theme === 'light' ? 'bg-white' : theme === 'dark' ? 'bg-slate-900 border border-rose-500/30' : theme === 'night' ? 'bg-zinc-950 border border-zinc-800' : 'bg-white border-2 border-red-400'
+            theme === 'light' ? 'bg-white' : theme === 'dark' ? 'bg-slate-900 border border-rose-500/30' : theme === 'night' ? 'bg-zinc-950 border border-zinc-800' : 'bg-white border-2 border-red-500'
           }`}>
             <div className="flex justify-between items-start mb-6">
               <h2 className={`text-3xl font-bold ${theme === 'dark' || theme === 'night' ? 'text-white' : 'text-slate-900'}`}>
@@ -560,7 +550,6 @@ export default function ChatWindow() {
                 <X size={24} />
               </button>
             </div>
-            
             <div className="space-y-6">
               <div className={`p-6 rounded-2xl border-2 ${theme === 'dark' || theme === 'night' ? 'bg-rose-900/30 border-rose-500/50' : 'bg-red-50 border-red-200'}`}>
                 <p className={`text-xl font-bold mb-3 ${theme === 'dark' || theme === 'night' ? 'text-rose-300' : 'text-red-700'}`}>
@@ -573,7 +562,6 @@ export default function ChatWindow() {
                   Suicide & Crisis Lifeline • US/Canada • 24/7 • Free & Confidential
                 </p>
               </div>
-
               <div className={`p-6 rounded-2xl ${theme === 'dark' || theme === 'night' ? 'bg-purple-900/30' : theme === 'neuro' ? 'bg-amber-50' : 'bg-purple-50'}`}>
                 <p className={`font-bold mb-4 ${theme === 'dark' || theme === 'night' ? 'text-purple-300' : theme === 'neuro' ? 'text-amber-900' : 'text-purple-700'}`}>
                   More Crisis Resources
@@ -587,7 +575,6 @@ export default function ChatWindow() {
                   <li>• <strong>International:</strong> <a href="https://findahelpline.com" target="_blank" rel="noopener noreferrer" className="underline">findahelpline.com</a></li>
                 </ul>
               </div>
-
               <div className={`p-4 rounded-xl text-xs ${theme === 'dark' || theme === 'night' ? 'bg-slate-800 text-slate-400' : 'bg-slate-100 text-slate-600'}`}>
                 <p className="font-semibold mb-2">⚠️ Important Disclaimer</p>
                 <p>
@@ -615,7 +602,6 @@ export default function ChatWindow() {
                     <div className="orbital-ring ring3"></div>
                   </div>
                 </div>
-                
                 <h2 className={`text-3xl font-bold ${themeClasses.text}`}>
                   I'm here. I see you.
                 </h2>
@@ -625,7 +611,6 @@ export default function ChatWindow() {
               </div>
             </div>
           )}
-          
           {messages.map((msg) => (
             <div 
               key={msg.id} 
@@ -652,7 +637,6 @@ export default function ChatWindow() {
               </div>
             </div>
           ))}
-          
           {isTyping && (
             <div className="flex justify-start animate-fade-in">
               <div className={`px-6 py-4 rounded-2xl shadow-md ${themeClasses.assistant} border`}>
@@ -664,7 +648,6 @@ export default function ChatWindow() {
               </div>
             </div>
           )}
-          
           <div ref={messagesEndRef} />
         </div>
       </div>
@@ -739,7 +722,6 @@ export default function ChatWindow() {
               Redirect
             </button>
           </div>
-
           <div className="flex gap-3 items-end">
             <textarea
               ref={inputRef}
@@ -770,7 +752,6 @@ export default function ChatWindow() {
               )}
             </button>
           </div>
-
           <div className="flex items-center justify-between">
             <button
               onClick={handleVoiceToggle}
@@ -799,157 +780,156 @@ export default function ChatWindow() {
                     : 'Voice Off'}
               </span>
             </button>
-
             <p className={`text-xs ${theme === 'dark' || theme === 'night' ? 'text-slate-400' : theme === 'neuro' ? 'text-slate-600' : 'text-slate-500'}`}>
               Press Enter to send
             </p>
           </div>
         </div>
-    </div>
+      </div>
 
-    <SidePanel 
-      isOpen={sidePanelOpen} 
-      onClose={() => setSidePanelOpen(false)} 
-      darkMode={theme === 'dark' || theme === 'night'}
-      currentSessionId={currentSessionId}
-      onNewChat={handleNewChat}
-      onLoadChat={handleLoadChat}
-    />
-
-    {userId && (
-      <WellnessHubModal
-        isOpen={showWellnessHub}
-        onClose={() => setShowWellnessHub(false)}
+      {/* SIDE PANEL, WELLNESS MODAL, AUDIO */}
+      <SidePanel 
+        isOpen={sidePanelOpen} 
+        onClose={() => setSidePanelOpen(false)} 
         darkMode={theme === 'dark' || theme === 'night'}
-        userId={userId}
+        currentSessionId={currentSessionId}
+        onNewChat={handleNewChat}
+        onLoadChat={handleLoadChat}
       />
-    )}
+      {userId && (
+        <WellnessHubModal
+          isOpen={showWellnessHub}
+          onClose={() => setShowWellnessHub(false)}
+          darkMode={theme === 'dark' || theme === 'night'}
+          userId={userId}
+        />
+      )}
+      <audio ref={audioRef} className="hidden" />
 
-    <audio ref={audioRef} className="hidden" />
-    
-    <style jsx>{`
-      @keyframes fade-in {
-          from {
-            opacity: 0;
-            transform: translateY(10px);
+      {/* STYLES */}
+      <style jsx>{`
+        @keyframes fade-in {
+            from {
+              opacity: 0;
+              transform: translateY(10px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
           }
-          to {
-            opacity: 1;
-            transform: translateY(0);
+
+          .animate-fade-in {
+            animation: fade-in 0.4s ease-out;
           }
-        }
 
-        .animate-fade-in {
-          animation: fade-in 0.4s ease-out;
-        }
-
-        .scrollbar-hide {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
-        }
-
-        .central-orb-container-small {
-          width: 200px;
-          height: 200px;
-          position: relative;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          margin: 0 auto 2rem auto;
-        }
-
-        .central-orb-small {
-          width: 160px;
-          height: 160px;
-          border-radius: 50%;
-          background: radial-gradient(circle at 35% 35%, 
-            #93C5FD 0%, 
-            #A78BFA 25%, 
-            #8B5CF6 50%, 
-            #4C1D95 75%),
-            radial-gradient(circle at 70% 70%, 
-            #EC4899 0%, 
-            transparent 50%);
-          position: relative;
-          animation: orbBreathe 8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-          box-shadow: 
-            inset 0 0 60px rgba(255, 255, 255, 0.9),
-            0 0 120px rgba(167, 139, 250, 0.6),
-            0 0 100px rgba(139, 92, 246, 0.5),
-            0 0 80px rgba(236, 72, 153, 0.3),
-            0 20px 60px rgba(0, 0, 0, 0.3);
-        }
-
-        @keyframes orbBreathe {
-          0%, 100% { 
-            transform: scale(1) rotate(0deg); 
-            filter: brightness(1);
+          .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
           }
-          50% { 
-            transform: scale(1.12) rotate(5deg); 
-            filter: brightness(1.15);
+
+          .scrollbar-hide::-webkit-scrollbar {
+            display: none;
           }
-        }
 
-        .orbital-ring {
-          position: absolute;
-          border: 1px solid;
-          border-radius: 50%;
-          animation: ringPulse 4s ease-in-out infinite;
-          pointer-events: none;
-        }
-
-        .ring1 {
-          inset: -15px;
-          border-color: rgba(184, 167, 232, 0.3);
-          animation-delay: 0s;
-        }
-
-        .ring2 {
-          inset: -30px;
-          border-color: rgba(232, 155, 155, 0.2);
-          animation-delay: 2s;
-        }
-
-        .ring3 {
-          inset: -45px;
-          border-color: rgba(232, 180, 208, 0.15);
-          animation-delay: 4s;
-        }
-
-        @keyframes ringPulse {
-          0%, 100% { 
-            opacity: 0.3; 
-            transform: scale(1); 
+          .central-orb-container-small {
+            width: 200px;
+            height: 200px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 2rem auto;
           }
-          50% { 
-            opacity: 0.6; 
-            transform: scale(1.05); 
+
+          .central-orb-small {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, 
+              #93C5FD 0%, 
+              #A78BFA 25%, 
+              #8B5CF6 50%, 
+              #4C1D95 75%),
+              radial-gradient(circle at 70% 70%, 
+              #EC4899 0%, 
+              transparent 50%);
+            position: relative;
+            animation: orbBreathe 8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+            box-shadow: 
+              inset 0 0 60px rgba(255, 255, 255, 0.9),
+              0 0 120px rgba(167, 139, 250, 0.6),
+              0 0 100px rgba(139, 92, 246, 0.5),
+              0 0 80px rgba(236, 72, 153, 0.3),
+              0 20px 60px rgba(0, 0, 0, 0.3);
           }
-        }
 
-        .inner-glow {
-          position: absolute;
-          inset: 20%;
-          border-radius: 50%;
-          background: radial-gradient(circle at center,
-            rgba(255, 255, 255, 0.8) 0%,
-            rgba(255, 255, 255, 0.4) 30%,
-            transparent 70%);
-          animation: innerPulse 6s ease-in-out infinite;
-          pointer-events: none;
-        }
+          @keyframes orbBreathe {
+            0%, 100% { 
+              transform: scale(1) rotate(0deg); 
+              filter: brightness(1);
+            }
+            50% { 
+              transform: scale(1.12) rotate(5deg); 
+              filter: brightness(1.15);
+            }
+          }
 
-        @keyframes innerPulse {
-          0%, 100% { opacity: 0.5; }
-          50% { opacity: 0.8; }
-        }
+          .orbital-ring {
+            position: absolute;
+            border: 1px solid;
+            border-radius: 50%;
+            animation: ringPulse 4s ease-in-out infinite;
+            pointer-events: none;
+          }
+
+          .ring1 {
+            inset: -15px;
+            border-color: rgba(184, 167, 232, 0.3);
+            animation-delay: 0s;
+          }
+
+          .ring2 {
+            inset: -30px;
+            border-color: rgba(232, 155, 155, 0.2);
+            animation-delay: 2s;
+          }
+
+          .ring3 {
+            inset: -45px;
+            border-color: rgba(232, 180, 208, 0.15);
+            animation-delay: 4s;
+          }
+
+          @keyframes ringPulse {
+            0%, 100% { 
+              opacity: 0.3; 
+              transform: scale(1); 
+            }
+            50% { 
+              opacity: 0.6; 
+              transform: scale(1.05); 
+            }
+          }
+
+          .inner-glow {
+            position: absolute;
+            inset: 20%;
+            border-radius: 50%;
+            background: radial-gradient(circle at center,
+              rgba(255, 255, 255, 0.8) 0%,
+              rgba(255, 255, 255, 0.4) 30%,
+              transparent 70%);
+            animation: innerPulse 6s ease-in-out infinite;
+            pointer-events: none;
+          }
+
+          @keyframes innerPulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 0.8; }
+          }
       `}</style>
-       {trialExpired && showUpgradeModal && UpgradeModal()}
+      {trialExpired && showUpgradeModal && UpgradeModal()}
     </div>
   );
 }

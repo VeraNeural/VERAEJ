@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>VERA Icon Generator</title>
+</head>
+<body>
+    <h1>VERA Icon Generator</h1>
+    <p>Click each button to download:</p>
+    <button onclick="generateIcon(192)">Download 192x192</button>
+    <button onclick="generateIcon(512)">Download 512x512</button>
+    <button onclick="generateIcon(180, 'apple-touch-icon')">Download Apple Icon (180x180)</button>
+
+    <script>
+        function generateIcon(size, filename = `icon-${size}`) {
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+
+            // Purple gradient background
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#9B59B6');
+            gradient.addColorStop(1, '#64B5F6');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, size, size);
+
+            // White text "VERA"
+            ctx.fillStyle = 'white';
+            ctx.font = `bold ${size * 0.35}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('VERA', size / 2, size / 2);
+
+            // Download
+            canvas.toBlob(blob => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${filename}.png`;
+                a.click();
+            });
+        }
+    </script>
+</body>
+</html>

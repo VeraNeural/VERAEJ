@@ -1,4 +1,4 @@
-'use client';
+Z'use client';
 import React, { useState, useEffect, useRef } from 'react';
 import { ArrowRight, Check, X } from 'lucide-react';
 import Link from 'next/link';
@@ -317,7 +317,7 @@ className="absolute top-4 right-4 p-2 rounded-lg hover:bg-slate-100 transition-c
           </ul>
 
           
-            href="https://buy.stripe.com/14AcN50oL7PpgVbdPv8bS0r"
+           <a href="https://buy.stripe.com/14AcN50oL7PpgVbdPv8bS0r"
             className="block w-full py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-normal transition-all text-center"
           >
             Start 7-Day Free Trial
@@ -368,7 +368,7 @@ className="absolute top-4 right-4 p-2 rounded-lg hover:bg-slate-100 transition-c
           </ul>
 
           
-            href="https://buy.stripe.com/5kQ00j6N93z9dIZ26N8bS0s"
+           <a href="https://buy.stripe.com/5kQ00j6N93z9dIZ26N8bS0s"
             className="block w-full py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-xl font-normal transition-all text-center shadow-lg"
           >
             Start 7-Day Free Trial

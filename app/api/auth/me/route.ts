@@ -49,10 +49,14 @@ export async function GET(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   const response = NextResponse.json({ success: true });
   
-  // Clear auth cookie
-  response.cookies.delete('auth_token');
+  // Clear auth cookie with explicit settings
+  response.cookies.set('auth_token', '', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 0, // Expire immediately
+    path: '/',
+  });
   
   return response;
 }
-
-// http://localhost:3000/api/auth/me

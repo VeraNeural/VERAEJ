@@ -10,6 +10,8 @@ export async function POST(request: NextRequest) {
     }
 
     const { pollId, optionId } = await request.json();
+    
+    console.log('Vote attempt:', { pollId, optionId, userId: user.userId }); // Debug log
 
     if (!pollId || !optionId) {
       return NextResponse.json(
@@ -51,9 +53,13 @@ export async function POST(request: NextRequest) {
       results: results.rows,
     });
   } catch (error) {
-    console.error('Error voting:', error);
+    console.error('Error voting - Full details:', error);
+    console.error('Error message:', error instanceof Error ? error.message : 'Unknown');
     return NextResponse.json(
-      { error: 'Failed to record vote' },
+      { 
+        error: 'Failed to record vote',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     );
   }

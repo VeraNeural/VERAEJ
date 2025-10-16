@@ -116,7 +116,8 @@ className="absolute top-4 right-4 p-2 rounded-lg hover:bg-slate-100 transition-c
           Sign In
         </Link>
         <Link 
-          href="/auth/signup"
+          <Link 
+  href="/auth/signup?plan=explorer"
           className="px-6 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-normal transition-all shadow-md hover:shadow-lg"
         >
           Get Started
@@ -481,7 +482,8 @@ className="absolute top-4 right-4 p-2 rounded-lg hover:bg-slate-100 transition-c
           Start listening to your body today. No commitment, just compassion.
         </p>
         <Link
-          href="/auth/signup"
+          <Link
+  href="/auth/signup?plan=explorer"
           className="inline-flex items-center gap-2 px-8 py-4 bg-white hover:bg-slate-100 text-slate-900 rounded-xl font-normal transition-all"
         >
           Start Free

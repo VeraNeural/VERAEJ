@@ -4,7 +4,7 @@ import Stripe from 'stripe';
 import { query } from '@/lib/db';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-11-20.acacia',
+  apiVersion: '2024-10-28.acacia',
 });
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;

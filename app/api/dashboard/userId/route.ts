@@ -1,10 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+import { query } from '@/lib/db';
 
 export async function GET(
   request: NextRequest,
@@ -21,38 +16,30 @@ export async function GET(
     const startDate = new Date(now.getTime() - (daysAgo * 24 * 60 * 60 * 1000));
 
     // Fetch check-ins
-    const { data: checkIns, error: checkInError } = await supabase
-      .from('daily_checkins')
-      .select('*')
-      .eq('user_id', userId)
-      .gte('created_at', startDate.toISOString())
-      .order('created_at', { ascending: false });
-
-    if (checkInError) {
-      console.error('Error fetching check-ins:', checkInError);
-    }
+    const checkInsResult = await query(
+      `SELECT * FROM daily_checkins 
+       WHERE user_id = $1 AND created_at >= $2 
+       ORDER BY created_at DESC`,
+      [userId, startDate.toISOString()]
+    );
+    const checkIns = checkInsResult.rows;
 
     // Fetch journal entries
-    const { data: journalEntries, error: journalError } = await supabase
-      .from('journal_entries')
-      .select('*')
-      .eq('user_id', userId)
-      .gte('created_at', startDate.toISOString())
-      .order('created_at', { ascending: false });
-
-    if (journalError) {
-      console.error('Error fetching journal entries:', journalError);
-    }
+    const journalResult = await query(
+      `SELECT * FROM journal_entries 
+       WHERE user_id = $1 AND created_at >= $2 
+       ORDER BY created_at DESC`,
+      [userId, startDate.toISOString()]
+    );
+    const journalEntries = journalResult.rows;
 
     // Fetch protocol items
-    const { data: protocolItems, error: protocolError } = await supabase
-      .from('protocol_items')
-      .select('*')
-      .eq('user_id', userId);
-
-    if (protocolError) {
-      console.error('Error fetching protocol items:', protocolError);
-    }
+    const protocolResult = await query(
+      `SELECT * FROM protocol_items 
+       WHERE user_id = $1`,
+      [userId]
+    );
+    const protocolItems = protocolResult.rows;
 
     // Calculate check-in streak
     const calculateStreak = (checkIns: any[]) => {
@@ -85,24 +72,23 @@ export async function GET(
     };
 
     // Calculate insights
-    const recentCheckIns = checkIns || [];
-    const avgMood = recentCheckIns.length > 0
-      ? recentCheckIns.reduce((sum, c) => sum + (c.mood || 0), 0) / recentCheckIns.length
+    const avgMood = checkIns.length > 0
+      ? checkIns.reduce((sum, c) => sum + (c.mood || 0), 0) / checkIns.length
       : 0;
-    const avgEnergy = recentCheckIns.length > 0
-      ? recentCheckIns.reduce((sum, c) => sum + (c.energy || 0), 0) / recentCheckIns.length
+    const avgEnergy = checkIns.length > 0
+      ? checkIns.reduce((sum, c) => sum + (c.energy || 0), 0) / checkIns.length
       : 0;
-    const avgStress = recentCheckIns.length > 0
-      ? recentCheckIns.reduce((sum, c) => sum + (c.stress || 0), 0) / recentCheckIns.length
+    const avgStress = checkIns.length > 0
+      ? checkIns.reduce((sum, c) => sum + (c.stress || 0), 0) / checkIns.length
       : 0;
-    const avgSleep = recentCheckIns.length > 0
-      ? recentCheckIns.reduce((sum, c) => sum + (c.sleep || 0), 0) / recentCheckIns.length
+    const avgSleep = checkIns.length > 0
+      ? checkIns.reduce((sum, c) => sum + (c.sleep || 0), 0) / checkIns.length
       : 0;
 
     // Calculate trends (comparing first half vs second half of period)
-    const midPoint = Math.floor(recentCheckIns.length / 2);
-    const firstHalf = recentCheckIns.slice(0, midPoint);
-    const secondHalf = recentCheckIns.slice(midPoint);
+    const midPoint = Math.floor(checkIns.length / 2);
+    const firstHalf = checkIns.slice(0, midPoint);
+    const secondHalf = checkIns.slice(midPoint);
 
     const firstHalfMood = firstHalf.length > 0
       ? firstHalf.reduce((sum, c) => sum + (c.mood || 0), 0) / firstHalf.length
@@ -130,21 +116,21 @@ export async function GET(
 
     // Calculate journal stats
     const oneWeekAgo = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
-    const entriesThisWeek = (journalEntries || []).filter(
+    const entriesThisWeek = journalEntries.filter(
       entry => new Date(entry.created_at) >= oneWeekAgo
     ).length;
 
     // Calculate protocol completion
-    const completedItems = (protocolItems || []).filter(item => item.completed).length;
-    const totalItems = (protocolItems || []).length;
+    const completedItems = protocolItems.filter(item => item.completed).length;
+    const totalItems = protocolItems.length;
     const completionRate = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
 
     // Format response
     const dashboardData = {
       checkIns: {
-        streak: calculateStreak(recentCheckIns),
-        totalCheckins: recentCheckIns.length,
-        recentCheckins: recentCheckIns.map(c => ({
+        streak: calculateStreak(checkIns),
+        totalCheckins: checkIns.length,
+        recentCheckins: checkIns.map(c => ({
           date: c.created_at,
           mood: c.mood || 0,
           energy: c.energy || 0,
@@ -153,7 +139,7 @@ export async function GET(
         })),
       },
       journal: {
-        totalEntries: (journalEntries || []).length,
+        totalEntries: journalEntries.length,
         entriesThisWeek: entriesThisWeek,
       },
       protocol: {

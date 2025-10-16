@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import Link from 'next/link'; // <-- CORRECTED IMPORT
 import { Send, Menu, Volume2, VolumeX, AlertCircle, X, Heart, Compass, Wind, Loader2, Sparkles, Zap } from 'lucide-react';
 import SidePanel from './SidePanel';
 import WellnessHubModal from './WellnessHubModal';

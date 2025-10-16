@@ -94,7 +94,6 @@ export default function EventsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50">
-      {/* Header */}
       <div className="bg-white/90 backdrop-blur-xl border-b border-purple-100 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -111,9 +110,7 @@ export default function EventsPage() {
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="max-w-5xl mx-auto px-4 py-8">
-        {/* Tabs */}
         <div className="flex gap-4 mb-8">
           <button
             onClick={() => setActiveTab('upcoming')}
@@ -137,7 +134,6 @@ export default function EventsPage() {
           </button>
         </div>
 
-        {/* Events List */}
         <div className="space-y-6">
           {activeTab === 'upcoming' ? (
             upcomingEvents.length === 0 ? (
@@ -166,18 +162,9 @@ export default function EventsPage() {
                       <h2 className="text-2xl font-medium text-slate-900 mb-2">{event.title}</h2>
                       <p className="text-slate-600 mb-4">{event.description}</p>
                       <div className="flex items-center gap-6 text-sm text-slate-500">
-                        <div className="flex items-center gap-2">
-                          <span>📅</span>
-                          <span>{formatDate(event.scheduled_at)}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span>⏱</span>
-                          <span>{event.duration_minutes} minutes</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span>👤</span>
-                          <span>Hosted by {event.host_name}</span>
-                        </div>
+                        <span>{formatDate(event.scheduled_at)}</span>
+                        <span>{event.duration_minutes} minutes</span>
+                        <span>Hosted by {event.host_name}</span>
                       </div>
                       {event.max_attendees && (
                         <p className="text-sm text-slate-500 mt-2">

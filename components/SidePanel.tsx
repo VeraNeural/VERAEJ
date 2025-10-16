@@ -238,17 +238,18 @@ export default function SidePanel({ isOpen, onClose, darkMode, currentSessionId,
               Dashboard
             </Link>
             
-            <Link 
-              href="/pricing"
-              onClick={onClose}
-              className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                darkMode 
-                  ? 'hover:bg-slate-800 text-slate-300' 
-                  : 'hover:bg-slate-100 text-slate-700'
-              }`}
-            >
-              Upgrade
-            </Link>
+            <a 
+  href="https://buy.stripe.com/5kQ00j6N93z9dIZ26N8bS0s"
+  target="_blank"
+  rel="noopener noreferrer"
+  className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+    darkMode 
+      ? 'hover:bg-slate-800 text-slate-300' 
+      : 'hover:bg-slate-100 text-slate-700'
+  }`}
+>
+  Upgrade to Regulator
+</a>
 
             <button
               onClick={handleSignOut}
@@ -266,4 +267,5 @@ export default function SidePanel({ isOpen, onClose, darkMode, currentSessionId,
     </>
   );
 }
+
 

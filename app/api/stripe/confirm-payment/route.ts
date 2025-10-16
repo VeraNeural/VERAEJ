@@ -78,10 +78,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-```
-
-**Step 4: Add Your Stripe Secret Key to Vercel**
-
-Go back to Vercel environment variables and add:
-```
-STRIPE_SECRET_KEY=sk_live_... (or sk_test_... for testing)

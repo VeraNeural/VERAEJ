@@ -188,9 +188,9 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gradient-to-br from-purple-50 via-blue-50/30 to-purple-100/20">
+    <div className="flex flex-col h-screen bg-gradient-to-br from-[#F5F3FF] via-[#FAF5FF] to-[#FDF4FF]">
       {/* Header */}
-      <header className="bg-white/90 backdrop-blur-xl border-b border-purple-200/40 px-6 py-4">
+      <header className="bg-white/80 backdrop-blur-xl border-b border-purple-200/30 px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
@@ -206,7 +206,7 @@ export default function ChatPage() {
               </div>
               <div>
                 <h1 className="text-xl font-normal text-slate-800">VERA</h1>
-                <p className="text-xs text-slate-500">I'm here, listening</p>
+                <p className="text-xs text-slate-600">I'm here, listening</p>
               </div>
             </div>
           </div>
@@ -214,7 +214,7 @@ export default function ChatPage() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => setShowWellnessHub(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-white hover:bg-purple-50 rounded-xl transition-all text-slate-700 border border-purple-200/50 shadow-sm"
+              className="flex items-center gap-2 px-4 py-2 bg-white/80 hover:bg-purple-50 rounded-xl transition-all text-slate-700 border border-purple-200/50 shadow-sm"
             >
               <span className="text-sm font-medium">Wellness Hub</span>
             </button>
@@ -230,19 +230,19 @@ export default function ChatPage() {
             <h2 className="text-3xl font-light text-slate-800 mb-3">
               I'm VERA. I'm here for you.
             </h2>
-            <p className="text-lg text-slate-600 mb-8 leading-relaxed">
+            <p className="text-lg text-slate-700 mb-8 leading-relaxed">
               Share what's happening in your body, and we'll explore it together. There's no rush, no judgment - just presence.
             </p>
 
             {/* Quick Prompts */}
             <div className="w-full max-w-xl">
-              <p className="text-sm text-slate-500 mb-4">Not sure where to start? Try one of these:</p>
+              <p className="text-sm text-slate-600 mb-4">Not sure where to start? Try one of these:</p>
               <div className="flex gap-2 flex-wrap justify-center">
                 {quickPrompts.map((prompt, index) => (
                   <button
                     key={index}
                     onClick={() => handleQuickPrompt(prompt.text)}
-                    className="px-4 py-2.5 rounded-xl bg-white hover:bg-purple-50 border border-purple-200/50 transition-all text-slate-700 text-sm shadow-sm"
+                    className="px-4 py-2.5 rounded-xl bg-white/90 hover:bg-purple-50 border border-purple-200/50 transition-all text-slate-700 text-sm shadow-sm"
                   >
                     {prompt.label}
                   </button>
@@ -260,8 +260,8 @@ export default function ChatPage() {
                 <div
                   className={`max-w-[80%] rounded-2xl px-5 py-4 ${
                     message.role === 'user'
-                      ? 'bg-purple-100 text-slate-800 shadow-sm'
-                      : 'bg-white text-slate-800 shadow-sm border border-purple-100'
+                      ? 'bg-purple-100/80 text-slate-800 shadow-sm'
+                      : 'bg-white/90 text-slate-800 shadow-sm border border-purple-200'
                   }`}
                 >
                   <div className="text-[15px] leading-relaxed whitespace-pre-wrap">
@@ -270,7 +270,7 @@ export default function ChatPage() {
                   {message.audioUrl && (
                     <audio 
                       controls 
-                      className="mt-3 w-full"
+                      className="mt-3 w-full opacity-80"
                       src={message.audioUrl}
                       autoPlay
                     />
@@ -284,7 +284,7 @@ export default function ChatPage() {
       </div>
 
       {/* Input Area */}
-      <div className="border-t border-purple-200/40 bg-white/90 backdrop-blur-xl px-6 py-4">
+      <div className="border-t border-purple-200/30 bg-white/80 backdrop-blur-xl px-6 py-4">
         <div className="max-w-4xl mx-auto">
           <div className="flex gap-3 items-end">
             {/* Voice Toggle */}
@@ -295,7 +295,7 @@ export default function ChatPage() {
                 audioEnabled
                   ? 'bg-purple-500 text-white shadow-lg'
                   : voiceAvailable
-                  ? 'bg-white text-purple-600 hover:bg-purple-50 border border-purple-200'
+                  ? 'bg-white/80 text-purple-600 hover:bg-purple-50 border border-purple-200'
                   : 'bg-gray-100 text-gray-400 cursor-not-allowed'
               }`}
               title={
@@ -318,7 +318,7 @@ export default function ChatPage() {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Share what's happening in your body..."
-                className="w-full px-5 py-3 bg-white border border-purple-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent resize-none text-slate-800 placeholder-slate-400 shadow-sm"
+                className="w-full px-5 py-3 bg-white border border-purple-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent resize-none text-slate-800 placeholder-slate-500 shadow-sm"
                 rows={1}
                 style={{
                   minHeight: '50px',
@@ -343,7 +343,7 @@ export default function ChatPage() {
 
           {/* Voice Usage Indicator */}
           {voiceAvailable && (
-            <div className="mt-2 text-xs text-slate-500 text-center">
+            <div className="mt-2 text-xs text-slate-600 text-center">
               {audioEnabled ? '🎙️ Voice responses enabled' : 'Voice responses off'} 
               {userTier === 'regulator' && ` • ${voiceUsageToday}/20 used today`}
               {userTier === 'integrator' && ' • Unlimited'}

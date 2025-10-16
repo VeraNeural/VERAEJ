@@ -218,12 +218,20 @@ export default function CommunityPage() {
               VERA Community
             </h1>
           </div>
-          <Link
-            href="/messages"
-            className="px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-xl font-medium transition-all"
-          >
-            Messages
-          </Link>
+         <div className="flex gap-3">
+            <Link
+              href="/rituals"
+              className="px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-xl font-medium transition-all"
+            >
+              Daily Ritual
+            </Link>
+            <Link
+              href="/messages"
+              className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium transition-all"
+            >
+              Messages
+            </Link>
+          </div>
         </div>
       </div>
 

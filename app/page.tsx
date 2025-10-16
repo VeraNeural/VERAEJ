@@ -9,10 +9,8 @@ export default function LandingPage() {
   const [showBackToTop, setShowBackToTop] = useState(false);
 
   useEffect(() => {
-    // Create living universe
     createLivingUniverse();
 
-    // Scroll handler
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 100);
       setShowBackToTop(window.scrollY > 100);
@@ -20,7 +18,6 @@ export default function LandingPage() {
 
     window.addEventListener('scroll', handleScroll);
 
-    // Mouse interaction with neurons
     const handleMouseMove = (e: MouseEvent) => {
       const neurons = document.querySelectorAll('.living-neuron');
       const x = (e.clientX / window.innerWidth - 0.5) * 2;
@@ -46,10 +43,8 @@ export default function LandingPage() {
     const universe = document.getElementById('livingUniverse');
     if (!universe) return;
 
-    // Clear existing
     universe.innerHTML = '';
     
-    // Consciousness waves
     for (let i = 0; i < 4; i++) {
       const wave = document.createElement('div');
       wave.className = 'consciousness-wave';
@@ -60,7 +55,6 @@ export default function LandingPage() {
       universe.appendChild(wave);
     }
     
-    // Living neurons
     for (let i = 0; i < 80; i++) {
       const neuron = document.createElement('div');
       neuron.className = 'living-neuron';
@@ -81,7 +75,6 @@ export default function LandingPage() {
       universe.appendChild(neuron);
     }
     
-    // Fascia web
     for (let i = 0; i < 30; i++) {
       const fascia = document.createElement('div');
       fascia.className = 'fascia-web';
@@ -156,77 +149,41 @@ export default function LandingPage() {
         }
 
         @keyframes neuronLife {
-          0%, 100% {
-            transform: translate(0, 0) scale(0.5);
-            opacity: 0.2;
-          }
-          20% {
-            transform: translate(80px, -60px) scale(1.5);
-            opacity: 0.9;
-          }
-          40% {
-            transform: translate(-60px, 80px) scale(1.2);
-            opacity: 0.7;
-          }
-          60% {
-            transform: translate(100px, 40px) scale(0.9);
-            opacity: 0.5;
-          }
-          80% {
-            transform: translate(-40px, -80px) scale(1.3);
-            opacity: 0.8;
-          }
+          0%, 100% { transform: translate(0, 0) scale(0.5); opacity: 0.2; }
+          20% { transform: translate(80px, -60px) scale(1.5); opacity: 0.9; }
+          40% { transform: translate(-60px, 80px) scale(1.2); opacity: 0.7; }
+          60% { transform: translate(100px, 40px) scale(0.9); opacity: 0.5; }
+          80% { transform: translate(-40px, -80px) scale(1.3); opacity: 0.8; }
         }
 
         .fascia-web {
           position: absolute;
           width: 2px;
           height: 200px;
-          background: linear-gradient(180deg, 
-            transparent, 
-            rgba(177, 156, 217, 0.3), 
-            transparent);
+          background: linear-gradient(180deg, transparent, rgba(177, 156, 217, 0.3), transparent);
           transform-origin: center;
           animation: fasciaFlow 25s infinite ease-in-out;
         }
 
         @keyframes fasciaFlow {
-          0%, 100% {
-            transform: rotate(0deg) scaleY(0.5);
-            opacity: 0;
-          }
-          50% {
-            transform: rotate(180deg) scaleY(1);
-            opacity: 0.4;
-          }
+          0%, 100% { transform: rotate(0deg) scaleY(0.5); opacity: 0; }
+          50% { transform: rotate(180deg) scaleY(1); opacity: 0.4; }
         }
 
         .consciousness-wave {
           position: absolute;
           width: 600px;
           height: 600px;
-          background: radial-gradient(circle,
-            rgba(155, 89, 182, 0.08) 0%,
-            rgba(100, 181, 246, 0.04) 30%,
-            transparent 70%);
+          background: radial-gradient(circle, rgba(155, 89, 182, 0.08) 0%, rgba(100, 181, 246, 0.04) 30%, transparent 70%);
           border-radius: 50%;
           filter: blur(100px);
           animation: consciousnessBreath 40s infinite ease-in-out;
         }
 
         @keyframes consciousnessBreath {
-          0%, 100% {
-            transform: translate(0, 0) scale(1);
-            opacity: 0.3;
-          }
-          33% {
-            transform: translate(-200px, 150px) scale(1.5);
-            opacity: 0.6;
-          }
-          66% {
-            transform: translate(150px, -100px) scale(1.2);
-            opacity: 0.4;
-          }
+          0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.3; }
+          33% { transform: translate(-200px, 150px) scale(1.5); opacity: 0.6; }
+          66% { transform: translate(150px, -100px) scale(1.2); opacity: 0.4; }
         }
 
         nav {
@@ -234,9 +191,7 @@ export default function LandingPage() {
           top: 0;
           width: 100%;
           padding: 1.5rem 3rem;
-          background: linear-gradient(180deg, 
-            rgba(10, 14, 39, 0.95) 0%, 
-            rgba(10, 14, 39, 0.85) 100%);
+          background: linear-gradient(180deg, rgba(10, 14, 39, 0.95) 0%, rgba(10, 14, 39, 0.85) 100%);
           backdrop-filter: blur(20px) saturate(120%);
           z-index: 1000;
           display: flex;
@@ -314,26 +269,9 @@ export default function LandingPage() {
           overflow: hidden;
         }
 
-        .nav-cta::before {
-          content: '';
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          width: 0;
-          height: 0;
-          background: radial-gradient(circle, rgba(255,255,255,0.3), transparent);
-          transform: translate(-50%, -50%);
-          transition: all 0.5s;
-        }
-
         .nav-cta:hover {
           transform: translateY(-2px);
           box-shadow: 0 10px 40px rgba(155, 89, 182, 0.4);
-        }
-
-        .nav-cta:hover::before {
-          width: 300px;
-          height: 300px;
         }
 
         .hero {
@@ -357,32 +295,18 @@ export default function LandingPage() {
         }
 
         @keyframes presenceAlive {
-          0%, 100% {
-            transform: scale(1) rotate(0deg);
-          }
-          25% {
-            transform: scale(1.1) rotate(90deg);
-          }
-          50% {
-            transform: scale(1.05) rotate(180deg);
-          }
-          75% {
-            transform: scale(1.1) rotate(270deg);
-          }
+          0%, 100% { transform: scale(1) rotate(0deg); }
+          25% { transform: scale(1.1) rotate(90deg); }
+          50% { transform: scale(1.05) rotate(180deg); }
+          75% { transform: scale(1.1) rotate(270deg); }
         }
 
         .presence-core {
           width: 100%;
           height: 100%;
-          background: radial-gradient(circle at 30% 30%,
-            rgba(155, 89, 182, 0.5) 0%,
-            rgba(100, 181, 246, 0.4) 25%,
-            rgba(248, 187, 208, 0.3) 50%,
-            transparent 75%);
+          background: radial-gradient(circle at 30% 30%, rgba(155, 89, 182, 0.5) 0%, rgba(100, 181, 246, 0.4) 25%, rgba(248, 187, 208, 0.3) 50%, transparent 75%);
           border-radius: 50%;
-          box-shadow: 
-            0 0 200px rgba(155, 89, 182, 0.6),
-            inset 0 0 150px rgba(100, 181, 246, 0.4);
+          box-shadow: 0 0 200px rgba(155, 89, 182, 0.6), inset 0 0 150px rgba(100, 181, 246, 0.4);
           position: relative;
         }
 
@@ -396,14 +320,8 @@ export default function LandingPage() {
         }
 
         @keyframes pulse-out {
-          0% {
-            transform: scale(1);
-            opacity: 0.8;
-          }
-          100% {
-            transform: scale(1.5);
-            opacity: 0;
-          }
+          0% { transform: scale(1); opacity: 0.8; }
+          100% { transform: scale(1.5); opacity: 0; }
         }
 
         .hero-content {
@@ -427,10 +345,7 @@ export default function LandingPage() {
           font-weight: 200;
           line-height: 1.2;
           margin-bottom: 1.5rem;
-          background: linear-gradient(135deg, 
-            white 0%, 
-            var(--vera-lavender) 50%, 
-            var(--vera-neural-blue) 100%);
+          background: linear-gradient(135deg, white 0%, var(--vera-lavender) 50%, var(--vera-neural-blue) 100%);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           opacity: 0;
@@ -447,50 +362,20 @@ export default function LandingPage() {
         }
 
         @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+          from { opacity: 0; transform: translateY(30px); }
+          to { opacity: 1; transform: translateY(0); }
         }
 
         .chat-preview {
           margin: 4rem auto;
           max-width: 800px;
-          background: linear-gradient(135deg,
-            rgba(155, 89, 182, 0.08) 0%,
-            rgba(100, 181, 246, 0.05) 100%);
+          background: linear-gradient(135deg, rgba(155, 89, 182, 0.08) 0%, rgba(100, 181, 246, 0.05) 100%);
           border-radius: 30px;
           padding: 3rem;
           border: 1px solid var(--glass-border);
           backdrop-filter: blur(20px);
           position: relative;
           overflow: hidden;
-        }
-
-        .chat-preview::before {
-          content: '';
-          position: absolute;
-          top: -2px;
-          left: -2px;
-          right: -2px;
-          bottom: -2px;
-          background: linear-gradient(135deg, 
-            var(--vera-lavender), 
-            var(--vera-neural-blue), 
-            var(--vera-glow-pink));
-          border-radius: 30px;
-          opacity: 0.3;
-          z-index: -1;
-          animation: borderGlow 4s linear infinite;
-        }
-
-        @keyframes borderGlow {
-          0%, 100% { opacity: 0.3; }
-          50% { opacity: 0.6; }
         }
 
         .chat-message {
@@ -504,14 +389,8 @@ export default function LandingPage() {
         .chat-message:nth-child(3) { animation-delay: 2.5s; }
 
         @keyframes messageAppear {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
         }
 
         .vera-msg {
@@ -529,22 +408,6 @@ export default function LandingPage() {
           position: relative;
         }
 
-        .vera-avatar-mini::after {
-          content: '';
-          position: absolute;
-          inset: -5px;
-          border-radius: 50%;
-          background: radial-gradient(circle, 
-            transparent 30%, 
-            rgba(155, 89, 182, 0.3) 70%);
-          animation: avatarPulse 3s infinite;
-        }
-
-        @keyframes avatarPulse {
-          0%, 100% { transform: scale(1); opacity: 0.5; }
-          50% { transform: scale(1.2); opacity: 1; }
-        }
-
         .msg-content {
           flex: 1;
           background: var(--glass-white);
@@ -560,9 +423,7 @@ export default function LandingPage() {
 
         .user-bubble {
           display: inline-block;
-          background: linear-gradient(135deg,
-            rgba(100, 181, 246, 0.15) 0%,
-            rgba(248, 187, 208, 0.1) 100%);
+          background: linear-gradient(135deg, rgba(100, 181, 246, 0.15) 0%, rgba(248, 187, 208, 0.1) 100%);
           padding: 1rem 1.5rem;
           border-radius: 20px;
           border: 1px solid rgba(100, 181, 246, 0.3);
@@ -589,16 +450,164 @@ export default function LandingPage() {
           box-shadow: 0 20px 50px rgba(155, 89, 182, 0.4);
         }
 
-        .testimonials {
+        .features {
           padding: 6rem 2rem;
           position: relative;
           z-index: 1;
+        }
+
+        .features-container {
+          max-width: 1400px;
+          margin: 0 auto;
+        }
+
+        .features-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: 2rem;
+          margin-top: 4rem;
+        }
+
+        .feature-card {
+          background: linear-gradient(135deg, rgba(155, 89, 182, 0.05) 0%, rgba(100, 181, 246, 0.03) 100%);
+          border: 1px solid var(--glass-border);
+          border-radius: 20px;
+          padding: 2rem;
+          text-align: center;
+          transition: all 0.3s;
+        }
+
+        .feature-card:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 20px 40px rgba(155, 89, 182, 0.2);
+        }
+
+        .feature-icon {
+          font-size: 2.5rem;
+          margin-bottom: 1rem;
+        }
+
+        .feature-title {
+          font-size: 1.3rem;
+          color: var(--vera-lavender);
+          margin-bottom: 0.5rem;
+        }
+
+        .feature-description {
+          color: var(--text-soft);
+          font-size: 0.95rem;
+        }
+
+        .methodology {
+          padding: 6rem 2rem;
+          position: relative;
+          z-index: 1;
+          background: linear-gradient(180deg, transparent 0%, rgba(155, 89, 182, 0.02) 100%);
+        }
+
+        .methodology-container {
+          max-width: 1200px;
+          margin: 0 auto;
+        }
+
+        .methodology-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: 2rem;
+          margin-top: 4rem;
+        }
+
+        .method-card {
+          background: var(--glass-white);
+          border: 1px solid var(--glass-border);
+          border-radius: 20px;
+          padding: 2rem;
+          text-align: center;
+          transition: all 0.3s;
+          position: relative;
           overflow: hidden;
         }
 
-        .testimonials-container {
+        .method-card::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 3px;
+          background: linear-gradient(90deg, transparent, var(--vera-lavender), transparent);
+          animation: methodShine 3s infinite;
+        }
+
+        @keyframes methodShine {
+          0%, 100% { transform: translateX(-100%); }
+          50% { transform: translateX(100%); }
+        }
+
+        .method-card:hover {
+          transform: translateY(-10px);
+          box-shadow: 0 20px 40px rgba(155, 89, 182, 0.3);
+          background: rgba(155, 89, 182, 0.05);
+        }
+
+        .method-number {
+          font-size: 3rem;
+          color: var(--vera-neural-blue);
+          margin-bottom: 1rem;
+          font-weight: 200;
+        }
+
+        .method-title {
+          font-size: 1.5rem;
+          color: var(--text-primary);
+          margin-bottom: 0.5rem;
+        }
+
+        .method-description {
+          color: var(--text-soft);
+          font-size: 1rem;
+          line-height: 1.6;
+        }
+
+        .partners {
+          padding: 6rem 2rem;
+          position: relative;
+          z-index: 1;
+        }
+
+        .partners-container {
           max-width: 1400px;
           margin: 0 auto;
+        }
+
+        .partners-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 3rem;
+          margin-top: 4rem;
+          align-items: center;
+        }
+
+        .partner-logo {
+          background: var(--glass-white);
+          border: 1px solid var(--glass-border);
+          border-radius: 15px;
+          padding: 2rem;
+          text-align: center;
+          transition: all 0.3s;
+          height: 120px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 1.5rem;
+          color: var(--text-soft);
+          font-weight: 300;
+        }
+
+        .partner-logo:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 10px 30px rgba(155, 89, 182, 0.2);
+          background: rgba(155, 89, 182, 0.05);
         }
 
         .section-header {
@@ -621,6 +630,17 @@ export default function LandingPage() {
           font-style: italic;
         }
 
+        .testimonials {
+          padding: 6rem 2rem;
+          position: relative;
+          z-index: 1;
+        }
+
+        .testimonials-container {
+          max-width: 1400px;
+          margin: 0 auto;
+        }
+
         .testimonials-grid {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
@@ -628,13 +648,10 @@ export default function LandingPage() {
         }
 
         .testimonial-card {
-          background: linear-gradient(135deg,
-            rgba(155, 89, 182, 0.05) 0%,
-            rgba(100, 181, 246, 0.03) 100%);
+          background: linear-gradient(135deg, rgba(155, 89, 182, 0.05) 0%, rgba(100, 181, 246, 0.03) 100%);
           border: 1px solid var(--glass-border);
           border-radius: 20px;
           padding: 2rem;
-          position: relative;
           transition: all 0.3s;
         }
 
@@ -662,9 +679,7 @@ export default function LandingPage() {
 
         .pricing {
           padding: 6rem 2rem;
-          background: linear-gradient(180deg,
-            transparent 0%,
-            rgba(155, 89, 182, 0.02) 100%);
+          background: linear-gradient(180deg, transparent 0%, rgba(155, 89, 182, 0.02) 100%);
           position: relative;
           z-index: 1;
         }
@@ -682,13 +697,10 @@ export default function LandingPage() {
         }
 
         .pricing-card {
-          background: linear-gradient(135deg,
-            rgba(155, 89, 182, 0.08) 0%,
-            rgba(100, 181, 246, 0.05) 100%);
+          background: linear-gradient(135deg, rgba(155, 89, 182, 0.08) 0%, rgba(100, 181, 246, 0.05) 100%);
           border: 1px solid var(--glass-border);
           border-radius: 30px;
           padding: 3rem 2rem;
-          position: relative;
           transition: all 0.3s;
           text-align: center;
         }
@@ -764,9 +776,7 @@ export default function LandingPage() {
         }
 
         footer {
-          background: linear-gradient(180deg,
-            transparent 0%,
-            rgba(10, 14, 39, 0.8) 100%);
+          background: linear-gradient(180deg, transparent 0%, rgba(10, 14, 39, 0.8) 100%);
           padding: 4rem 2rem 2rem;
           position: relative;
           z-index: 1;
@@ -900,58 +910,28 @@ export default function LandingPage() {
         }
 
         @media (max-width: 768px) {
-          .hero-title {
-            font-size: 2.5rem;
-          }
-          
-          .hero-presence {
-            width: 300px;
-            height: 300px;
-          }
-          
-          .pricing-grid {
-            grid-template-columns: 1fr;
-          }
-          
-          .nav-menu {
-            display: none;
-          }
-          
-          .testimonials-grid {
-            grid-template-columns: 1fr;
-          }
-
-          .footer-grid {
-            grid-template-columns: 1fr;
-            text-align: center;
-          }
-
-          .footer-bottom {
-            flex-direction: column;
-            gap: 1rem;
-            text-align: center;
-          }
-
-          .footer-legal {
-            justify-content: center;
-          }
+          .hero-title { font-size: 2.5rem; }
+          .hero-presence { width: 300px; height: 300px; }
+          .pricing-grid { grid-template-columns: 1fr; }
+          .nav-menu { display: none; }
+          .testimonials-grid { grid-template-columns: 1fr; }
+          .footer-grid { grid-template-columns: 1fr; text-align: center; }
+          .footer-bottom { flex-direction: column; gap: 1rem; text-align: center; }
+          .footer-legal { justify-content: center; }
         }
       `}</style>
 
-      {/* Living Neural Universe Background */}
       <div className="living-universe" id="livingUniverse"></div>
 
-      {/* Navigation */}
       <nav className={isScrolled ? 'scrolled' : ''}>
         <div className="logo" onClick={scrollToTop}>VERA</div>
         <div className="nav-menu">
-          <a className="nav-link" onClick={() => document.getElementById('vera')?.scrollIntoView({ behavior: 'smooth' })}>VERA</a>
-          <a className="nav-link" onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}>Plans</a>
-          <button className="nav-cta" onClick={() => router.push('/auth/signin')}>Try VERA</button>
+          <a className="nav-link" onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}>Features</a>
+          <a className="nav-link" onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}>Pricing</a>
+          <button className="nav-cta" onClick={() => router.push('/auth/signin')}>Try VERA - 7 Days Free</button>
         </div>
       </nav>
 
-      {/* Hero Section */}
       <section className="hero" id="vera">
         <div className="hero-presence">
           <div className="presence-core">
@@ -971,7 +951,6 @@ export default function LandingPage() {
           </p>
         </div>
 
-        {/* Interactive Chat Preview */}
         <div className="chat-preview">
           <div className="chat-message vera-msg">
             <div className="vera-avatar-mini"></div>
@@ -994,6 +973,101 @@ export default function LandingPage() {
           <center>
             <button className="try-vera-btn" onClick={() => router.push('/auth/signin')}>Experience VERA Now</button>
           </center>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="features" id="features">
+        <div className="features-container">
+          <div className="section-header">
+            <h2 className="section-title">Intelligence Built for Your Body</h2>
+            <p className="section-subtitle">Beyond talk therapy. Into your fascia.</p>
+          </div>
+
+          <div className="features-grid">
+            <div className="feature-card">
+              <div className="feature-icon">🧬</div>
+              <h3 className="feature-title">Protocols</h3>
+              <p className="feature-description">Custom regulation sequences for your nervous system</p>
+            </div>
+
+            <div className="feature-card">
+              <div className="feature-icon">🔍</div>
+              <h3 className="feature-title">Decode Behavior Patterns</h3>
+              <p className="feature-description">See the adaptive codes running your life</p>
+            </div>
+
+            <div className="feature-card">
+              <div className="feature-icon">⚡</div>
+              <h3 className="feature-title">Biology Intelligence</h3>
+              <p className="feature-description">Real-time somatic awareness and mapping</p>
+            </div>
+
+            <div className="feature-card">
+              <div className="feature-icon">📝</div>
+              <h3 className="feature-title">Journaling</h3>
+              <p className="feature-description">Track your nervous system&apos;s voice</p>
+            </div>
+
+            <div className="feature-card">
+              <div className="feature-icon">✓</div>
+              <h3 className="feature-title">Daily Check-In</h3>
+              <p className="feature-description">Measure regulation over time</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Methodology Section */}
+      <section className="methodology" id="methodology">
+        <div className="methodology-container">
+          <div className="section-header">
+            <h2 className="section-title">The VERA Method</h2>
+            <p className="section-subtitle">Four steps. Lifelong regulation.</p>
+          </div>
+
+          <div className="methodology-grid">
+            <div className="method-card">
+              <div className="method-number">1</div>
+              <h3 className="method-title">SENSE</h3>
+              <p className="method-description">Your body speaks first. We listen to what your fascia is holding before words exist.</p>
+            </div>
+
+            <div className="method-card">
+              <div className="method-number">2</div>
+              <h3 className="method-title">DECODE</h3>
+              <p className="method-description">Map the adaptive code. Understand why your nervous system chose this protection pattern.</p>
+            </div>
+
+            <div className="method-card">
+              <div className="method-number">3</div>
+              <h3 className="method-title">REGULATE</h3>
+              <p className="method-description">Micro-movements shift states. No force. Just awareness meeting biology.</p>
+            </div>
+
+            <div className="method-card">
+              <div className="method-number">4</div>
+              <h3 className="method-title">INTEGRATE</h3>
+              <p className="method-description">New pathways become permanent. Your nervous system learns it&apos;s safe to be here.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Partners Section */}
+      <section className="partners">
+        <div className="partners-container">
+          <div className="section-header">
+            <h2 className="section-title">Trusted Partners</h2>
+            <p className="section-subtitle">Organizations healing with VERA</p>
+          </div>
+
+          <div className="partners-grid">
+            <div className="partner-logo">Veterans Support Network</div>
+            <div className="partner-logo">Trauma Recovery Center</div>
+            <div className="partner-logo">Somatic Institute</div>
+            <div className="partner-logo">Wellness Alliance</div>
+          </div>
         </div>
       </section>
 
@@ -1023,29 +1097,11 @@ export default function LandingPage() {
               <div className="testimonial-author">Dr. Jennifer K.</div>
               <div className="testimonial-role">Somatic Therapist</div>
             </div>
-
-            <div className="testimonial-card">
-              <p className="testimonial-text">&quot;The fascia mapping changed everything. I can actually feel where emotions live in my body now.&quot;</p>
-              <div className="testimonial-author">David L.</div>
-              <div className="testimonial-role">CEO, Tech Startup</div>
-            </div>
-
-            <div className="testimonial-card">
-              <p className="testimonial-text">&quot;VERA is like having a translator for sensations I&apos;ve felt my whole life but never understood.&quot;</p>
-              <div className="testimonial-author">Maria G.</div>
-              <div className="testimonial-role">Yoga Instructor</div>
-            </div>
-
-            <div className="testimonial-card">
-              <p className="testimonial-text">&quot;This is what we&apos;ve been searching for in nervous system regulation. Revolutionary.&quot;</p>
-              <div className="testimonial-author">Veterans Support Group</div>
-              <div className="testimonial-role">San Diego Chapter</div>
-            </div>
           </div>
         </div>
       </section>
 
-      {/* Pricing Plans */}
+      {/* Pricing */}
       <section className="pricing" id="pricing">
         <div className="pricing-container">
           <div className="section-header">
@@ -1065,7 +1121,7 @@ export default function LandingPage() {
                 <li><span className="feature-neuron"></span> Pattern insights</li>
                 <li><span className="feature-neuron"></span> Dashboard analytics</li>
               </ul>
-              <button className="plan-cta" onClick={() => router.push('/auth/signin')}>Start Free Trial</button>
+              <button className="plan-cta" onClick={() => router.push('/auth/signin')}>Start 7-Day Free Trial</button>
             </div>
 
             <div className="pricing-card featured">
@@ -1079,7 +1135,7 @@ export default function LandingPage() {
                 <li><span className="feature-neuron"></span> Advanced dashboard</li>
                 <li><span className="feature-neuron"></span> Deep pattern analysis</li>
               </ul>
-              <button className="plan-cta" onClick={() => window.location.href = 'https://buy.stripe.com/5kQ00j6N93z9dIZ26N8bS0s'}>Get Regulated</button>
+              <button className="plan-cta" onClick={() => router.push('/auth/signin')}>Start 7-Day Free Trial</button>
             </div>
 
             <div className="pricing-card">
@@ -1093,7 +1149,7 @@ export default function LandingPage() {
                 <li><span className="feature-neuron"></span> White-label options</li>
                 <li><span className="feature-neuron"></span> Priority support</li>
               </ul>
-              <button className="plan-cta" onClick={() => alert('Integrator tier coming Q1 2026!')}>Coming Soon</button>
+              <button className="plan-cta" onClick={() => router.push('/auth/signin')}>Join Waitlist</button>
             </div>
           </div>
         </div>
@@ -1115,8 +1171,8 @@ export default function LandingPage() {
             <div className="footer-section">
               <h4>Product</h4>
               <ul className="footer-links">
-                <li><a onClick={() => router.push('/chat')}>Dashboard</a></li>
-                <li><a onClick={() => document.getElementById('vera')?.scrollIntoView({ behavior: 'smooth' })}>Features</a></li>
+                <li><a onClick={() => router.push('/chat')}>Chat with VERA</a></li>
+                <li><a onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}>Features</a></li>
                 <li><a onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}>Pricing</a></li>
               </ul>
             </div>
@@ -1125,7 +1181,7 @@ export default function LandingPage() {
               <h4>Company</h4>
               <ul className="footer-links">
                 <li><a>About</a></li>
-                <li><a>Methodology</a></li>
+                <li><a onClick={() => document.getElementById('methodology')?.scrollIntoView({ behavior: 'smooth' })}>Methodology</a></li>
                 <li><a>Research</a></li>
                 <li><a>Contact</a></li>
               </ul>
@@ -1154,7 +1210,6 @@ export default function LandingPage() {
         </div>
       </footer>
 
-      {/* Back to Top */}
       <div className={`back-to-top ${showBackToTop ? 'visible' : ''}`} onClick={scrollToTop}></div>
     </>
   );

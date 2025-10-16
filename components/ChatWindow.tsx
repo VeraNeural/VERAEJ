@@ -152,37 +152,57 @@ export default function ChatWindow() {
         let expired = false;
         
         // Check trial status
-        if (user.subscription_status === 'trial') {
-          const trialEndsAt = new Date(user.trial_ends_at);
-          const now = new Date();
+useEffect(() => {
+  const fetchUserData = async () => {
+    try {
+      const response = await fetch('/api/auth/me');
+      if (!response.ok) throw new Error('Not authenticated');
+      
+      const data = await response.json();
+      const user = data.user;
+      
+      let tier = 'free';
+      let expired = false;
+      
+      // Check trial status
+      if (user.subscription_status === 'trial') {
+        const trialEndsAt = new Date(user.trial_ends_at);
+        const now = new Date();
+        
+        if (now < trialEndsAt) {
+          // Trial still active
+          tier = user.subscription_tier || 'explorer';
+        } else {
+          // Trial expired
+          expired = true;
+          setTrialExpired(true);
           
-          if (now < trialEndsAt) {
-            // Trial still active - determine which tier they're trialing
-            tier = user.subscription_tier || 'explorer';
-          } else {
-            // Trial expired
-            expired = true;
-            setTrialExpired(true);
+          // Only show modal if not dismissed today
+          const dismissedToday = localStorage.getItem('upgrade_modal_dismissed');
+          const today = new Date().toDateString();
+          
+          if (dismissedToday !== today) {
             setShowUpgradeModal(true);
           }
-        } else if (user.subscription_status === 'active') {
-          // Paid subscription
-          tier = user.subscription_tier || 'explorer';
         }
-        
-        if (user.test_mode) tier = 'test';
-        
-        setUserTier(tier);
-        setUserId(user.id);
-        
-      } catch (error) {
-        console.error('Failed to fetch user data:', error);
-        setUserTier('free');
+      } else if (user.subscription_status === 'active') {
+        // Paid subscription
+        tier = user.subscription_tier || 'explorer';
       }
-    };
-    
-    fetchUserData();
-  }, []);
+      
+      if (user.test_mode) tier = 'test';
+      
+      setUserTier(tier);
+      setUserId(user.id);
+      
+    } catch (error) {
+      console.error('Failed to fetch user data:', error);
+      setUserTier('free');
+    }
+  };
+  
+  fetchUserData();
+}, []););
 
   useEffect(() => {
     const fetchVoiceUsage = async () => {

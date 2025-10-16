@@ -261,7 +261,7 @@ export default function CommunityPage() {
           </div>
 
           {/* Posts Area */}
-          <div className="col-span-9">
+          <div className="lg:col-span-9">
             {selectedChannel && (
               <div className="space-y-4">
                 {/* Channel Header */}

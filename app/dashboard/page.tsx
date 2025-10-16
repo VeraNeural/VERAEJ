@@ -3,22 +3,52 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { MessageCircle, Trash2, Plus, ArrowLeft, Calendar, MessageSquare, Loader2, LogOut } from 'lucide-react';
+import { ArrowLeft, Loader2, LogOut, TrendingUp, TrendingDown, Minus, Calendar, BookOpen, CheckSquare, Zap, Brain, Heart, Moon } from 'lucide-react';
+
+interface DashboardData {
+  checkIns: {
+    streak: number;
+    totalCheckins: number;
+    recentCheckins: Array<{
+      date: string;
+      mood: number;
+      energy: number;
+      stress: number;
+      sleep: number;
+    }>;
+  };
+  journal: {
+    totalEntries: number;
+    entriesThisWeek: number;
+  };
+  protocol: {
+    totalItems: number;
+    completedItems: number;
+    completionRate: number;
+  };
+  insights: {
+    moodTrend: 'up' | 'down' | 'stable';
+    energyTrend: 'up' | 'down' | 'stable';
+    avgMood: number;
+    avgEnergy: number;
+    avgStress: number;
+    avgSleep: number;
+  };
+}
 
 export default function DashboardPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
-  const [sessions, setSessions] = useState<any[]>([]);
-  const [deleting, setDeleting] = useState<string | null>(null);
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [timeRange, setTimeRange] = useState<'7d' | '30d'>('7d');
 
   useEffect(() => {
-    checkAuthAndLoadSessions();
-  }, []);
+    checkAuthAndLoadData();
+  }, [timeRange]);
 
-  const checkAuthAndLoadSessions = async () => {
+  const checkAuthAndLoadData = async () => {
     try {
-      // Check authentication
       const authResponse = await fetch('/api/auth/me');
       if (!authResponse.ok) {
         router.push('/auth/signin');
@@ -28,41 +58,26 @@ export default function DashboardPage() {
       const authData = await authResponse.json();
       setUser(authData.user);
 
-      // Load sessions
-      const sessionsResponse = await fetch('/api/sessions');
-      if (sessionsResponse.ok) {
-        const sessionsData = await sessionsResponse.json();
-        setSessions(sessionsData.sessions);
+      // Check if user has access to dashboard (Regulator tier or above)
+      const tier = authData.user.subscription_tier;
+      if (!['regulator', 'integrator', 'test'].includes(tier)) {
+        // Redirect to upgrade page or show message
+        alert('Dashboard is available with Regulator plan ($39/month)\n\nUpgrade at veraneural.com/pricing');
+        router.push('/chat');
+        return;
+      }
+
+      // Load dashboard data
+      const dashboardResponse = await fetch(`/api/dashboard/${authData.user.id}?range=${timeRange}`);
+      if (dashboardResponse.ok) {
+        const dashboardData = await dashboardResponse.json();
+        setData(dashboardData);
       }
 
       setLoading(false);
     } catch (error) {
       console.error('Error loading dashboard:', error);
       router.push('/auth/signin');
-    }
-  };
-
-  const handleDeleteSession = async (sessionId: string) => {
-    if (!confirm('Are you sure you want to delete this chat? This cannot be undone.')) {
-      return;
-    }
-
-    setDeleting(sessionId);
-    try {
-      const response = await fetch(`/api/sessions?id=${sessionId}`, {
-        method: 'DELETE'
-      });
-
-      if (response.ok) {
-        setSessions(sessions.filter(s => s.id !== sessionId));
-      } else {
-        alert('Failed to delete chat. Please try again.');
-      }
-    } catch (error) {
-      console.error('Delete error:', error);
-      alert('Failed to delete chat. Please try again.');
-    } finally {
-      setDeleting(null);
     }
   };
 
@@ -75,24 +90,47 @@ export default function DashboardPage() {
     }
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-
-    if (days === 0) return 'Today';
-    if (days === 1) return 'Yesterday';
-    if (days < 7) return `${days} days ago`;
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  const getTrendIcon = (trend: 'up' | 'down' | 'stable') => {
+    if (trend === 'up') return <TrendingUp size={16} className="text-green-500" />;
+    if (trend === 'down') return <TrendingDown size={16} className="text-red-500" />;
+    return <Minus size={16} className="text-slate-500" />;
   };
+
+  const StatCard = ({ 
+    title, 
+    value, 
+    icon: Icon, 
+    trend, 
+    color 
+  }: { 
+    title: string; 
+    value: string | number; 
+    icon: any; 
+    trend?: 'up' | 'down' | 'stable';
+    color: string;
+  }) => (
+    <div className="p-5 rounded-xl border bg-white border-slate-200 shadow-sm">
+      <div className="flex items-center justify-between mb-3">
+        <div className={`p-2.5 rounded-lg ${color}`}>
+          <Icon size={22} />
+        </div>
+        {trend && getTrendIcon(trend)}
+      </div>
+      <p className="text-xs text-slate-600 mb-1">
+        {title}
+      </p>
+      <p className="text-3xl font-bold text-slate-900">
+        {value}
+      </p>
+    </div>
+  );
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-rose-50/30 to-blue-50/20 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-12 h-12 text-purple-500 animate-spin mx-auto mb-4" />
-          <p className="text-slate-600">Loading your chats...</p>
+          <p className="text-slate-600">Loading your wellness analytics...</p>
         </div>
       </div>
     );
@@ -117,108 +155,8 @@ export default function DashboardPage() {
             <div className="flex items-center gap-4">
               <div className="text-right">
                 <p className="font-medium text-slate-800">{user?.name}</p>
-                <p className="text-xs text-slate-500 capitalize">{user?.subscription_status} Plan</p>
+                <p className="text-xs text-slate-500 capitalize">{user?.subscription_tier} Plan</p>
               </div>
               <button
                 onClick={handleSignOut}
-                className="p-2 text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition-all"
-                title="Sign Out"
-              >
-                <LogOut size={20} />
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-6 py-12">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-slate-900 mb-2">Your Chat History</h1>
-          <p className="text-slate-600">Review and continue your conversations with VERA</p>
-        </div>
-
-        {/* New Chat Button */}
-        <Link
-          href="/chat"
-          className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white rounded-xl font-medium transition-all shadow-md mb-8"
-        >
-          <Plus size={20} />
-          Start New Chat
-        </Link>
-
-        {/* Sessions Grid */}
-        {sessions.length === 0 ? (
-          <div className="text-center py-20">
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-rose-100 to-purple-100 flex items-center justify-center mx-auto mb-6">
-              <MessageCircle className="text-purple-500" size={40} />
-            </div>
-            <h2 className="text-2xl font-bold text-slate-800 mb-2">No chats yet</h2>
-            <p className="text-slate-600 mb-6">Start your first conversation with VERA</p>
-            <Link
-              href="/chat"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white rounded-xl font-medium transition-all shadow-md"
-            >
-              <Plus size={20} />
-              Start Chatting
-            </Link>
-          </div>
-        ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {sessions.map((session) => (
-              <div
-                key={session.id}
-                className="bg-white rounded-2xl p-6 border border-slate-200/50 hover:shadow-lg transition-all group"
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-100 to-blue-100 flex items-center justify-center">
-                      <MessageSquare className="text-purple-600" size={20} />
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-slate-900 line-clamp-1">
-                        {session.title}
-                      </h3>
-                      <div className="flex items-center gap-2 text-xs text-slate-500 mt-1">
-                        <Calendar size={12} />
-                        {formatDate(session.updated_at)}
-                      </div>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => handleDeleteSession(session.id)}
-                    disabled={deleting === session.id}
-                    className="opacity-0 group-hover:opacity-100 p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all disabled:opacity-50"
-                    title="Delete chat"
-                  >
-                    {deleting === session.id ? (
-                      <Loader2 className="animate-spin" size={16} />
-                    ) : (
-                      <Trash2 size={16} />
-                    )}
-                  </button>
-                </div>
-
-                {session.last_message && (
-                  <p className="text-sm text-slate-600 line-clamp-2 mb-4">
-                    {session.last_message}
-                  </p>
-                )}
-
-                <div className="flex items-center justify-between text-xs text-slate-500">
-                  <span>{session.message_count || 0} messages</span>
-                  <Link
-                    href={`/chat?session=${session.id}`}
-                    className="text-purple-600 hover:text-purple-700 font-medium"
-                  >
-                    Continue →
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </main>
-    </div>
-  );
-}
+                className="p-2 text-slate-

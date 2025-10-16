@@ -1,174 +1,114 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { headers } from 'next/headers';
+import Stripe from 'stripe';
 import { query } from '@/lib/db';
 
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.text();
-    const event = JSON.parse(body);
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: '2024-11-20.acacia',
+});
 
-    console.log('📨 Stripe webhook received:', event.type);
+const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.text();
+    const headersList = await headers();
+    const signature = headersList.get('stripe-signature');
+
+    if (!signature) {
+      return NextResponse.json({ error: 'No signature' }, { status: 400 });
+    }
+
+    // Verify webhook signature
+    let event: Stripe.Event;
+    try {
+      event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+    } catch (err) {
+      console.error('⚠️ Webhook signature verification failed:', err);
+      return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
+    }
+
+    console.log('✅ Stripe webhook received:', event.type);
 
     // Handle different event types
     switch (event.type) {
-      case 'checkout.session.completed':
-        await handleCheckoutCompleted(event.data.object);
-        break;
+      case 'checkout.session.completed': {
+        const session = event.data.object as Stripe.Checkout.Session;
+        
+        // Get customer email
+        const customerEmail = session.customer_email || session.customer_details?.email;
+        
+        if (!customerEmail) {
+          console.error('❌ No customer email in session');
+          break;
+        }
 
-      case 'customer.subscription.updated':
-        await handleSubscriptionUpdated(event.data.object);
-        break;
+        // Determine tier from price ID
+        let tier = 'explorer';
+        if (session.line_items?.data[0]?.price?.id === process.env.STRIPE_PRICE_REGULATOR) {
+          tier = 'regulator';
+        } else if (session.line_items?.data[0]?.price?.id === process.env.STRIPE_PRICE_INTEGRATOR) {
+          tier = 'integrator';
+        }
 
-      case 'customer.subscription.deleted':
-        await handleSubscriptionDeleted(event.data.object);
-        break;
+        // Or determine from metadata if you set it
+        if (session.metadata?.tier) {
+          tier = session.metadata.tier;
+        }
 
-      case 'invoice.payment_succeeded':
-        await handlePaymentSucceeded(event.data.object);
-        break;
+        // Update user in database
+        await query(
+          `UPDATE users 
+           SET subscription_tier = $1,
+               subscription_status = 'active',
+               stripe_customer_id = $2
+           WHERE email = $3`,
+          [tier, session.customer, customerEmail]
+        );
 
-      case 'invoice.payment_failed':
-        await handlePaymentFailed(event.data.object);
+        console.log('✅ User upgraded:', customerEmail, 'to', tier);
         break;
+      }
+
+      case 'customer.subscription.updated': {
+        const subscription = event.data.object as Stripe.Subscription;
+        
+        await query(
+          `UPDATE users 
+           SET subscription_status = $1
+           WHERE stripe_customer_id = $2`,
+          [subscription.status, subscription.customer]
+        );
+        
+        console.log('✅ Subscription updated:', subscription.customer);
+        break;
+      }
+
+      case 'customer.subscription.deleted': {
+        const subscription = event.data.object as Stripe.Subscription;
+        
+        await query(
+          `UPDATE users 
+           SET subscription_tier = 'free',
+               subscription_status = 'canceled'
+           WHERE stripe_customer_id = $1`,
+          [subscription.customer]
+        );
+        
+        console.log('✅ Subscription canceled:', subscription.customer);
+        break;
+      }
 
       default:
-        console.log(`Unhandled event type: ${event.type}`);
+        console.log('ℹ️ Unhandled event type:', event.type);
     }
 
-    return NextResponse.json({ received: true }, { status: 200 });
-
+    return NextResponse.json({ received: true });
   } catch (error) {
-    console.error('❌ Stripe webhook error:', error);
-    return NextResponse.json({ 
-      error: 'Webhook handler failed',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 400 });
-  }
-}
-
-// Handle successful checkout
-async function handleCheckoutCompleted(session: any) {
-  const customerEmail = session.customer_email || session.customer_details?.email;
-  const stripeCustomerId = session.customer;
-  const stripeSubscriptionId = session.subscription;
-
-  if (!customerEmail) {
-    console.error('No email in checkout session');
-    return;
-  }
-
-  try {
-    // Update user to Explorer tier
-    await query(
-      `UPDATE users 
-       SET 
-         subscription_status = 'active',
-         subscription_tier = 'explorer',
-         stripe_customer_id = $1,
-         stripe_subscription_id = $2,
-         subscription_started_at = CURRENT_TIMESTAMP,
-         updated_at = CURRENT_TIMESTAMP
-       WHERE email = $3`,
-      [stripeCustomerId, stripeSubscriptionId, customerEmail]
+    console.error('❌ Webhook error:', error);
+    return NextResponse.json(
+      { error: 'Webhook handler failed' },
+      { status: 500 }
     );
-
-    // Mark lead as converted
-    await query(
-      `UPDATE leads 
-       SET converted_to_user = TRUE 
-       WHERE email = $1`,
-      [customerEmail]
-    );
-
-    console.log('✅ User upgraded to Explorer:', customerEmail);
-
-  } catch (error) {
-    console.error('Failed to upgrade user:', error);
-  }
-}
-
-// Handle subscription updated
-async function handleSubscriptionUpdated(subscription: any) {
-  const stripeSubscriptionId = subscription.id;
-  const status = subscription.status; // active, canceled, etc.
-
-  try {
-    await query(
-      `UPDATE users 
-       SET 
-         subscription_status = $1,
-         updated_at = CURRENT_TIMESTAMP
-       WHERE stripe_subscription_id = $2`,
-      [status, stripeSubscriptionId]
-    );
-
-    console.log('✅ Subscription updated:', stripeSubscriptionId, status);
-
-  } catch (error) {
-    console.error('Failed to update subscription:', error);
-  }
-}
-
-// Handle subscription deleted/canceled
-async function handleSubscriptionDeleted(subscription: any) {
-  const stripeSubscriptionId = subscription.id;
-
-  try {
-    await query(
-      `UPDATE users 
-       SET 
-         subscription_status = 'cancelled',
-         subscription_tier = 'free',
-         subscription_ends_at = CURRENT_TIMESTAMP,
-         updated_at = CURRENT_TIMESTAMP
-       WHERE stripe_subscription_id = $1`,
-      [stripeSubscriptionId]
-    );
-
-    console.log('✅ Subscription cancelled:', stripeSubscriptionId);
-
-  } catch (error) {
-    console.error('Failed to cancel subscription:', error);
-  }
-}
-
-// Handle successful payment
-async function handlePaymentSucceeded(invoice: any) {
-  const stripeSubscriptionId = invoice.subscription;
-
-  try {
-    await query(
-      `UPDATE users 
-       SET 
-         subscription_status = 'active',
-         updated_at = CURRENT_TIMESTAMP
-       WHERE stripe_subscription_id = $1`,
-      [stripeSubscriptionId]
-    );
-
-    console.log('✅ Payment succeeded:', stripeSubscriptionId);
-
-  } catch (error) {
-    console.error('Failed to update payment status:', error);
-  }
-}
-
-// Handle failed payment
-async function handlePaymentFailed(invoice: any) {
-  const stripeSubscriptionId = invoice.subscription;
-
-  try {
-    await query(
-      `UPDATE users 
-       SET 
-         subscription_status = 'past_due',
-         updated_at = CURRENT_TIMESTAMP
-       WHERE stripe_subscription_id = $1`,
-      [stripeSubscriptionId]
-    );
-
-    console.log('⚠️ Payment failed:', stripeSubscriptionId);
-
-  } catch (error) {
-    console.error('Failed to update payment failure:', error);
   }
 }

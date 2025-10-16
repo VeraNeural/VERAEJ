@@ -763,6 +763,108 @@ export default function LandingPage() {
           box-shadow: 0 10px 30px rgba(155, 89, 182, 0.4);
         }
 
+        footer {
+          background: linear-gradient(180deg,
+            transparent 0%,
+            rgba(10, 14, 39, 0.8) 100%);
+          padding: 4rem 2rem 2rem;
+          position: relative;
+          z-index: 1;
+          margin-top: 6rem;
+          border-top: 1px solid var(--glass-border);
+        }
+
+        .footer-container {
+          max-width: 1400px;
+          margin: 0 auto;
+        }
+
+        .footer-grid {
+          display: grid;
+          grid-template-columns: 2fr 1fr 1fr 1fr;
+          gap: 3rem;
+          margin-bottom: 3rem;
+        }
+
+        .footer-brand {
+          grid-column: 1;
+        }
+
+        .footer-logo {
+          font-size: 2.5rem;
+          font-weight: 300;
+          letter-spacing: 0.3em;
+          background: linear-gradient(135deg, var(--vera-lavender), var(--vera-neural-blue));
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          margin-bottom: 1rem;
+        }
+
+        .footer-tagline {
+          color: var(--text-soft);
+          font-style: italic;
+          margin-bottom: 1.5rem;
+        }
+
+        .footer-section h4 {
+          color: var(--vera-lavender);
+          margin-bottom: 1.5rem;
+          font-weight: 500;
+        }
+
+        .footer-links {
+          list-style: none;
+        }
+
+        .footer-links li {
+          margin-bottom: 0.8rem;
+        }
+
+        .footer-links a {
+          color: var(--text-soft);
+          text-decoration: none;
+          transition: all 0.3s;
+          cursor: pointer;
+        }
+
+        .footer-links a:hover {
+          color: var(--vera-neural-blue);
+          transform: translateX(5px);
+          display: inline-block;
+        }
+
+        .footer-bottom {
+          padding-top: 2rem;
+          border-top: 1px solid var(--glass-border);
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          flex-wrap: wrap;
+        }
+
+        .footer-copyright {
+          color: var(--text-muted);
+          font-size: 0.9rem;
+        }
+
+        .footer-legal {
+          display: flex;
+          gap: 2rem;
+          flex-wrap: wrap;
+        }
+
+        .footer-legal a {
+          color: var(--text-muted);
+          text-decoration: none;
+          font-size: 0.9rem;
+          transition: color 0.3s;
+          cursor: pointer;
+        }
+
+        .footer-legal a:hover {
+          color: var(--vera-lavender);
+        }
+
         .back-to-top {
           position: fixed;
           bottom: 30px;
@@ -817,6 +919,21 @@ export default function LandingPage() {
           
           .testimonials-grid {
             grid-template-columns: 1fr;
+          }
+
+          .footer-grid {
+            grid-template-columns: 1fr;
+            text-align: center;
+          }
+
+          .footer-bottom {
+            flex-direction: column;
+            gap: 1rem;
+            text-align: center;
+          }
+
+          .footer-legal {
+            justify-content: center;
           }
         }
       `}</style>
@@ -981,6 +1098,61 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* Footer */}
+      <footer>
+        <div className="footer-container">
+          <div className="footer-grid">
+            <div className="footer-brand">
+              <div className="footer-logo">VERA</div>
+              <p className="footer-tagline">Where your nervous system finally speaks</p>
+              <p style={{ color: 'var(--text-muted)', marginTop: '1rem' }}>
+                Educational nervous system guidance.<br />
+                Not therapy or medical advice.
+              </p>
+            </div>
+
+            <div className="footer-section">
+              <h4>Product</h4>
+              <ul className="footer-links">
+                <li><a onClick={() => router.push('/chat')}>Dashboard</a></li>
+                <li><a onClick={() => document.getElementById('vera')?.scrollIntoView({ behavior: 'smooth' })}>Features</a></li>
+                <li><a onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}>Pricing</a></li>
+              </ul>
+            </div>
+
+            <div className="footer-section">
+              <h4>Company</h4>
+              <ul className="footer-links">
+                <li><a>About</a></li>
+                <li><a>Methodology</a></li>
+                <li><a>Research</a></li>
+                <li><a>Contact</a></li>
+              </ul>
+            </div>
+
+            <div className="footer-section">
+              <h4>Support</h4>
+              <ul className="footer-links">
+                <li><a>Help Center</a></li>
+                <li><a>Community</a></li>
+                <li><a>Status</a></li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="footer-bottom">
+            <div className="footer-copyright">
+              © 2024 VERA Technologies. All rights reserved.
+            </div>
+            <div className="footer-legal">
+              <a>Terms of Service</a>
+              <a>Privacy Policy</a>
+              <a>Data Security</a>
+            </div>
+          </div>
+        </div>
+      </footer>
 
       {/* Back to Top */}
       <div className={`back-to-top ${showBackToTop ? 'visible' : ''}`} onClick={scrollToTop}></div>

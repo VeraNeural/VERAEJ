@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Loader2, CheckCircle } from 'lucide-react';
 
-export default function PaymentSuccess() {
+function SuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
@@ -99,5 +99,17 @@ export default function PaymentSuccess() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function PaymentSuccess() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-blue-50">
+        <Loader2 className="w-16 h-16 text-purple-600 animate-spin" />
+      </div>
+    }>
+      <SuccessContent />
+    </Suspense>
   );
 }

@@ -293,7 +293,7 @@ export default function CommunityPage() {
                       className={`w-full text-left px-4 py-3 rounded-xl transition-all ${
                         selectedChannel?.id === channel.id
                           ? 'bg-purple-100 text-purple-900'
-                          : 'hover:bg-slate-50'
+                          : 'hover:bg-slate-50 text-slate-900'
                       }`}
                     >
                       <div className="flex items-center justify-between">

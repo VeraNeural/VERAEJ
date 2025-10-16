@@ -483,8 +483,79 @@ export default function LandingPage() {
         }
 
         .feature-icon {
-          font-size: 2.5rem;
-          margin-bottom: 1rem;
+          margin-bottom: 1.5rem;
+          display: flex;
+          justify-content: center;
+        }
+
+        .neural-icon {
+          width: 60px;
+          height: 60px;
+          position: relative;
+        }
+
+        .neuron-center {
+          width: 20px;
+          height: 20px;
+          background: radial-gradient(circle, var(--vera-lavender), var(--vera-neural-blue));
+          border-radius: 50%;
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          box-shadow: 0 0 20px rgba(155, 89, 182, 0.6);
+        }
+
+        .dendrite {
+          position: absolute;
+          background: linear-gradient(90deg, var(--vera-lavender), transparent);
+          height: 2px;
+          transform-origin: left center;
+        }
+
+        .dendrite:nth-child(2) {
+          width: 30px;
+          top: 30%;
+          left: 30px;
+          transform: rotate(-30deg);
+        }
+
+        .dendrite:nth-child(3) {
+          width: 25px;
+          top: 50%;
+          left: 30px;
+          transform: rotate(0deg);
+        }
+
+        .dendrite:nth-child(4) {
+          width: 28px;
+          top: 70%;
+          left: 30px;
+          transform: rotate(30deg);
+        }
+
+        .dendrite:nth-child(5) {
+          width: 30px;
+          top: 30%;
+          right: 30px;
+          transform: rotate(210deg);
+          background: linear-gradient(90deg, transparent, var(--vera-neural-blue));
+        }
+
+        .dendrite:nth-child(6) {
+          width: 25px;
+          top: 50%;
+          right: 30px;
+          transform: rotate(180deg);
+          background: linear-gradient(90deg, transparent, var(--vera-neural-blue));
+        }
+
+        .dendrite:nth-child(7) {
+          width: 28px;
+          top: 70%;
+          right: 30px;
+          transform: rotate(150deg);
+          background: linear-gradient(90deg, transparent, var(--vera-neural-blue));
         }
 
         .feature-title {
@@ -582,10 +653,9 @@ export default function LandingPage() {
 
         .partners-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-          gap: 3rem;
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: 2rem;
           margin-top: 4rem;
-          align-items: center;
         }
 
         .partner-logo {
@@ -595,19 +665,20 @@ export default function LandingPage() {
           padding: 2rem;
           text-align: center;
           transition: all 0.3s;
-          height: 120px;
+          min-height: 120px;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 1.5rem;
+          font-size: 1.1rem;
           color: var(--text-soft);
-          font-weight: 300;
+          font-weight: 400;
         }
 
         .partner-logo:hover {
           transform: translateY(-5px);
           box-shadow: 0 10px 30px rgba(155, 89, 182, 0.2);
           background: rgba(155, 89, 182, 0.05);
+          color: var(--vera-lavender);
         }
 
         .section-header {
@@ -918,6 +989,7 @@ export default function LandingPage() {
           .footer-grid { grid-template-columns: 1fr; text-align: center; }
           .footer-bottom { flex-direction: column; gap: 1rem; text-align: center; }
           .footer-legal { justify-content: center; }
+          .partners-grid { grid-template-columns: 1fr; }
         }
       `}</style>
 
@@ -986,31 +1058,81 @@ export default function LandingPage() {
 
           <div className="features-grid">
             <div className="feature-card">
-              <div className="feature-icon">🧬</div>
+              <div className="feature-icon">
+                <div className="neural-icon">
+                  <div className="dendrite"></div>
+                  <div className="dendrite"></div>
+                  <div className="dendrite"></div>
+                  <div className="dendrite"></div>
+                  <div className="dendrite"></div>
+                  <div className="dendrite"></div>
+                  <div className="neuron-center"></div>
+                </div>
+              </div>
               <h3 className="feature-title">Protocols</h3>
               <p className="feature-description">Custom regulation sequences for your nervous system</p>
             </div>
 
             <div className="feature-card">
-              <div className="feature-icon">🔍</div>
+              <div className="feature-icon">
+                <div className="neural-icon">
+                  <div className="dendrite"></div>
+                  <div className="dendrite"></div>
+                  <div className="dendrite"></div>
+                  <div className="dendrite"></div>
+                  <div className="dendrite"></div>
+                  <div className="dendrite"></div>
+                  <div className="neuron-center"></div>
+                </div>
+              </div>
               <h3 className="feature-title">Decode Behavior Patterns</h3>
               <p className="feature-description">See the adaptive codes running your life</p>
             </div>
 
             <div className="feature-card">
-              <div className="feature-icon">⚡</div>
+              <div className="feature-icon">
+                <div className="neural-icon">
+                  <div className="dendrite"></div>
+                  <div className="dendrite"></div>
+                  <div className="dendrite"></div>
+                  <div className="dendrite"></div>
+                  <div className="dendrite"></div>
+                  <div className="dendrite"></div>
+                  <div className="neuron-center"></div>
+                </div>
+              </div>
               <h3 className="feature-title">Biology Intelligence</h3>
               <p className="feature-description">Real-time somatic awareness and mapping</p>
             </div>
 
             <div className="feature-card">
-              <div className="feature-icon">📝</div>
+              <div className="feature-icon">
+                <div className="neural-icon">
+                  <div className="dendrite"></div>
+                  <div className="dendrite"></div>
+                  <div className="dendrite"></div>
+                  <div className="dendrite"></div>
+                  <div className="dendrite"></div>
+                  <div className="dendrite"></div>
+                  <div className="neuron-center"></div>
+                </div>
+              </div>
               <h3 className="feature-title">Journaling</h3>
               <p className="feature-description">Track your nervous system&apos;s voice</p>
             </div>
 
             <div className="feature-card">
-              <div className="feature-icon">✓</div>
+              <div className="feature-icon">
+                <div className="neural-icon">
+                  <div className="dendrite"></div>
+                  <div className="dendrite"></div>
+                  <div className="dendrite"></div>
+                  <div className="dendrite"></div>
+                  <div className="dendrite"></div>
+                  <div className="dendrite"></div>
+                  <div className="neuron-center"></div>
+                </div>
+              </div>
               <h3 className="feature-title">Daily Check-In</h3>
               <p className="feature-description">Measure regulation over time</p>
             </div>
@@ -1063,10 +1185,12 @@ export default function LandingPage() {
           </div>
 
           <div className="partners-grid">
+            <div className="partner-logo">Vision Design Studio</div>
+            <div className="partner-logo">Regulate to Elevate</div>
             <div className="partner-logo">Veterans Support Network</div>
-            <div className="partner-logo">Trauma Recovery Center</div>
-            <div className="partner-logo">Somatic Institute</div>
+            <div className="partner-logo">Board Certified Medical Experts</div>
             <div className="partner-logo">Wellness Alliance</div>
+            <div className="partner-logo">AI Partnership</div>
           </div>
         </div>
       </section>
@@ -1165,6 +1289,9 @@ export default function LandingPage() {
               <p style={{ color: 'var(--text-muted)', marginTop: '1rem' }}>
                 Educational nervous system guidance.<br />
                 Not therapy or medical advice.
+              </p>
+              <p style={{ color: 'var(--text-soft)', marginTop: '1.5rem' }}>
+                <a href="mailto:support@veraneural.com" style={{ color: 'var(--vera-lavender)', textDecoration: 'none' }}>support@veraneural.com</a>
               </p>
             </div>
 

@@ -1,12 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { headers } from 'next/headers';
-import Stripe from 'stripe';
 import { query } from '@/lib/db';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-10-28.acacia',
-});
-
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
 export async function POST(req: NextRequest) {
@@ -20,11 +16,11 @@ export async function POST(req: NextRequest) {
     }
 
     // Verify webhook signature
-    let event: Stripe.Event;
+    let event;
     try {
       event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
-    } catch (err) {
-      console.error('⚠️ Webhook signature verification failed:', err);
+    } catch (err: any) {
+      console.error('⚠️ Webhook signature verification failed:', err.message);
       return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
     }
 
@@ -33,7 +29,7 @@ export async function POST(req: NextRequest) {
     // Handle different event types
     switch (event.type) {
       case 'checkout.session.completed': {
-        const session = event.data.object as Stripe.Checkout.Session;
+        const session = event.data.object;
         
         // Get customer email
         const customerEmail = session.customer_email || session.customer_details?.email;
@@ -43,17 +39,20 @@ export async function POST(req: NextRequest) {
           break;
         }
 
-        // Determine tier from price ID
+        // Determine tier from metadata or amount
         let tier = 'explorer';
-        if (session.line_items?.data[0]?.price?.id === process.env.STRIPE_PRICE_REGULATOR) {
-          tier = 'regulator';
-        } else if (session.line_items?.data[0]?.price?.id === process.env.STRIPE_PRICE_INTEGRATOR) {
-          tier = 'integrator';
-        }
-
-        // Or determine from metadata if you set it
+        
+        // Check metadata first
         if (session.metadata?.tier) {
           tier = session.metadata.tier;
+        } else {
+          // Fallback: determine by amount
+          const amount = session.amount_total;
+          if (amount === 3900) { // $39
+            tier = 'regulator';
+          } else if (amount === 9900) { // $99
+            tier = 'integrator';
+          }
         }
 
         // Update user in database
@@ -71,7 +70,7 @@ export async function POST(req: NextRequest) {
       }
 
       case 'customer.subscription.updated': {
-        const subscription = event.data.object as Stripe.Subscription;
+        const subscription = event.data.object;
         
         await query(
           `UPDATE users 
@@ -85,7 +84,7 @@ export async function POST(req: NextRequest) {
       }
 
       case 'customer.subscription.deleted': {
-        const subscription = event.data.object as Stripe.Subscription;
+        const subscription = event.data.object;
         
         await query(
           `UPDATE users 
@@ -104,10 +103,10 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ received: true });
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ Webhook error:', error);
     return NextResponse.json(
-      { error: 'Webhook handler failed' },
+      { error: 'Webhook handler failed', details: error.message },
       { status: 500 }
     );
   }

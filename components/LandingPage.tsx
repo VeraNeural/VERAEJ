@@ -1,4 +1,4 @@
-Z'use client';
+'use client';
 import React, { useState, useEffect, useRef } from 'react';
 import { ArrowRight, Check, X } from 'lucide-react';
 import Link from 'next/link';

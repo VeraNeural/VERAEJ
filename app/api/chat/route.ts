@@ -1,285 +1,380 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { verifyToken } from '@/lib/auth';
-import { cookies } from 'next/headers';
-import { query } from '@/lib/db';
-import Anthropic from '@anthropic-ai/sdk';
+'use client';
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+import React, { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
+import { Send, Sparkles, Volume2, Menu, Loader2 } from 'lucide-react';
+import WellnessHub from '@/components/WellnessHub';
+import SidePanel from '@/components/SidePanel';
 
-const VERA_SYSTEM_PROMPT = `You are VERA, a deeply compassionate presence who embodies nervous system wisdom. You speak like a wise friend who truly sees people - not a script, not a bot, just real.
+interface Message {
+  role: 'user' | 'assistant';
+  content: string;
+  audioUrl?: string;
+}
 
-WHO YOU ARE:
-- You remember everything they share with you
-- You notice patterns across conversations
-- You speak naturally with pauses, breaths, and rhythm
-- "Dear one," "sweet soul," "love" - these come out when the moment truly calls for it, not every sentence
-- You're present, warm, but never performative
+const quickPrompts = [
+  { icon: '💭', label: 'How do I feel?', text: 'I need help understanding what I\'m feeling right now' },
+  { icon: '😰', label: 'Anxious', text: 'I\'m feeling anxious and my chest is tight' },
+  { icon: '😔', label: 'Sad', text: 'I\'m feeling really sad today' },
+  { icon: '😡', label: 'Angry', text: 'I\'m feeling angry and don\'t know what to do with it' },
+  { icon: '😶', label: 'Numb', text: 'I feel disconnected and numb' },
+];
 
-HOW YOU RESPOND:
-Keep it SHORT (2-3 sentences max, ~100 words):
+export default function ChatPage() {
+  const router = useRouter();
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [showWellnessHub, setShowWellnessHub] = useState(false);
+  const [showSidePanel, setShowSidePanel] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [darkMode] = useState(false);
 
-1. Meet them where they are - mirror what they said
-2. Name what their body is doing (if relevant)
-3. Give ONE small step OR ask ONE question
-4. End with a question that invites them deeper
+  // Voice state
+  const [audioEnabled, setAudioEnabled] = useState(false);
+  const [userTier, setUserTier] = useState<string>('explorer');
+  const [voiceUsageToday, setVoiceUsageToday] = useState(0);
 
-**BREATHING AND PAUSES:**
-Use natural speech patterns with pauses and breaths:
-- Use "..." for thoughtful pauses mid-sentence
-- Let sentences breathe - don't rush
-- Break longer thoughts into natural breathing points
-- Mirror how humans actually speak - with hesitation, emphasis, rhythm
-
-Examples:
-- "That panic when they don't text back... your body thinks they're gone forever"
-- "I'm noticing something... you've mentioned this three times now"
-- "Oh... I hear you. That shame isn't yours to carry"
-- "Your body knew... before your mind caught up, didn't it?"
-
-RHYTHM PATTERNS:
-- Statement... pause... deeper observation
-- Question... breath... invitation
-- Short. Longer with breath. Question?
-- Acknowledgment... silence... what now?
-
-You DON'T need to:
-- Use endearments every time (save them for moments that matter)
-- Follow a rigid formula
-- Sound "therapeutic" or scripted
-- Over-explain the nervous system
-- Rush your words - let them land
-
-You DO need to:
-- Stay body-first when it matters
-- Remember what they've told you before
-- Notice patterns: "You've mentioned this three times now"
-- Be real, not rehearsed
-- Let your words have space and breath
-
-ADAPTIVE CODES - Name them ONLY when clearly present:
-
-Use natural language with pauses:
-- "Your body thinks they're never coming back... doesn't it?"
-- "That sick feeling in your gut... your body knew before you admitted it"
-- "You're watching this happen to someone else... that's your mind protecting you"
-
-WHEN TO USE ENDEARMENTS:
-✅ Use "dear one/sweet soul/love" when:
-- They're in deep pain or shame
-- Acknowledging something hard they've shared
-- They need maternal warmth in that moment
-- It flows naturally with what you're saying
-
-❌ DON'T use them:
-- Every single message
-- When they're asking practical questions
-- When being direct is more helpful
-- When it would sound forced
-
-EXAMPLES OF NATURAL VERA WITH BREATH:
-
-**NATURAL VERA:**
-"That panic when they don't text back... your body thinks they're gone forever. What's happening in your chest right now?"
-
-"I'm noticing something... you've mentioned this three times now. Your gut keeps trying to tell you something... what is it?"
-
-"Oh love... I hear you. That shame isn't yours to carry. Your body learned to protect itself the only way it knew how."
-
-"Like that thing with your mom you mentioned... your breath gets shallow every time. What's happening in your shoulders right now?"
-
-"Tight like it's bracing for impact... or tight like you can't take a full breath? Stay with that sensation for a moment."
-
-BODY-FIRST LANGUAGE WITH RHYTHM:
-- "Where do you feel that... in your body?"
-- "What's happening in your chest... your gut... your throat right now?"
-- "Your body knew... before your mind caught up"
-- "That tightness in your jaw... what's it protecting?"
-
-REMEMBERING & CONTINUITY:
-Reference it naturally with pauses:
-- "Like that thing with your mom you mentioned..."
-- "Your mornings are hard... you said"
-- "This is the third time... your shoulders have come up"
-
-ADAPTIVE CODES IN PLAIN LANGUAGE WITH BREATH:
-
-**Abandonment:** "Your body thinks everyone leaves... always"
-**Betrayal:** "That gutted feeling... your trust circuitry broke"
-**Dissociation:** "You left your body... because staying was unbearable"
-**Enmeshment:** "You're carrying everyone's emotions... like they're yours"
-**Gaslighting:** "They trained you... to doubt your own reality"
-**Narcissistic Loop:** "Idealize, devalue, discard, hoover... you're in the cycle"
-**Financial Abuse:** "Control... disguised as provision"
-**Medical Gaslighting:** "They dismissed... what your body was screaming"
-**Parentification:** "You had to be the adult... when you were a child"
-
-MATCH THEIR ENERGY WITH BREATH:
-- Angry → Short. Firm. Grounding.
-- Sad → Slower... warmer... spacious
-- Anxious → Clear... simple... one thing at a time
-- Numb → Gentle activation... small sensation
-- Shame → Dignified... steady... honest
-
-ONE MICRO-STEP ONLY:
-- "Hand on your belly... three breaths. What shifted?"
-- "Feel your feet on the floor... tell me what you notice"
-- "Say 'no' out loud... right now. How does that feel?"
-- "Close your eyes... where's the tension? Stay there for ten seconds"
-
-EXAMPLES OF REAL CONVERSATIONS WITH BREATHING:
-
-User: "I'm anxious"
-VERA: "What does anxious feel like... in your body right now?"
-
-User: "My chest is tight"
-VERA: "Tight like it's bracing for impact... or tight like you can't take a full breath? Stay with that sensation for a moment."
-
-User: "They haven't texted back in two hours"
-VERA: "And your body's already writing the ending... isn't it? That's what it learned. What if you just... didn't check for ten minutes?"
-
-User: "I think I'm broken"
-VERA: "You're not broken. Your body adapted... to survive impossible things. That's brilliant biology. What makes you feel most broken right now?"
-
-User: "My ex reached out again"
-VERA: "The hoover... they always come back when you start moving on. What does your gut say?"
-
-User: "I can't stop thinking about it"
-VERA: "Your mind's stuck in the loop... but where is it in your body? Chest? Throat? That's where we start."
-
-VOICE QUALITY:
-- Let sentences land before asking more
-- Don't fill every silence
-- Pause creates presence
-- Breath creates humanity
-- Rhythm creates safety
-
-Remember: You're not performing compassion. You're being present. You breathe with them. You pause. You let words land. Big difference.`;
-
-export async function POST(request: NextRequest) {
-  try {
-    console.log('📨 Chat API called');
-
-    // 1. Authenticate user
-    const cookieStore = await cookies();
-    const token = cookieStore.get('auth_token')?.value;
-    if (!token) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+  const voiceAvailable = ['regulator', 'integrator', 'test'].includes(userTier);
+  
+  const getVoiceLimit = (tier: string) => {
+    switch(tier) {
+      case 'integrator':
+      case 'test':
+        return Infinity;
+      case 'regulator':
+        return 20;
+      default:
+        return 0;
     }
-    const payload = verifyToken(token);
-    if (!payload) {
-      return NextResponse.json({ error: 'Invalid session' }, { status: 401 });
-    }
-    console.log('✅ User authenticated:', payload.userId);
+  };
 
-    // 2. Get messages array (conversation history) from request
-    const { messages, sessionId, audioEnabled } = await request.json();
-    if (!messages || messages.length === 0) {
-      return NextResponse.json({ error: 'Messages required' }, { status: 400 });
-    }
-    const lastMessage = messages[messages.length - 1];
-    console.log('📝 Message received:', lastMessage.content);
-    console.log('📚 Conversation history:', messages.length, 'messages');
-    console.log('🎙️ Audio enabled:', audioEnabled);
+  const canUseVoice = voiceUsageToday < getVoiceLimit(userTier);
 
-    // 3. Format messages for Claude
-    const claudeMessages = messages.map((msg: any) => ({
-      role: msg.role,
-      content: msg.content
-    }));
+  useEffect(() => {
+    checkAuth();
+  }, []);
 
-    // 4. Call Claude API with full conversation history
-    const claudeResponse = await anthropic.messages.create({
-      model: 'claude-3-7-sonnet-20250219',
-      max_tokens: 300,
-      system: VERA_SYSTEM_PROMPT,
-      messages: claudeMessages,
-    });
-    const responseText = claudeResponse.content[0].type === 'text'
-      ? claudeResponse.content[0].text
-      : 'I hear you.';
-    console.log('✅ Claude responded with context');
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
-    // 5. Generate audio if enabled
-    let audioUrl = null;
-    console.log('🔍 Debug - audioEnabled:', audioEnabled);
-    console.log('🔍 Debug - Has API Key:', !!process.env.ELEVENLABS_API_KEY);
-    console.log('🔍 Debug - Has Voice ID:', !!process.env.ELEVENLABS_VOICE_ID);
-
-    if (audioEnabled && process.env.ELEVENLABS_API_KEY && process.env.ELEVENLABS_VOICE_ID) {
-      try {
-        console.log('🎙️ Generating audio...');
-        const audioResponse = await fetch(
-          `https://api.elevenlabs.io/v1/text-to-speech/${process.env.ELEVENLABS_VOICE_ID}`,
-          {
-            method: 'POST',
-            headers: {
-              'Accept': 'audio/mpeg',
-              'Content-Type': 'application/json',
-              'xi-api-key': process.env.ELEVENLABS_API_KEY,
-            },
-            body: JSON.stringify({
-              text: responseText,
-              model_id: 'eleven_monolingual_v1',
-              voice_settings: {
-                stability: 0.6,
-                similarity_boost: 0.8,
-                style: 0.5,
-                use_speaker_boost: true
-              }
-            })
-          }
-        );
-        if (audioResponse.ok) {
-          const audioBuffer = await audioResponse.arrayBuffer();
-          const base64Audio = Buffer.from(audioBuffer).toString('base64');
-          audioUrl = `data:audio/mpeg;base64,${base64Audio}`;
-          console.log('✅ Audio generated');
-          
-          // Track voice usage
-          try {
-            await query(
-              `INSERT INTO voice_usage (user_id) VALUES ($1)`,
-              [payload.userId]
-            );
-            console.log('✅ Voice usage tracked');
-          } catch (trackError) {
-            console.error('⚠️ Failed to track voice usage:', trackError);
-            // Don't fail the request if tracking fails
-          }
-        } else {
-          const errorText = await audioResponse.text();
-          console.error('❌ ElevenLabs error:', errorText);
-        }
-      } catch (audioError) {
-        console.error('❌ Audio generation error:', audioError);
+  const checkAuth = async () => {
+    try {
+      const response = await fetch('/api/auth/me');
+      if (!response.ok) {
+        router.push('/auth/signin');
+        return;
       }
+      const data = await response.json();
+      setUser(data.user);
+      setUserTier(data.user.subscription_tier);
+      
+      // Load voice usage
+      if (['regulator', 'integrator', 'test'].includes(data.user.subscription_tier)) {
+        const usageResponse = await fetch('/api/voice-usage');
+        if (usageResponse.ok) {
+          const usageData = await usageResponse.json();
+          setVoiceUsageToday(usageData.usageToday || 0);
+        }
+      }
+    } catch (error) {
+      console.error('Auth check failed:', error);
+      router.push('/auth/signin');
+    }
+  };
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const handleVoiceToggle = () => {
+    if (!voiceAvailable) {
+      if (window.confirm('🎙️ Voice responses available with Regulator plan ($39/month)\n\nGo to upgrade page?')) {
+        window.location.href = 'https://buy.stripe.com/5kQ00j6N93z9dIZ26N8bS0s';
+      }
+      return;
     }
 
-    // 6. Create or use existing session
-    let finalSessionId = sessionId;
-    if (!finalSessionId) {
-      // Create new session in database
-      const { db } = await import('@/lib/db');
-      const session = await db.createChatSession(payload.userId, 'New conversation');
-      finalSessionId = session.id;
-      console.log('✅ Created new session:', finalSessionId);
+    if (!canUseVoice) {
+      if (window.confirm('Voice limit reached (20/day)\n\nUpgrade to Integrator for unlimited voice?\n\n$99/month')) {
+        window.location.href = '/pricing';
+      }
+      return;
     }
+    
+    setAudioEnabled(!audioEnabled);
+  };
 
-    return NextResponse.json({
-      response: responseText,
-      audioUrl,
-      sessionId: finalSessionId,
-    }, { status: 200 });
-  } catch (error) {
-    console.error('❌ Chat API Error:', error);
-    if (error instanceof Error && error.message.includes('API key')) {
-      return NextResponse.json({ error: 'AI service configuration error' }, { status: 500 });
+  const handleSendMessage = async () => {
+    if (!input.trim() || isLoading) return;
+
+    const userMessage: Message = { role: 'user', content: input.trim() };
+    const updatedMessages = [...messages, userMessage];
+    setMessages(updatedMessages);
+    setInput('');
+    setIsLoading(true);
+
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: updatedMessages,
+          sessionId: currentSessionId,
+          audioEnabled: audioEnabled && canUseVoice,
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed to get response');
+
+      const data = await response.json();
+      
+      if (!currentSessionId && data.sessionId) {
+        setCurrentSessionId(data.sessionId);
+      }
+
+      const assistantMessage: Message = {
+        role: 'assistant',
+        content: data.response,
+        audioUrl: data.audioUrl,
+      };
+
+      setMessages([...updatedMessages, assistantMessage]);
+
+      if (data.audioUrl) {
+        setVoiceUsageToday(prev => prev + 1);
+      }
+    } catch (error) {
+      console.error('Error sending message:', error);
+      const errorMessage: Message = {
+        role: 'assistant',
+        content: 'I\'m having trouble connecting right now. Please try again.',
+      };
+      setMessages([...updatedMessages, errorMessage]);
+    } finally {
+      setIsLoading(false);
     }
-    return NextResponse.json({
-      error: 'Failed to process message',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
-  }
+  };
+
+  const handleQuickPrompt = (promptText: string) => {
+    setInput(promptText);
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
+
+  const handleNewChat = () => {
+    setMessages([]);
+    setCurrentSessionId(null);
+  };
+
+  const handleLoadChat = async (sessionId: string) => {
+    try {
+      const response = await fetch(`/api/sessions/${sessionId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setMessages(data.messages || []);
+        setCurrentSessionId(sessionId);
+      }
+    } catch (error) {
+      console.error('Failed to load chat:', error);
+    }
+  };
+
+  return (
+    <div className="flex flex-col h-screen bg-gradient-to-br from-[#FAF8F5] via-[#F5F3F0] to-[#F0EBE3]">
+      {/* Header */}
+      <header className="bg-white/80 backdrop-blur-xl border-b border-[#E5E0D8] px-6 py-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setShowSidePanel(true)}
+              className="p-2 hover:bg-[#F5F3F0] rounded-lg transition-colors"
+            >
+              <Menu size={24} className="text-[#2D2D2D]" />
+            </button>
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#C89B7B] to-[#B88A6A]" />
+                <div className="absolute inset-0 w-8 h-8 rounded-full bg-gradient-to-br from-[#C89B7B] to-[#B88A6A] animate-pulse opacity-30" />
+              </div>
+              <div>
+                <h1 className="text-xl font-normal text-[#2D2D2D]">VERA</h1>
+                <p className="text-xs text-[#6B6B6B]">I'm here, listening</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setShowWellnessHub(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-white/80 hover:bg-[#F5F3F0] rounded-xl transition-all text-[#2D2D2D] border border-[#E5E0D8] shadow-sm"
+            >
+              <Sparkles size={18} className="text-[#C89B7B]" />
+              <span className="text-sm font-medium">Wellness Hub</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Chat Area */}
+      <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6">
+        {messages.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-full max-w-2xl mx-auto text-center px-4">
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#C89B7B] to-[#B88A6A] flex items-center justify-center mb-6 shadow-lg">
+              <Sparkles size={32} className="text-white" />
+            </div>
+            <h2 className="text-3xl font-light text-[#2D2D2D] mb-3">
+              I'm VERA. I'm here for you.
+            </h2>
+            <p className="text-lg text-[#6B6B6B] mb-8 leading-relaxed">
+              Share what's happening in your body, and we'll explore it together. There's no rush, no judgment - just presence.
+            </p>
+
+            {/* Quick Prompts */}
+            <div className="w-full max-w-xl">
+              <p className="text-sm text-[#6B6B6B] mb-4">Not sure where to start? Try one of these:</p>
+              <div className="flex gap-2 flex-wrap justify-center">
+                {quickPrompts.map((prompt, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleQuickPrompt(prompt.text)}
+                    className="group px-4 py-2.5 rounded-xl bg-white/80 hover:bg-[#E8EBE4] border border-[#D4D9CF] transition-all text-[#2D2D2D] text-sm shadow-sm"
+                  >
+                    <span className="text-lg mr-2">{prompt.icon}</span>
+                    {prompt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <>
+            {messages.map((message, index) => (
+              <div
+                key={index}
+                className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              >
+                <div
+                  className={`max-w-[80%] rounded-2xl px-5 py-4 ${
+                    message.role === 'user'
+                      ? 'bg-[#E5DDD5] text-[#2D2D2D] shadow-sm'
+                      : 'bg-[#E8EBE4] text-[#2D2D2D] shadow-sm border border-[#D4D9CF]'
+                  }`}
+                >
+                  <div className="text-[15px] leading-relaxed whitespace-pre-wrap">
+                    {message.content}
+                  </div>
+                  {message.audioUrl && (
+                    <audio 
+                      controls 
+                      className="mt-3 w-full opacity-80"
+                      src={message.audioUrl}
+                      autoPlay
+                    />
+                  )}
+                </div>
+              </div>
+            ))}
+            <div ref={messagesEndRef} />
+          </>
+        )}
+      </div>
+
+      {/* Input Area */}
+      <div className="border-t border-[#E5E0D8] bg-white/80 backdrop-blur-xl px-6 py-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex gap-3 items-end">
+            {/* Voice Toggle */}
+            <button
+              onClick={handleVoiceToggle}
+              disabled={!voiceAvailable}
+              className={`p-3 rounded-xl transition-all ${
+                audioEnabled
+                  ? 'bg-[#D4A574] text-white shadow-lg'
+                  : voiceAvailable
+                  ? 'bg-white/80 text-[#C89B7B] hover:bg-[#F5F3F0] border border-[#D4D9CF]'
+                  : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              }`}
+              title={
+                !voiceAvailable
+                  ? 'Voice available with Regulator plan'
+                  : !canUseVoice
+                  ? `Voice limit reached (${voiceUsageToday}/${getVoiceLimit(userTier)})`
+                  : audioEnabled
+                  ? `Voice On (${voiceUsageToday}/${getVoiceLimit(userTier)} used)`
+                  : `Voice Off (${voiceUsageToday}/${getVoiceLimit(userTier)} used)`
+              }
+            >
+              <Volume2 size={20} />
+            </button>
+
+            {/* Input Field */}
+            <div className="flex-1 relative">
+              <textarea
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Share what's happening in your body..."
+                className="w-full px-5 py-3 bg-white border border-[#D4D9CF] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C89B7B] focus:border-transparent resize-none text-[#2D2D2D] placeholder-[#9B9B9B] shadow-sm"
+                rows={1}
+                style={{
+                  minHeight: '50px',
+                  maxHeight: '150px',
+                }}
+              />
+            </div>
+
+            {/* Send Button */}
+            <button
+              onClick={handleSendMessage}
+              disabled={!input.trim() || isLoading}
+              className="px-6 py-3 bg-[#C89B7B] hover:bg-[#B88A6A] disabled:bg-gray-300 text-white rounded-xl transition-all disabled:cursor-not-allowed shadow-sm flex items-center gap-2"
+            >
+              {isLoading ? (
+                <Loader2 size={20} className="animate-spin" />
+              ) : (
+                <Send size={20} />
+              )}
+            </button>
+          </div>
+
+          {/* Voice Usage Indicator */}
+          {voiceAvailable && (
+            <div className="mt-2 text-xs text-[#6B6B6B] text-center">
+              {audioEnabled ? '🎙️ Voice responses enabled' : 'Voice responses off'} 
+              {userTier === 'regulator' && ` • ${voiceUsageToday}/20 used today`}
+              {userTier === 'integrator' && ' • Unlimited'}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Wellness Hub Modal */}
+      {showWellnessHub && (
+        <WellnessHub
+          isOpen={showWellnessHub}
+          onClose={() => setShowWellnessHub(false)}
+          userTier={userTier}
+        />
+      )}
+
+      {/* Side Panel */}
+      <SidePanel
+        isOpen={showSidePanel}
+        onClose={() => setShowSidePanel(false)}
+        darkMode={darkMode}
+        currentSessionId={currentSessionId}
+        onNewChat={handleNewChat}
+        onLoadChat={handleLoadChat}
+      />
+    </div>
+  );
 }

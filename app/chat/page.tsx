@@ -53,35 +53,25 @@ export default function ChatPage() {
 
   const canUseVoice = voiceUsageToday < getVoiceLimit(userTier);
 
-  useEffect(() => {
-    checkAuth();
-    createSlowNeurons();
-  }, []);
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
   const createSlowNeurons = () => {
     const container = document.getElementById('slowNeurons');
     if (!container) return;
 
     container.innerHTML = '';
 
-    // Create slow-moving neurons (fewer, slower)
-    for (let i = 0; i < 30; i++) {
+    // Create slow-moving neurons (40 neurons - subtle)
+    for (let i = 0; i < 40; i++) {
       const neuron = document.createElement('div');
       neuron.className = 'slow-neuron';
       neuron.style.left = Math.random() * 100 + '%';
       neuron.style.top = Math.random() * 100 + '%';
       neuron.style.animationDelay = Math.random() * 60 + 's';
-      neuron.style.animationDuration = (80 + Math.random() * 40) + 's'; // Very slow
+      neuron.style.animationDuration = (80 + Math.random() * 40) + 's';
       
       const colors = [
-        'rgba(155, 89, 182, 0.4)',
-        'rgba(100, 181, 246, 0.4)',
-        'rgba(177, 156, 217, 0.4)',
-        'rgba(248, 187, 208, 0.3)'
+        'rgba(155, 89, 182, 0.3)',
+        'rgba(100, 181, 246, 0.3)',
+        'rgba(177, 156, 217, 0.3)',
       ];
       const color = colors[Math.floor(Math.random() * colors.length)];
       neuron.style.background = `radial-gradient(circle, ${color} 0%, transparent 70%)`;
@@ -89,7 +79,7 @@ export default function ChatPage() {
       container.appendChild(neuron);
     }
 
-    // Add consciousness waves (very slow)
+    // Add consciousness waves (very slow and subtle)
     for (let i = 0; i < 3; i++) {
       const wave = document.createElement('div');
       wave.className = 'slow-consciousness-wave';
@@ -100,6 +90,15 @@ export default function ChatPage() {
       container.appendChild(wave);
     }
   };
+
+  useEffect(() => {
+    checkAuth();
+    createSlowNeurons();
+  }, []);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   const checkAuth = async () => {
     try {
@@ -229,6 +228,9 @@ export default function ChatPage() {
 
   return (
     <>
+      {/* Slow-Moving Neurons Background */}
+      <div className="slow-neurons-container" id="slowNeurons"></div>
+
       <style jsx global>{`
         .slow-neurons-container {
           position: fixed;
@@ -245,7 +247,7 @@ export default function ChatPage() {
           position: absolute;
           width: 3px;
           height: 3px;
-          background: radial-gradient(circle, rgba(155, 89, 182, 0.4) 0%, transparent 70%);
+          background: radial-gradient(circle, rgba(155, 89, 182, 0.3) 0%, transparent 70%);
           border-radius: 50%;
           animation: slowNeuronFloat 100s infinite ease-in-out;
         }
@@ -253,19 +255,19 @@ export default function ChatPage() {
         @keyframes slowNeuronFloat {
           0%, 100% {
             transform: translate(0, 0) scale(0.8);
-            opacity: 0.3;
+            opacity: 0.2;
           }
           25% {
-            transform: translate(40px, -30px) scale(1.2);
-            opacity: 0.6;
+            transform: translate(40px, -30px) scale(1.1);
+            opacity: 0.5;
           }
           50% {
             transform: translate(-30px, 40px) scale(1);
-            opacity: 0.5;
+            opacity: 0.4;
           }
           75% {
             transform: translate(50px, 20px) scale(0.9);
-            opacity: 0.4;
+            opacity: 0.3;
           }
         }
 
@@ -274,7 +276,7 @@ export default function ChatPage() {
           width: 400px;
           height: 400px;
           background: radial-gradient(circle,
-            rgba(155, 89, 182, 0.04) 0%,
+            rgba(155, 89, 182, 0.03) 0%,
             rgba(100, 181, 246, 0.02) 30%,
             transparent 70%);
           border-radius: 50%;
@@ -285,21 +287,18 @@ export default function ChatPage() {
         @keyframes slowWaveBreath {
           0%, 100% {
             transform: translate(0, 0) scale(1);
-            opacity: 0.2;
+            opacity: 0.15;
           }
           33% {
             transform: translate(-100px, 80px) scale(1.3);
-            opacity: 0.4;
+            opacity: 0.3;
           }
           66% {
             transform: translate(80px, -50px) scale(1.1);
-            opacity: 0.3;
+            opacity: 0.2;
           }
         }
       `}</style>
-
-      {/* Slow-Moving Neurons Background */}
-      <div className="slow-neurons-container" id="slowNeurons"></div>
 
       <div className="flex flex-col h-screen bg-gradient-to-br from-indigo-200 via-purple-200 to-blue-200 relative">
         {/* Header */}

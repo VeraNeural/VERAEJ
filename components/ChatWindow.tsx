@@ -463,12 +463,12 @@ useEffect(() => {
               <li>• Daily check-ins</li>
               <li>• View protocols</li>
             </ul>
-            <Link
+            
               href={process.env.NEXT_PUBLIC_STRIPE_EXPLORER_LINK || '/pricing'}
               className="block w-full py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium text-center transition-all"
             >
               Choose Explorer
-            </Link>
+            </Link>a>
           </div>
           <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-xl p-6 border-2 border-blue-300 dark:border-blue-700">
             <div className="text-xs bg-blue-600 text-white px-2 py-1 rounded-full inline-block mb-2">
@@ -486,12 +486,12 @@ useEffect(() => {
               <li>• Voice responses 🎙️</li>
               <li>• Dashboard analytics</li>
             </ul>
-            <Link
+            
               href={process.env.NEXT_PUBLIC_STRIPE_REGULATOR_LINK || '/pricing'}
               className="block w-full py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg font-medium text-center transition-all"
             >
               Choose Regulator
-            </Link>
+            
           </div>
         </div>
         <p className="text-center text-sm text-slate-500 dark:text-slate-400">

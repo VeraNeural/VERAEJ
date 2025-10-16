@@ -468,7 +468,7 @@ useEffect(() => {
               className="block w-full py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium text-center transition-all"
             >
               Choose Explorer
-            </Link>a>
+            a>
           </div>
           <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-xl p-6 border-2 border-blue-300 dark:border-blue-700">
             <div className="text-xs bg-blue-600 text-white px-2 py-1 rounded-full inline-block mb-2">

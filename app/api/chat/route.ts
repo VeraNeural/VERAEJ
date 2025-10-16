@@ -262,17 +262,52 @@ export async function POST(request: NextRequest) {
     console.log('📚 Conversation history:', messages.length, 'messages');
     console.log('🎙️ Audio enabled:', audioEnabled);
 
-    const claudeMessages = messages.map((msg: any) => ({
+// Get recent conversation context (last 5 messages from previous sessions)
+const { data: recentMessages } = await supabase
+  .from('chat_messages')
+  .select('content, role, created_at')
+  .eq('user_id', user.id)
+  .neq('session_id', currentSessionId)
+  .order('created_at', { ascending: false })
+  .limit(5);
+
+// Build context string from recent messages
+let conversationContext = '';
+if (recentMessages && recentMessages.length > 0) {
+  const recentTopics = recentMessages
+    .filter(m => m.role === 'user')
+    .map(m => m.content.substring(0, 50))
+    .join(', ');
+  
+  conversationContext = `[Context: You've spoken with this person before. Recent topics they mentioned: ${recentTopics}...]`;
+  console.log('🧠 Added conversation memory:', conversationContext);
+}
+
+// Map messages with optional context
+const claudeMessages = conversationContext 
+  ? [
+      {
+        role: 'user' as const,
+        content: conversationContext
+      },
+      ...messages.map((msg: any) => ({
+        role: msg.role,
+        content: msg.content
+      }))
+    ]
+  : messages.map((msg: any) => ({
       role: msg.role,
       content: msg.content
     }));
 
-    const claudeResponse = await anthropic.messages.create({
-      model: 'claude-3-7-sonnet-20250219',
-      max_tokens: 300,
-      system: VERA_SYSTEM_PROMPT,
-      messages: claudeMessages,
-    });
+console.log('📚 Sending to Claude with memory context');
+
+const claudeResponse = await anthropic.messages.create({
+  model: 'claude-3-7-sonnet-20250219',
+  max_tokens: 300,
+  system: VERA_SYSTEM_PROMPT,
+  messages: claudeMessages,
+});
     const responseText = claudeResponse.content[0].type === 'text'
       ? claudeResponse.content[0].text
       : 'I hear you.';

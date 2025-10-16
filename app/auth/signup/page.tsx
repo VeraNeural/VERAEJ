@@ -252,7 +252,9 @@ Creating account for <strong>{plan === 'explorer' ? 'Explorer' : 'Regulator'}</s
       <p className="text-xs text-slate-600">
         <strong>⚠️ Important:</strong> VERA is NOT a substitute for medical care. 
         In crisis, call 988 or 911.
-      </p>
+             </p>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
+  );
+}

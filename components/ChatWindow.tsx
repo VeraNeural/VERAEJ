@@ -434,72 +434,76 @@ useEffect(() => {
     });
   };
 
-  const UpgradeModal = () => (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className={`rounded-3xl p-8 max-w-2xl shadow-2xl ${theme === 'dark' || theme === 'night' ? 'bg-slate-900 border border-purple-500/30' : 'bg-white'}`}>
-        <div className="text-center mb-6">
-          <div className="w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Sparkles className="w-8 h-8 text-purple-600 dark:text-purple-400" />
-          </div>
-          <h2 className={`text-3xl font-bold mb-2 ${theme === 'dark' || theme === 'night' ? 'text-white' : 'text-slate-900'}`}>
-            Your 7-Day Trial Has Ended
-          </h2>
-          <p className={`text-lg ${theme === 'dark' || theme === 'night' ? 'text-slate-300' : 'text-slate-600'}`}>
-            Continue your journey with VERA
-          </p>
+const UpgradeModal = () => (
+  <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div className={`rounded-3xl p-8 max-w-2xl shadow-2xl ${
+      theme === 'dark' || theme === 'night' ? 'bg-slate-900 border border-purple-500/30' : 'bg-white'
+    }`}>
+      <div className="text-center mb-6">
+        <div className="w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+          <Sparkles className="w-8 h-8 text-purple-600 dark:text-purple-400" />
         </div>
-
-        <div className="grid md:grid-cols-2 gap-4 mb-6">
-          <div className="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-6 border-2 border-purple-200 dark:border-purple-700">
-            <h3 className="text-xl font-semibold text-purple-900 dark:text-purple-300 mb-2">
-              Explorer
-            </h3>
-            <div className="text-3xl font-bold text-slate-900 dark:text-white mb-3">
-              $19<span className="text-lg font-normal text-slate-600 dark:text-slate-400">/month</span>
-            </div>
-            <ul className="space-y-2 text-sm text-slate-700 dark:text-slate-300 mb-4">
-              <li>• Unlimited conversations</li>
-              <li>• Full journal access</li>
-              <li>• Daily check-ins</li>
-              <li>• View protocols</li>
-            </ul>
-            
-              href={process.env.NEXT_PUBLIC_STRIPE_EXPLORER_LINK || '/pricing'}
-              className="block w-full py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium text-center transition-all"
-            >
-              Choose Explorer
-            a>
-          </div>
-          <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-xl p-6 border-2 border-blue-300 dark:border-blue-700">
-            <div className="text-xs bg-blue-600 text-white px-2 py-1 rounded-full inline-block mb-2">
-              RECOMMENDED
-            </div>
-            <h3 className="text-xl font-semibold text-blue-900 dark:text-blue-300 mb-2">
-              Regulator
-            </h3>
-            <div className="text-3xl font-bold text-slate-900 dark:text-white mb-3">
-              $39<span className="text-lg font-normal text-slate-600 dark:text-slate-400">/month</span>
-            </div>
-            <ul className="space-y-2 text-sm text-slate-700 dark:text-slate-300 mb-4">
-              <li>• Everything in Explorer</li>
-              <li>• Full Protocol editing</li>
-              <li>• Voice responses 🎙️</li>
-              <li>• Dashboard analytics</li>
-            </ul>
-            
-              href={process.env.NEXT_PUBLIC_STRIPE_REGULATOR_LINK || '/pricing'}
-              className="block w-full py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg font-medium text-center transition-all"
-            >
-              Choose Regulator
-            
-          </div>
-        </div>
-        <p className="text-center text-sm text-slate-500 dark:text-slate-400">
-          Need help deciding? Email <a href="mailto:support@veraneural.com" className="text-purple-600 hover:text-purple-700 underline">support@veraneural.com</a>
+        <h2 className={`text-3xl font-bold mb-2 ${theme === 'dark' || theme === 'night' ? 'text-white' : 'text-slate-900'}`}>
+          Your 7-Day Trial Has Ended
+        </h2>
+        <p className={`text-lg ${theme === 'dark' || theme === 'night' ? 'text-slate-300' : 'text-slate-600'}`}>
+          Continue your journey with VERA
         </p>
       </div>
+
+      <div className="grid md:grid-cols-2 gap-4 mb-6">
+        <div className="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-6 border-2 border-purple-200 dark:border-purple-700">
+          <h3 className="text-xl font-semibold text-purple-900 dark:text-purple-300 mb-2">
+            Explorer
+          </h3>
+          <div className="text-3xl font-bold text-slate-900 dark:text-white mb-3">
+            $19<span className="text-lg font-normal text-slate-600 dark:text-slate-400">/month</span>
+          </div>
+          <ul className="space-y-2 text-sm text-slate-700 dark:text-slate-300 mb-4">
+            <li>• Unlimited conversations</li>
+            <li>• Full journal access</li>
+            <li>• Daily check-ins</li>
+            <li>• View protocols</li>
+          </ul>
+          
+            href="https://buy.stripe.com/14AcN50oL7PpgVbdPv8bS0r"
+            className="block w-full py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium text-center transition-all"
+          >
+            Choose Explorer
+          </a>
+        </div>
+
+        <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-xl p-6 border-2 border-blue-300 dark:border-blue-700">
+          <div className="text-xs bg-blue-600 text-white px-2 py-1 rounded-full inline-block mb-2">
+            RECOMMENDED
+          </div>
+          <h3 className="text-xl font-semibold text-blue-900 dark:text-blue-300 mb-2">
+            Regulator
+          </h3>
+          <div className="text-3xl font-bold text-slate-900 dark:text-white mb-3">
+            $39<span className="text-lg font-normal text-slate-600 dark:text-slate-400">/month</span>
+          </div>
+          <ul className="space-y-2 text-sm text-slate-700 dark:text-slate-300 mb-4">
+            <li>• Everything in Explorer</li>
+            <li>• Full Protocol editing</li>
+            <li>• Voice responses 🎙️</li>
+            <li>• Dashboard analytics</li>
+          </ul>
+          
+            href="https://buy.stripe.com/5kQ00j6N93z9dIZ26N8bS0s"
+            className="block w-full py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg font-medium text-center transition-all"
+          >
+            Choose Regulator
+          </a>
+        </div>
+      </div>
+
+      <p className="text-center text-sm text-slate-500 dark:text-slate-400">
+        Need help deciding? Email <a href="mailto:support@veraneural.com" className="text-purple-600 hover:text-purple-700 underline">support@veraneural.com</a>
+      </p>
     </div>
-  );
+  </div>
+);
 
   return (
     <div className={`flex flex-col h-screen transition-all duration-700 ${themeClasses.bg} ${themeClasses.font}`}>

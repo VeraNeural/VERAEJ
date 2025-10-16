@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Send, Sparkles, Volume2, Menu, Loader2 } from 'lucide-react';
+import { Send, Volume2, Menu, Loader2 } from 'lucide-react';
 import WellnessHub from '@/components/WellnessHubModal';
 import SidePanel from '@/components/SidePanel';
 
@@ -13,11 +13,11 @@ interface Message {
 }
 
 const quickPrompts = [
-  { icon: '💭', label: 'How do I feel?', text: 'I need help understanding what I\'m feeling right now' },
-  { icon: '😰', label: 'Anxious', text: 'I\'m feeling anxious and my chest is tight' },
-  { icon: '😔', label: 'Sad', text: 'I\'m feeling really sad today' },
-  { icon: '😡', label: 'Angry', text: 'I\'m feeling angry and don\'t know what to do with it' },
-  { icon: '😶', label: 'Numb', text: 'I feel disconnected and numb' },
+  { label: 'How do I feel?', text: 'I need help understanding what I\'m feeling right now' },
+  { label: 'Anxious', text: 'I\'m feeling anxious and my chest is tight' },
+  { label: 'Sad', text: 'I\'m feeling really sad today' },
+  { label: 'Angry', text: 'I\'m feeling angry and don\'t know what to do with it' },
+  { label: 'Numb', text: 'I feel disconnected and numb' },
 ];
 
 export default function ChatPage() {
@@ -72,7 +72,6 @@ export default function ChatPage() {
       setUser(data.user);
       setUserTier(data.user.subscription_tier);
       
-      // Load voice usage
       if (['regulator', 'integrator', 'test'].includes(data.user.subscription_tier)) {
         const usageResponse = await fetch('/api/voice-usage');
         if (usageResponse.ok) {
@@ -189,25 +188,25 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gradient-to-br from-[#FAF8F5] via-[#F5F3F0] to-[#F0EBE3]">
+    <div className="flex flex-col h-screen bg-gradient-to-br from-purple-50 via-blue-50/30 to-purple-100/20">
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-xl border-b border-[#E5E0D8] px-6 py-4">
+      <header className="bg-white/90 backdrop-blur-xl border-b border-purple-200/40 px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
               onClick={() => setShowSidePanel(true)}
-              className="p-2 hover:bg-[#F5F3F0] rounded-lg transition-colors"
+              className="p-2 hover:bg-purple-50 rounded-lg transition-colors"
             >
-              <Menu size={24} className="text-[#2D2D2D]" />
+              <Menu size={24} className="text-slate-700" />
             </button>
             <div className="flex items-center gap-3">
               <div className="relative">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#C89B7B] to-[#B88A6A]" />
-                <div className="absolute inset-0 w-8 h-8 rounded-full bg-gradient-to-br from-[#C89B7B] to-[#B88A6A] animate-pulse opacity-30" />
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-blue-500" />
+                <div className="absolute inset-0 w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-blue-500 animate-pulse opacity-30" />
               </div>
               <div>
-                <h1 className="text-xl font-normal text-[#2D2D2D]">VERA</h1>
-                <p className="text-xs text-[#6B6B6B]">I'm here, listening</p>
+                <h1 className="text-xl font-normal text-slate-800">VERA</h1>
+                <p className="text-xs text-slate-500">I'm here, listening</p>
               </div>
             </div>
           </div>
@@ -215,9 +214,8 @@ export default function ChatPage() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => setShowWellnessHub(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-white/80 hover:bg-[#F5F3F0] rounded-xl transition-all text-[#2D2D2D] border border-[#E5E0D8] shadow-sm"
+              className="flex items-center gap-2 px-4 py-2 bg-white hover:bg-purple-50 rounded-xl transition-all text-slate-700 border border-purple-200/50 shadow-sm"
             >
-              <Sparkles size={18} className="text-[#C89B7B]" />
               <span className="text-sm font-medium">Wellness Hub</span>
             </button>
           </div>
@@ -228,27 +226,24 @@ export default function ChatPage() {
       <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6">
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full max-w-2xl mx-auto text-center px-4">
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#C89B7B] to-[#B88A6A] flex items-center justify-center mb-6 shadow-lg">
-              <Sparkles size={32} className="text-white" />
-            </div>
-            <h2 className="text-3xl font-light text-[#2D2D2D] mb-3">
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-400 to-blue-500 flex items-center justify-center mb-6 shadow-lg" />
+            <h2 className="text-3xl font-light text-slate-800 mb-3">
               I'm VERA. I'm here for you.
             </h2>
-            <p className="text-lg text-[#6B6B6B] mb-8 leading-relaxed">
+            <p className="text-lg text-slate-600 mb-8 leading-relaxed">
               Share what's happening in your body, and we'll explore it together. There's no rush, no judgment - just presence.
             </p>
 
             {/* Quick Prompts */}
             <div className="w-full max-w-xl">
-              <p className="text-sm text-[#6B6B6B] mb-4">Not sure where to start? Try one of these:</p>
+              <p className="text-sm text-slate-500 mb-4">Not sure where to start? Try one of these:</p>
               <div className="flex gap-2 flex-wrap justify-center">
                 {quickPrompts.map((prompt, index) => (
                   <button
                     key={index}
                     onClick={() => handleQuickPrompt(prompt.text)}
-                    className="group px-4 py-2.5 rounded-xl bg-white/80 hover:bg-[#E8EBE4] border border-[#D4D9CF] transition-all text-[#2D2D2D] text-sm shadow-sm"
+                    className="px-4 py-2.5 rounded-xl bg-white hover:bg-purple-50 border border-purple-200/50 transition-all text-slate-700 text-sm shadow-sm"
                   >
-                    <span className="text-lg mr-2">{prompt.icon}</span>
                     {prompt.label}
                   </button>
                 ))}
@@ -265,8 +260,8 @@ export default function ChatPage() {
                 <div
                   className={`max-w-[80%] rounded-2xl px-5 py-4 ${
                     message.role === 'user'
-                      ? 'bg-[#E5DDD5] text-[#2D2D2D] shadow-sm'
-                      : 'bg-[#E8EBE4] text-[#2D2D2D] shadow-sm border border-[#D4D9CF]'
+                      ? 'bg-purple-100 text-slate-800 shadow-sm'
+                      : 'bg-white text-slate-800 shadow-sm border border-purple-100'
                   }`}
                 >
                   <div className="text-[15px] leading-relaxed whitespace-pre-wrap">
@@ -275,7 +270,7 @@ export default function ChatPage() {
                   {message.audioUrl && (
                     <audio 
                       controls 
-                      className="mt-3 w-full opacity-80"
+                      className="mt-3 w-full"
                       src={message.audioUrl}
                       autoPlay
                     />
@@ -289,7 +284,7 @@ export default function ChatPage() {
       </div>
 
       {/* Input Area */}
-      <div className="border-t border-[#E5E0D8] bg-white/80 backdrop-blur-xl px-6 py-4">
+      <div className="border-t border-purple-200/40 bg-white/90 backdrop-blur-xl px-6 py-4">
         <div className="max-w-4xl mx-auto">
           <div className="flex gap-3 items-end">
             {/* Voice Toggle */}
@@ -298,9 +293,9 @@ export default function ChatPage() {
               disabled={!voiceAvailable}
               className={`p-3 rounded-xl transition-all ${
                 audioEnabled
-                  ? 'bg-[#D4A574] text-white shadow-lg'
+                  ? 'bg-purple-500 text-white shadow-lg'
                   : voiceAvailable
-                  ? 'bg-white/80 text-[#C89B7B] hover:bg-[#F5F3F0] border border-[#D4D9CF]'
+                  ? 'bg-white text-purple-600 hover:bg-purple-50 border border-purple-200'
                   : 'bg-gray-100 text-gray-400 cursor-not-allowed'
               }`}
               title={
@@ -323,7 +318,7 @@ export default function ChatPage() {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Share what's happening in your body..."
-                className="w-full px-5 py-3 bg-white border border-[#D4D9CF] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C89B7B] focus:border-transparent resize-none text-[#2D2D2D] placeholder-[#9B9B9B] shadow-sm"
+                className="w-full px-5 py-3 bg-white border border-purple-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent resize-none text-slate-800 placeholder-slate-400 shadow-sm"
                 rows={1}
                 style={{
                   minHeight: '50px',
@@ -336,7 +331,7 @@ export default function ChatPage() {
             <button
               onClick={handleSendMessage}
               disabled={!input.trim() || isLoading}
-              className="px-6 py-3 bg-[#C89B7B] hover:bg-[#B88A6A] disabled:bg-gray-300 text-white rounded-xl transition-all disabled:cursor-not-allowed shadow-sm flex items-center gap-2"
+              className="px-6 py-3 bg-purple-500 hover:bg-purple-600 disabled:bg-gray-300 text-white rounded-xl transition-all disabled:cursor-not-allowed shadow-sm flex items-center gap-2"
             >
               {isLoading ? (
                 <Loader2 size={20} className="animate-spin" />
@@ -348,7 +343,7 @@ export default function ChatPage() {
 
           {/* Voice Usage Indicator */}
           {voiceAvailable && (
-            <div className="mt-2 text-xs text-[#6B6B6B] text-center">
+            <div className="mt-2 text-xs text-slate-500 text-center">
               {audioEnabled ? '🎙️ Voice responses enabled' : 'Voice responses off'} 
               {userTier === 'regulator' && ` • ${voiceUsageToday}/20 used today`}
               {userTier === 'integrator' && ' • Unlimited'}

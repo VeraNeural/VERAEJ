@@ -1,12 +1,12 @@
-
 'use client';
-import { useState, useEffect } from 'react';
+import { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-export default function SignUpPage() {
+import { Loader2 } from 'lucide-react';
+function SignUpForm() {
 const router = useRouter();
 const searchParams = useSearchParams();
-const plan = searchParams.get('plan'); // Get plan from URL
+const plan = searchParams.get('plan');
 const [name, setName] = useState('');
 const [email, setEmail] = useState('');
 const [password, setPassword] = useState('');
@@ -14,14 +14,12 @@ const [confirmPassword, setConfirmPassword] = useState('');
 const [acceptedTerms, setAcceptedTerms] = useState(false);
 const [error, setError] = useState('');
 const [isLoading, setIsLoading] = useState(false);
-// Password validation
 const hasLength = password.length >= 8;
 const hasLower = /[a-z]/.test(password);
 const hasUpper = /[A-Z]/.test(password);
 const hasNumber = /[0-9]/.test(password);
 const passwordsMatch = password === confirmPassword && confirmPassword.length > 0;
 const allGood = hasLength && hasLower && hasUpper && hasNumber;
-// Stripe payment links
 const stripeLinks = {
 explorer: 'https://buy.stripe.com/14AcN50oL7PpgVbdPv8bS0r',
 regulator: 'https://buy.stripe.com/5kQ00j6N93z9dIZ26N8bS0s'
@@ -89,7 +87,6 @@ try {
     return;
   }
 
-  // ✅ Save userId to localStorage (critical for success page!)
   if (data.user?.id) {
     localStorage.setItem('userId', data.user.id);
     localStorage.setItem('subscription_tier', data.user.subscription_tier || 'explorer');
@@ -97,13 +94,11 @@ try {
     console.log('✅ User ID saved to localStorage:', data.user.id);
   }
 
-  // ✅ Redirect to Stripe based on plan
   if (plan === 'explorer' || plan === 'regulator') {
     const stripeLink = stripeLinks[plan as 'explorer' | 'regulator'];
     console.log('🔄 Redirecting to Stripe:', plan);
     window.location.href = stripeLink;
   } else {
-    // No plan specified, go to orientation (free tier)
     router.push('/orientation');
   }
   
@@ -252,9 +247,9 @@ Creating account for <strong>{plan === 'explorer' ? 'Explorer' : 'Regulator'}</s
       <p className="text-xs text-slate-600">
         <strong>⚠️ Important:</strong> VERA is NOT a substitute for medical care. 
         In crisis, call 988 or 911.
-             </p>
-        </div>
-      </div>
+      </p>
     </div>
-  );
+  </div>
+</div>
+);
 }

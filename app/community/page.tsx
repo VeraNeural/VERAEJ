@@ -2,13 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 interface Channel {
   id: string;
   name: string;
   slug: string;
   description: string;
-  icon: string;
   required_tier: string | null;
 }
 
@@ -26,16 +26,36 @@ export default function CommunityPage() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [newPost, setNewPost] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [hasAccess, setHasAccess] = useState(true);
 
   useEffect(() => {
-    loadChannels();
+    checkAccess();
   }, []);
 
   useEffect(() => {
-    if (selectedChannel) {
+    if (selectedChannel && hasAccess) {
       loadPosts(selectedChannel.id);
     }
-  }, [selectedChannel]);
+  }, [selectedChannel, hasAccess]);
+
+  async function checkAccess() {
+    try {
+      const res = await fetch('/api/community/check-access');
+      const data = await res.json();
+      
+      if (!data.hasAccess) {
+        setHasAccess(false);
+        setIsLoading(false);
+        return;
+      }
+      
+      setHasAccess(true);
+      loadChannels();
+    } catch (error) {
+      console.error('Failed to check access:', error);
+      setIsLoading(false);
+    }
+  }
 
   async function loadChannels() {
     try {
@@ -92,11 +112,68 @@ export default function CommunityPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 flex items-center justify-center">
-        <div className="text-purple-600">Loading community...</div>
+        <div className="text-purple-600">Loading...</div>
       </div>
     );
   }
 
+  // No access - show upgrade page
+  if (!hasAccess) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 flex items-center justify-center p-4">
+        <div className="max-w-2xl w-full">
+          <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-purple-100 p-12 text-center">
+            <div className="mb-8">
+              <h1 className="text-4xl font-normal bg-gradient-to-r from-rose-400 via-purple-400 to-blue-400 text-transparent bg-clip-text mb-4">
+                VERA Community
+              </h1>
+              <p className="text-xl text-slate-700 mb-2">A sacred space for collective healing</p>
+              <p className="text-slate-600">Available exclusively to Regulator tier members</p>
+            </div>
+
+            <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-2xl p-8 mb-8">
+              <h2 className="text-2xl font-medium text-slate-900 mb-6">What awaits you inside:</h2>
+              <div className="space-y-4 text-left">
+                <div className="flex items-start gap-3">
+                  <div className="w-2 h-2 rounded-full bg-purple-500 mt-2"></div>
+                  <p className="text-slate-700">Connect with others who truly understand the nervous system journey</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-2 h-2 rounded-full bg-purple-500 mt-2"></div>
+                  <p className="text-slate-700">Share wins, ask questions, and support each other</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-2 h-2 rounded-full bg-purple-500 mt-2"></div>
+                  <p className="text-slate-700">Access exclusive resources and protocols</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-2 h-2 rounded-full bg-purple-500 mt-2"></div>
+                  <p className="text-slate-700">Direct connection with Eva and the VERA team</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <Link
+                href="https://buy.stripe.com/YOUR_REGULATOR_LINK"
+                className="block w-full py-4 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white rounded-xl font-medium transition-all shadow-lg"
+              >
+                Upgrade to Regulator - $39/month
+              </Link>
+              <button
+                onClick={() => router.push('/chat')}
+                className="block w-full py-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium transition-all"
+              >
+                Back to Chat
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Has access - show community
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50">
       {/* Header */}
@@ -107,7 +184,7 @@ export default function CommunityPage() {
               onClick={() => router.push('/chat')}
               className="text-purple-600 hover:text-purple-700"
             >
-              ← Back to Chat
+              Back to Chat
             </button>
             <h1 className="text-2xl font-normal bg-gradient-to-r from-rose-400 via-purple-400 to-blue-400 text-transparent bg-clip-text">
               VERA Community
@@ -134,11 +211,7 @@ export default function CommunityPage() {
                         : 'hover:bg-slate-100 text-slate-700'
                     }`}
                   >
-                    <div className="flex items-center gap-2">
-                      <span>{channel.icon}</span>
-                      <span className="font-medium">{channel.name}</span>
-                    </div>
-                    <p className="text-xs text-slate-500 mt-1">{channel.description}</p>
+                    <span className="font-medium">{channel.name}</span>
                   </button>
                 ))}
               </div>
@@ -151,12 +224,8 @@ export default function CommunityPage() {
               <div className="space-y-4">
                 {/* Channel Header */}
                 <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-lg border border-purple-100 p-6">
-                  <div className="flex items-center gap-3">
-                    <span className="text-3xl">{selectedChannel.icon}</span>
-                    <div>
-                      <h2 className="text-xl font-medium text-slate-900">{selectedChannel.name}</h2>
-                      <p className="text-sm text-slate-600">{selectedChannel.description}</p>
-                    </div>
+                  <div>
+                    <h2 className="text-xl font-medium text-slate-900">{selectedChannel.name}</h2>
                   </div>
                 </div>
 
@@ -186,7 +255,7 @@ export default function CommunityPage() {
                 <div className="space-y-4">
                   {posts.length === 0 ? (
                     <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-lg border border-purple-100 p-12 text-center">
-                      <p className="text-slate-500">No posts yet. Be the first to share!</p>
+                      <p className="text-slate-500">No posts yet. Be the first to share</p>
                     </div>
                   ) : (
                     posts.map((post) => (

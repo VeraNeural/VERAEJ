@@ -1298,7 +1298,7 @@ export default function LandingPage() {
             <div className="footer-section">
               <h4>Product</h4>
               <ul className="footer-links">
-                <li><a onClick={() => router.push('/chat')}>Chat with VERA</a></li>
+                <li><a onClick={() => router.push('/auth/signin')}>Chat with VERA</a></li>
                 <li><a onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}>Features</a></li>
                 <li><a onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}>Pricing</a></li>
               </ul>

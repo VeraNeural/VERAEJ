@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, RefreshCw, Download, TrendingUp, Check, Plus } from 'lucide-react';
+import { Sparkles, RefreshCw, Download, TrendingUp, Check, Plus, Lock } from 'lucide-react';
 
 interface PersonalProtocolProps {
   darkMode: boolean;
   userId: string;
+  readOnly?: boolean; // NEW: Add readOnly prop for Explorer users
 }
 
 interface Protocol {
@@ -16,7 +17,7 @@ interface Protocol {
   last_completed: string | null;
 }
 
-const PersonalProtocol: React.FC<PersonalProtocolProps> = ({ darkMode, userId }) => {
+const PersonalProtocol: React.FC<PersonalProtocolProps> = ({ darkMode, userId, readOnly = false }) => {
   const [protocols, setProtocols] = useState<Protocol[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -40,6 +41,11 @@ const PersonalProtocol: React.FC<PersonalProtocolProps> = ({ darkMode, userId })
   };
 
   const handleComplete = async (protocolId: string) => {
+    if (readOnly) {
+      alert('Upgrade to Regulator plan to track protocol completions!\n\nVisit veraneural.com/pricing to upgrade.');
+      return;
+    }
+
     try {
       const response = await fetch(`/api/protocol/${userId}/complete`, {
         method: 'POST',
@@ -55,6 +61,26 @@ const PersonalProtocol: React.FC<PersonalProtocolProps> = ({ darkMode, userId })
     }
   };
 
+  const handleAddSample = () => {
+    if (readOnly) {
+      alert('Upgrade to Regulator plan to create and manage your own protocols!\n\nVisit veraneural.com/pricing to upgrade.');
+      return;
+    }
+
+    const sampleProtocol = {
+      title: 'Morning Mindfulness',
+      description: 'Start your day with 5 minutes of mindful breathing',
+      category: 'mindfulness',
+      frequency: 'daily'
+    };
+    
+    fetch(`/api/protocol/${userId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(sampleProtocol)
+    }).then(() => fetchProtocols());
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -67,53 +93,74 @@ const PersonalProtocol: React.FC<PersonalProtocolProps> = ({ darkMode, userId })
     );
   }
 
-if (protocols.length === 0) {
-  return (
-    <div className={`text-center py-12 px-6 rounded-2xl border ${
-      darkMode 
-        ? 'bg-slate-800/50 border-slate-700/50' 
-        : 'bg-white border-slate-200'
-    }`}>
-      <Sparkles size={48} className={`mx-auto mb-4 ${
-        darkMode ? 'text-purple-400' : 'text-purple-600'
-      }`} />
-      <h3 className={`text-xl font-bold mb-2 ${
-        darkMode ? 'text-white' : 'text-slate-800'
+  if (protocols.length === 0) {
+    return (
+      <div className={`text-center py-12 px-6 rounded-2xl border ${
+        darkMode 
+          ? 'bg-slate-800/50 border-slate-700/50' 
+          : 'bg-white border-slate-200'
       }`}>
-        No Protocol Items Yet
-      </h3>
-      <p className={`text-sm mb-6 ${
-        darkMode ? 'text-slate-400' : 'text-slate-600'
-      }`}>
-        Your personalized wellness protocol will appear here as VERA learns from your interactions
-      </p>
-      <button
-        onClick={() => {
-          // For now, let's add a sample protocol item
-          const sampleProtocol = {
-            title: 'Morning Mindfulness',
-            description: 'Start your day with 5 minutes of mindful breathing',
-            category: 'mindfulness',
-            frequency: 'daily'
-          };
-          fetch(`/api/protocol/${userId}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(sampleProtocol)
-          }).then(() => fetchProtocols());
-        }}
-        className={`px-6 py-3 rounded-xl font-semibold transition-all ${
-          darkMode
-            ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:shadow-lg hover:shadow-purple-500/30'
-            : 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:shadow-lg hover:shadow-purple-500/30'
-        }`}
-      >
-        <Plus size={18} className="inline mr-2" />
-        Add Sample Protocol Item
-      </button>
-    </div>
-  );
-}
+        <Sparkles size={48} className={`mx-auto mb-4 ${
+          darkMode ? 'text-purple-400' : 'text-purple-600'
+        }`} />
+        <h3 className={`text-xl font-bold mb-2 ${
+          darkMode ? 'text-white' : 'text-slate-800'
+        }`}>
+          No Protocol Items Yet
+        </h3>
+        <p className={`text-sm mb-6 ${
+          darkMode ? 'text-slate-400' : 'text-slate-600'
+        }`}>
+          {readOnly 
+            ? 'Protocol items will appear here as VERA suggests wellness practices for you'
+            : 'Your personalized wellness protocol will appear here as VERA learns from your interactions'
+          }
+        </p>
+        
+        {readOnly ? (
+          <div className={`p-4 rounded-xl ${
+            darkMode ? 'bg-blue-900/20 border border-blue-500/30' : 'bg-blue-50 border border-blue-200'
+          }`}>
+            <Lock size={32} className={`mx-auto mb-3 ${
+              darkMode ? 'text-blue-400' : 'text-blue-600'
+            }`} />
+            <p className={`text-sm font-medium mb-2 ${
+              darkMode ? 'text-blue-300' : 'text-blue-800'
+            }`}>
+              Explorer Plan - View Only
+            </p>
+            <p className={`text-xs mb-4 ${
+              darkMode ? 'text-blue-400' : 'text-blue-700'
+            }`}>
+              Upgrade to Regulator ($39/month) to create, track, and complete your own wellness protocols
+            </p>
+            <a
+              href="/pricing"
+              className={`inline-block px-6 py-2 rounded-lg font-semibold transition-all ${
+                darkMode
+                  ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                  : 'bg-blue-600 hover:bg-blue-700 text-white'
+              }`}
+            >
+              Upgrade to Regulator
+            </a>
+          </div>
+        ) : (
+          <button
+            onClick={handleAddSample}
+            className={`px-6 py-3 rounded-xl font-semibold transition-all ${
+              darkMode
+                ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:shadow-lg hover:shadow-purple-500/30'
+                : 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:shadow-lg hover:shadow-purple-500/30'
+            }`}
+          >
+            <Plus size={18} className="inline mr-2" />
+            Add Sample Protocol Item
+          </button>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -124,11 +171,19 @@ if (protocols.length === 0) {
             darkMode ? 'text-white' : 'text-slate-800'
           }`}>
             Your Personal Protocol
+            {readOnly && (
+              <span className={`ml-2 text-xs px-2 py-1 rounded-full ${
+                darkMode ? 'bg-blue-900/30 text-blue-300' : 'bg-blue-100 text-blue-700'
+              }`}>
+                View Only
+              </span>
+            )}
           </h3>
           <p className={`text-xs mt-1 ${
             darkMode ? 'text-slate-400' : 'text-slate-600'
           }`}>
             {protocols.length} active items
+            {readOnly && ' • Upgrade to Regulator to track completions'}
           </p>
         </div>
         <button
@@ -153,7 +208,7 @@ if (protocols.length === 0) {
               darkMode 
                 ? 'bg-slate-800/50 border-slate-700/50 hover:border-purple-500/50' 
                 : 'bg-white border-slate-200 hover:border-purple-300'
-            } transition-colors`}
+            } transition-colors ${readOnly ? 'opacity-90' : ''}`}
           >
             <div className="flex items-start justify-between">
               <div className="flex-1">
@@ -194,14 +249,19 @@ if (protocols.length === 0) {
               </div>
               <button
                 onClick={() => handleComplete(protocol.id)}
+                disabled={readOnly}
                 className={`ml-3 p-2 rounded-lg transition-colors ${
-                  darkMode 
-                    ? 'bg-purple-600 hover:bg-purple-700 text-white' 
-                    : 'bg-purple-600 hover:bg-purple-700 text-white'
+                  readOnly
+                    ? darkMode
+                      ? 'bg-slate-700 text-slate-500 cursor-not-allowed'
+                      : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                    : darkMode 
+                      ? 'bg-purple-600 hover:bg-purple-700 text-white' 
+                      : 'bg-purple-600 hover:bg-purple-700 text-white'
                 }`}
-                title="Mark as complete"
+                title={readOnly ? 'Upgrade to Regulator to track completions' : 'Mark as complete'}
               >
-                <Check size={16} />
+                {readOnly ? <Lock size={16} /> : <Check size={16} />}
               </button>
             </div>
           </div>

@@ -234,14 +234,33 @@ useEffect(() => {
     }
   }, [messages]);
 
-  const sendMessage = async (customMessage?: string) => {
-    const messageToSend = customMessage || input.trim();
-    if (!messageToSend || isLoading) return;
+ const sendMessage = async (customMessage?: string) => {
+  const messageToSend = customMessage || input.trim();
+  if (!messageToSend || isLoading) return;
 
-    if (userTier === 'free' && messageCount >= MESSAGE_LIMIT) {
-      alert('You\'ve reached your daily limit of 10 messages. Upgrade to Explorer ($29/month) for unlimited conversations!\n\nVisit veraneural.com/pricing to upgrade.');
-      return;
-    }
+  // NEW: Check 100 messages/day limit for ALL users
+  const today = new Date().toDateString();
+  const storedDate = localStorage.getItem('message_count_date');
+  const storedCount = parseInt(localStorage.getItem('message_count') || '0');
+  
+  let dailyCount = storedCount;
+  
+  // Reset counter if it's a new day
+  if (storedDate !== today) {
+    dailyCount = 0;
+    localStorage.setItem('message_count_date', today);
+  }
+  
+  // Check if hit 100 messages today
+  if (dailyCount >= 100) {
+    alert('You\'ve had 100 conversations with VERA today! 💜\n\nLet\'s give your nervous system a rest. See you tomorrow!');
+    return;
+  }
+
+  // Continue with rest of function...
+  if (!customMessage) setInput('');
+  setIsLoading(true);
+  setIsTyping(true);
 
     if (!customMessage) setInput('');
     setIsLoading(true);

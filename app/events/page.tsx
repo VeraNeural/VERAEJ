@@ -236,7 +236,7 @@ export default function EventsPage() {
                     </div>
                   </div>
 
-                  {event.recording_url && (
+                 {event.recording_url && (
                     
                       href={event.recording_url}
                       target="_blank"

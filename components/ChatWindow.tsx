@@ -202,7 +202,7 @@ useEffect(() => {
   };
   
   fetchUserData();
-}, []););
+}, []);
 
   useEffect(() => {
     const fetchVoiceUsage = async () => {

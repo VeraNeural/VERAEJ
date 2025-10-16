@@ -826,8 +826,6 @@ export default function ChatWindow() {
     )}
 
     <audio ref={audioRef} className="hidden" />
-
-    <audio ref={audioRef} className="hidden" />
     
     <style jsx>{`
       @keyframes fade-in {

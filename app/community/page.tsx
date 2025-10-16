@@ -19,6 +19,7 @@ interface Post {
   user_name: string;
   user_id: string;
   created_at: string;
+  is_pinned?: boolean;
 }
 
 export default function CommunityPage() {
@@ -380,37 +381,55 @@ export default function CommunityPage() {
                       <p className="text-slate-500">No posts yet. Be the first to share</p>
                     </div>
                   ) : (
-                    posts.map((post) => (
-                      <div
-                        key={post.id}
-                        className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-lg border border-purple-100 p-4 md:p-6"
-                      >
-                        <div className="flex items-start gap-3 md:gap-4">
-                          <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-r from-purple-400 to-blue-400 flex items-center justify-center text-white font-medium text-sm flex-shrink-0">
-                            {post.user_name?.charAt(0)?.toUpperCase() || 'U'}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-start justify-between mb-2 gap-2">
-                              <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-2 min-w-0">
-                                <span className="font-medium text-slate-900 text-sm md:text-base truncate">{post.user_name}</span>
-                                <span className="text-xs text-slate-500">
-                                  {new Date(post.created_at).toLocaleString()}
-                                </span>
-                              </div>
-                              {post.user_id !== currentUserId && (
-                                <button
-                                  onClick={() => startConversation(post.user_id, post.user_name)}
-                                  className="text-xs md:text-sm text-purple-600 hover:text-purple-700 font-medium whitespace-nowrap flex-shrink-0"
-                                >
-                                  Message
-                                </button>
-                              )}
+                    posts.map((post) => {
+                      const isVera = post.user_name === 'VERA';
+                      const isPinned = post.is_pinned;
+                      
+                      return (
+                        <div
+                          key={post.id}
+                          className={`backdrop-blur-xl rounded-3xl shadow-lg border p-4 md:p-6 ${
+                            isVera 
+                              ? 'bg-gradient-to-br from-purple-50 to-blue-50 border-purple-200' 
+                              : 'bg-white/90 border-purple-100'
+                          }`}
+                        >
+                          {isPinned && (
+                            <div className="flex items-center gap-2 mb-3 text-xs text-purple-600 font-medium">
+                              📌 Pinned
                             </div>
-                            <p className="text-slate-700 whitespace-pre-wrap text-sm md:text-base break-words">{post.content}</p>
+                          )}
+                          <div className="flex items-start gap-3 md:gap-4">
+                            <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center text-white font-medium text-sm flex-shrink-0 ${
+                              isVera 
+                                ? 'bg-gradient-to-br from-purple-500 to-blue-500' 
+                                : 'bg-gradient-to-r from-purple-400 to-blue-400'
+                            }`}>
+                              {post.user_name?.charAt(0)?.toUpperCase() || 'U'}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-start justify-between mb-2 gap-2">
+                                <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-2 min-w-0">
+                                  <span className="font-medium text-slate-900 text-sm md:text-base truncate">{post.user_name}</span>
+                                  <span className="text-xs text-slate-500">
+                                    {new Date(post.created_at).toLocaleString()}
+                                  </span>
+                                </div>
+                                {post.user_id !== currentUserId && !isVera && (
+                                  <button
+                                    onClick={() => startConversation(post.user_id, post.user_name)}
+                                    className="text-xs md:text-sm text-purple-600 hover:text-purple-700 font-medium whitespace-nowrap flex-shrink-0"
+                                  >
+                                    Message
+                                  </button>
+                                )}
+                              </div>
+                              <p className="text-slate-700 whitespace-pre-wrap text-sm md:text-base break-words">{post.content}</p>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))
+                      );
+                    })
                   )}
                 </div>
               </div>

@@ -100,15 +100,6 @@ export default function RitualsPage() {
     }
   }
 
-  const getStateEmoji = (state: string) => {
-    const emojis: { [key: string]: string } = {
-      'activated': '🔥',
-      'settled': '🌊',
-      'shutdown': '💤'
-    };
-    return emojis[state] || '🌊';
-  };
-
   const getStateLabel = (state: string) => {
     const labels: { [key: string]: string } = {
       'activated': 'Activated',
@@ -138,10 +129,10 @@ export default function RitualsPage() {
             Daily Ritual
           </h1>
           <button
-            onClick={() => router.push('/chat')}
+            onClick={() => router.push('/community')}
             className="text-purple-600 hover:text-purple-700"
           >
-            Back to Chat
+            Back to Community
           </button>
         </div>
       </div>
@@ -151,7 +142,6 @@ export default function RitualsPage() {
         {/* Streak */}
         {streak > 0 && (
           <div className="text-center mb-8">
-            <p className="text-4xl mb-2">🔥</p>
             <p className="text-slate-600">
               <span className="text-2xl font-medium text-slate-900">{streak}</span> day streak
             </p>
@@ -173,27 +163,24 @@ export default function RitualsPage() {
                 onClick={() => handleCheckIn('activated')}
                 className="p-8 bg-gradient-to-br from-red-50 to-orange-50 hover:from-red-100 hover:to-orange-100 rounded-2xl border-2 border-red-200 transition-all"
               >
-                <p className="text-5xl mb-3">🔥</p>
-                <p className="text-lg font-medium text-slate-900">Activated</p>
-                <p className="text-sm text-slate-600 mt-1">Anxious, wired, overwhelmed</p>
+                <p className="text-lg font-medium text-slate-900 mb-2">Activated</p>
+                <p className="text-sm text-slate-600">Anxious, wired, overwhelmed</p>
               </button>
 
               <button
                 onClick={() => handleCheckIn('settled')}
                 className="p-8 bg-gradient-to-br from-blue-50 to-cyan-50 hover:from-blue-100 hover:to-cyan-100 rounded-2xl border-2 border-blue-200 transition-all"
               >
-                <p className="text-5xl mb-3">🌊</p>
-                <p className="text-lg font-medium text-slate-900">Settled</p>
-                <p className="text-sm text-slate-600 mt-1">Calm, present, regulated</p>
+                <p className="text-lg font-medium text-slate-900 mb-2">Settled</p>
+                <p className="text-sm text-slate-600">Calm, present, regulated</p>
               </button>
 
               <button
                 onClick={() => handleCheckIn('shutdown')}
                 className="p-8 bg-gradient-to-br from-slate-50 to-purple-50 hover:from-slate-100 hover:to-purple-100 rounded-2xl border-2 border-slate-200 transition-all"
               >
-                <p className="text-5xl mb-3">💤</p>
-                <p className="text-lg font-medium text-slate-900">Shutdown</p>
-                <p className="text-sm text-slate-600 mt-1">Numb, disconnected, collapsed</p>
+                <p className="text-lg font-medium text-slate-900 mb-2">Shutdown</p>
+                <p className="text-sm text-slate-600">Numb, disconnected, collapsed</p>
               </button>
             </div>
           </div>
@@ -203,7 +190,7 @@ export default function RitualsPage() {
             <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-purple-100 p-12">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
-                  <span className="text-4xl">{getStateEmoji(todayRitual.nervous_system_state)}</span>
+                  <div className="w-3 h-3 rounded-full bg-purple-500"></div>
                   <div>
                     <p className="text-sm text-slate-500">Your state today</p>
                     <p className="text-lg font-medium text-slate-900">

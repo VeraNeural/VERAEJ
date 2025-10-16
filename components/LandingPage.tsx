@@ -284,96 +284,136 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Pricing - 2 Tiers Only */}
-      <section className="py-24 px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-light text-slate-900 mb-4">
-              Simple pricing
-            </h2>
-            <p className="text-xl text-slate-600 mb-8 font-light">
-              Start free, grow with me when ready
-            </p>
+      {/* Replace your Pricing section with this */}
+
+{/* Pricing - 3 Tiers */}
+<section className="py-24 px-6">
+  <div className="max-w-7xl mx-auto">
+    <div className="text-center mb-12">
+      <h2 className="text-4xl font-light text-slate-900 mb-4">
+        Choose Your Path
+      </h2>
+      <p className="text-xl text-slate-600 mb-8 font-light">
+        Start free, grow when you're ready
+      </p>
+    </div>
+
+    <div className="grid lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+      {/* FREE TIER */}
+      <div className="bg-white rounded-3xl p-8 border border-slate-200">
+        <div className="mb-8">
+          <h3 className="text-xl font-normal text-slate-800 mb-2">Free</h3>
+          <div className="flex items-baseline gap-2">
+            <span className="text-5xl font-light text-slate-900">$0</span>
           </div>
-
-          <div className="grid lg:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {/* FREE */}
-            <div className="bg-white rounded-3xl p-8 border border-slate-200">
-              <div className="mb-8">
-                <h3 className="text-xl font-normal text-slate-800 mb-2">Free</h3>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-5xl font-light text-slate-900">$0</span>
-                </div>
-                <p className="text-slate-600 text-sm mt-2 font-light">Start your journey</p>
-              </div>
-
-              <ul className="space-y-4 mb-8">
-                {[
-                  '10 messages per day',
-                  '5 quick prompts per day',
-                  'Brief pattern insights',
-                  'Crisis resources',
-                  'Journaling support'
-                ].map((feature, idx) => (
-                  <li key={idx} className="flex items-start gap-3">
-                    <Check className="text-purple-400 flex-shrink-0 mt-0.5" size={20} />
-                    <span className="text-slate-700 font-light">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <Link
-                href="/auth/signup"
-                className="block w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-900 rounded-xl font-normal transition-all text-center"
-              >
-                Start Free
-              </Link>
-            </div>
-
-            {/* EXPLORER $29 */}
-            <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-3xl p-8 border-2 border-purple-200 relative shadow-lg">
-              <div className="absolute -top-3 left-8 bg-slate-900 text-white text-xs font-normal px-3 py-1 rounded-full">
-                MOST POPULAR
-              </div>
-              
-              <div className="mb-8">
-                <h3 className="text-xl font-normal text-purple-700 mb-2">Explorer</h3>
-                <div className="flex items-baseline gap-2 mb-1">
-                  <span className="text-5xl font-light text-slate-900">$29</span>
-                  <span className="text-slate-600 font-light">/month</span>
-                </div>
-                <p className="text-purple-600 text-sm font-light">Full access, unlimited growth</p>
-              </div>
-
-              <ul className="space-y-4 mb-8">
-                {[
-                  'Unlimited conversations — talk to me anytime',
-                  'Unlimited quick prompts — regulate whenever you need',
-                  'Save all chats — never lose our work together',
-                  'Deep pattern analysis — understand your nervous system',
-                  'Priority email support — get help within 24 hours'
-                ].map((feature, idx) => (
-                  <li key={idx} className="flex items-start gap-3">
-                    <Check className="text-purple-500 flex-shrink-0 mt-0.5" size={20} />
-                    <span className="text-slate-800 font-light">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <Link
-                href={process.env.NEXT_PUBLIC_STRIPE_EXPLORER_MONTHLY || '/auth/signup'}
-                className="block w-full py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-normal transition-all text-center"
-              >
-                Get Explorer - $29/mo
-              </Link>
-            </div>
-          </div>
-
-          <p className="text-center text-slate-500 mt-8 text-sm font-light">
-            Start free, upgrade anytime. Cancel anytime.
-          </p>
+          <p className="text-slate-600 text-sm mt-2 font-light">Try VERA today</p>
         </div>
-      </section>
+
+        <ul className="space-y-4 mb-8">
+          {[
+            '10 messages per day',
+            '5 quick prompts per day',
+            'Daily journal notifications',
+            'Crisis resources',
+            'Brief pattern insights'
+          ].map((feature, idx) => (
+            <li key={idx} className="flex items-start gap-3">
+              <Check className="text-purple-400 flex-shrink-0 mt-0.5" size={20} />
+              <span className="text-slate-700 font-light">{feature}</span>
+            </li>
+          ))}
+        </ul>
+
+        <Link
+          href="/auth/signup"
+          className="block w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-900 rounded-xl font-normal transition-all text-center"
+        >
+          Start Free
+        </Link>
+      </div>
+
+      {/* EXPLORER $19 - MOST POPULAR */}
+      <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-3xl p-8 border-2 border-purple-200 relative shadow-lg transform scale-105">
+        <div className="absolute -top-3 left-8 bg-slate-900 text-white text-xs font-normal px-3 py-1 rounded-full">
+          MOST POPULAR
+        </div>
+        
+        <div className="mb-8">
+          <h3 className="text-xl font-normal text-purple-700 mb-2">Explorer</h3>
+          <div className="flex items-baseline gap-2 mb-1">
+            <span className="text-5xl font-light text-slate-900">$19</span>
+            <span className="text-slate-600 font-light">/month</span>
+          </div>
+          <p className="text-purple-600 text-sm font-light">Full access for daily wellness</p>
+        </div>
+
+        <ul className="space-y-4 mb-8">
+          {[
+            'Unlimited conversations',
+            'Unlimited quick prompts',
+            'Full journal with prompts',
+            'Daily check-in tracking',
+            'View wellness protocols',
+            'Save all your chats'
+          ].map((feature, idx) => (
+            <li key={idx} className="flex items-start gap-3">
+              <Check className="text-purple-500 flex-shrink-0 mt-0.5" size={20} />
+              <span className="text-slate-800 font-light">{feature}</span>
+            </li>
+          ))}
+        </ul>
+
+        <Link
+          href={process.env.NEXT_PUBLIC_STRIPE_EXPLORER_LINK || '/auth/signup'}
+          className="block w-full py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-normal transition-all text-center"
+        >
+          Get Explorer
+        </Link>
+      </div>
+
+      {/* REGULATOR $39 */}
+      <div className="bg-white rounded-3xl p-8 border border-slate-200">
+        <div className="mb-8">
+          <h3 className="text-xl font-normal text-slate-800 mb-2">Regulator</h3>
+          <div className="flex items-baseline gap-2 mb-1">
+            <span className="text-5xl font-light text-slate-900">$39</span>
+            <span className="text-slate-600 font-light">/month</span>
+          </div>
+          <p className="text-slate-600 text-sm font-light">Advanced nervous system tools</p>
+        </div>
+
+        <ul className="space-y-4 mb-8">
+          {[
+            'Everything in Explorer, plus:',
+            'Full Protocol feature — create & track wellness routines',
+            'Dashboard analytics & insights',
+            'Voice response feature',
+            'Deep pattern analysis',
+            'Priority email support'
+          ].map((feature, idx) => (
+            <li key={idx} className="flex items-start gap-3">
+              <Check className="text-blue-500 flex-shrink-0 mt-0.5" size={20} />
+              <span className={`font-light ${idx === 0 ? 'font-medium text-slate-900' : 'text-slate-700'}`}>
+                {feature}
+              </span>
+            </li>
+          ))}
+        </ul>
+
+        <Link
+          href={process.env.NEXT_PUBLIC_STRIPE_REGULATOR_LINK || '/auth/signup'}
+          className="block w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl font-normal transition-all text-center"
+        >
+          Get Regulator
+        </Link>
+      </div>
+    </div>
+
+    <p className="text-center text-slate-500 mt-8 text-sm font-light">
+      All plans include end-to-end encryption • Cancel anytime
+    </p>
+  </div>
+</section>
 
       {/* Partners Section */}
       <section className="py-20 px-6 bg-gradient-to-br from-purple-50/30 via-white to-blue-50/30 border-y border-purple-100">

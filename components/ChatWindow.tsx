@@ -135,7 +135,6 @@ export default function ChatWindow() {
   };
   
   const themeClasses = getThemeClasses();
-  const themeClasses = getThemeClasses();
 
  const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });

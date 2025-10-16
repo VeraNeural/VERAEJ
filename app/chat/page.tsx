@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Send, Sparkles, Volume2, Menu, Loader2 } from 'lucide-react';
-import WellnessHub from '@/components/WellnessHub';
+import WellnessHub from '@/components/WellnessHubModal';
 import SidePanel from '@/components/SidePanel';
 
 interface Message {

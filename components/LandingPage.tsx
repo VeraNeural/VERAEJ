@@ -360,7 +360,7 @@ export default function LandingPage() {
           {[
             { text: 'Everything in Explorer, plus:', bold: true },
             { text: 'Full Protocol feature — create & track wellness routines', bold: false },
-            { text: 'Voice responses with ElevenLabs AI', bold: false, badge: 'NEW' },
+            { text: 'Voice responses with Voice responses', bold: false, badge: 'NEW' },
             { text: 'Dashboard analytics & insights', bold: false },
             { text: 'Deep pattern analysis', bold: false },
             { text: 'Priority email support (24h)', bold: false },

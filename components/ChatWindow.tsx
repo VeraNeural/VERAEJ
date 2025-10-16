@@ -21,6 +21,8 @@ function parseTimestamp(ts: any): Date {
 }
 
 export default function ChatWindow() {
+  const [trialExpired, setTrialExpired] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -137,29 +139,49 @@ export default function ChatWindow() {
   };
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const response = await fetch('/api/auth/me');
-        if (!response.ok) throw new Error('Not authenticated');
-        const data = await response.json();
-        const user = data.user;
-        let tier = 'free';
-        if (user.subscription_status === 'trial') {
-          const trialEndsAt = new Date(user.trial_ends_at);
-          if (new Date() < trialEndsAt) tier = 'explorer';
-        } else if (user.subscription_status === 'active') {
+  const fetchUserData = async () => {
+    try {
+      const response = await fetch('/api/auth/me');
+      if (!response.ok) throw new Error('Not authenticated');
+      
+      const data = await response.json();
+      const user = data.user;
+      
+      let tier = 'free';
+      let expired = false;
+      
+      // Check trial status
+      if (user.subscription_status === 'trial') {
+        const trialEndsAt = new Date(user.trial_ends_at);
+        const now = new Date();
+        
+        if (now < trialEndsAt) {
+          // Trial still active - determine which tier they're trialing
           tier = user.subscription_tier || 'explorer';
+        } else {
+          // Trial expired
+          expired = true;
+          setTrialExpired(true);
+          setShowUpgradeModal(true);
         }
-        if (user.test_mode) tier = 'test';
-        setUserTier(tier);
-        setUserId(user.id);
-      } catch (error) {
-        console.error('Failed to fetch user data:', error);
-        setUserTier('free');
+      } else if (user.subscription_status === 'active') {
+        // Paid subscription
+        tier = user.subscription_tier || 'explorer';
       }
-    };
-    fetchUserData();
-  }, []);
+      
+      if (user.test_mode) tier = 'test';
+      
+      setUserTier(tier);
+      setUserId(user.id);
+      
+    } catch (error) {
+      console.error('Failed to fetch user data:', error);
+      setUserTier('free');
+    }
+  };
+  
+  fetchUserData();
+}, []);
 
   useEffect(() => {
     const fetchVoiceUsage = async () => {
@@ -370,6 +392,12 @@ export default function ChatWindow() {
   });
 };
 
+   const UpgradeModal = () => (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      {/* All the modal content from the artifact */}
+    </div>
+  );
+  
   return (
     <div className={`flex flex-col h-screen transition-all duration-700 ${themeClasses.bg} ${themeClasses.font}`}>
 
@@ -855,6 +883,7 @@ export default function ChatWindow() {
           50% { opacity: 0.8; }
         }
       `}</style>
+       {trialExpired && showUpgradeModal && <UpgradeModal />}
     </div>
   );
 }

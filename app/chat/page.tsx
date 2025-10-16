@@ -45,7 +45,7 @@ export default function ChatPage() {
       case 'test':
         return Infinity;
       case 'regulator':
-        return 20;
+        return 15;
       default:
         return 0;
     }
@@ -91,14 +91,14 @@ export default function ChatPage() {
 
   const handleVoiceToggle = () => {
     if (!voiceAvailable) {
-      if (window.confirm('🎙️ Voice responses available with Regulator plan ($39/month)\n\n20 voice responses per day\n\nGo to upgrade page?')) {
+      if (window.confirm('🎙️ Voice responses available with Regulator plan ($39/month)\n\n15 voice responses per day\n\nGo to upgrade page?')) {
         window.location.href = 'https://buy.stripe.com/5kQ00j6N93z9dIZ26N8bS0s';
       }
       return;
     }
 
     if (!canUseVoice) {
-      if (window.confirm('Voice limit reached (20/day)\n\nUpgrade to Integrator for UNLIMITED voice responses?\n\n$99/month')) {
+      if (window.confirm('Voice limit reached (15/day)\n\nUpgrade to Integrator for UNLIMITED voice responses?\n\n$99/month')) {
         window.location.href = '/pricing';
       }
       return;
@@ -188,25 +188,25 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100">
+    <div className="flex flex-col h-screen bg-gradient-to-br from-violet-200 via-purple-200 to-fuchsia-200">
       {/* Header */}
-      <header className="bg-white/60 backdrop-blur-xl border-b border-purple-200/50 px-6 py-4">
+      <header className="bg-white/50 backdrop-blur-xl border-b border-purple-300/60 px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
               onClick={() => setShowSidePanel(true)}
-              className="p-2 hover:bg-purple-100/70 rounded-lg transition-colors"
+              className="p-2 hover:bg-purple-200/70 rounded-lg transition-colors"
             >
               <Menu size={24} className="text-slate-700" />
             </button>
             <div className="flex items-center gap-3">
               <div className="relative">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500" />
-                <div className="absolute inset-0 w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 animate-pulse opacity-40" />
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-fuchsia-500" />
+                <div className="absolute inset-0 w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-fuchsia-500 animate-pulse opacity-50" />
               </div>
               <div>
                 <h1 className="text-xl font-normal text-slate-800">VERA</h1>
-                <p className="text-xs text-slate-600">I'm here, listening</p>
+                <p className="text-xs text-slate-700">I'm here, listening</p>
               </div>
             </div>
           </div>
@@ -214,7 +214,7 @@ export default function ChatPage() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => setShowWellnessHub(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-white/60 hover:bg-purple-100/70 rounded-xl transition-all text-slate-700 border border-purple-200/60 shadow-sm"
+              className="flex items-center gap-2 px-4 py-2 bg-white/50 hover:bg-purple-200/60 rounded-xl transition-all text-slate-800 border border-purple-300/70 shadow-sm"
             >
               <span className="text-sm font-medium">Wellness Hub</span>
             </button>
@@ -226,23 +226,23 @@ export default function ChatPage() {
       <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6">
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full max-w-2xl mx-auto text-center px-4">
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mb-6 shadow-xl" />
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-500 to-fuchsia-500 flex items-center justify-center mb-6 shadow-xl" />
             <h2 className="text-3xl font-light text-slate-800 mb-3">
               I'm VERA. I'm here for you.
             </h2>
-            <p className="text-lg text-slate-700 mb-8 leading-relaxed">
+            <p className="text-lg text-slate-800 mb-8 leading-relaxed">
               Share what's happening in your body, and we'll explore it together. There's no rush, no judgment - just presence.
             </p>
 
             {/* Quick Prompts */}
             <div className="w-full max-w-xl">
-              <p className="text-sm text-slate-600 mb-4">Not sure where to start? Try one of these:</p>
+              <p className="text-sm text-slate-700 mb-4">Not sure where to start? Try one of these:</p>
               <div className="flex gap-2 flex-wrap justify-center">
                 {quickPrompts.map((prompt, index) => (
                   <button
                     key={index}
                     onClick={() => handleQuickPrompt(prompt.text)}
-                    className="px-4 py-2.5 rounded-xl bg-white/70 hover:bg-purple-50 border border-purple-200/60 transition-all text-slate-700 text-sm shadow-sm hover:shadow-md"
+                    className="px-4 py-2.5 rounded-xl bg-white/60 hover:bg-purple-100 border border-purple-300/70 transition-all text-slate-800 text-sm shadow-sm hover:shadow-md"
                   >
                     {prompt.label}
                   </button>
@@ -260,8 +260,8 @@ export default function ChatPage() {
                 <div
                   className={`max-w-[80%] rounded-2xl px-5 py-4 ${
                     message.role === 'user'
-                      ? 'bg-gradient-to-br from-purple-400 to-pink-400 text-white shadow-md'
-                      : 'bg-white/90 text-slate-800 shadow-md border border-purple-200/50'
+                      ? 'bg-gradient-to-br from-purple-500 to-fuchsia-500 text-white shadow-lg'
+                      : 'bg-white/80 text-slate-800 shadow-lg border border-purple-300/60'
                   }`}
                 >
                   <div className="text-[15px] leading-relaxed whitespace-pre-wrap">
@@ -284,7 +284,7 @@ export default function ChatPage() {
       </div>
 
       {/* Input Area */}
-      <div className="border-t border-purple-200/50 bg-white/60 backdrop-blur-xl px-6 py-4">
+      <div className="border-t border-purple-300/60 bg-white/50 backdrop-blur-xl px-6 py-4">
         <div className="max-w-4xl mx-auto">
           <div className="flex gap-3 items-end">
             {/* Voice Toggle */}
@@ -293,19 +293,19 @@ export default function ChatPage() {
               disabled={!voiceAvailable}
               className={`p-3 rounded-xl transition-all ${
                 audioEnabled
-                  ? 'bg-gradient-to-br from-purple-500 to-pink-500 text-white shadow-lg'
+                  ? 'bg-gradient-to-br from-purple-500 to-fuchsia-500 text-white shadow-lg'
                   : voiceAvailable
-                  ? 'bg-white/70 text-purple-600 hover:bg-purple-50 border border-purple-300'
-                  : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  ? 'bg-white/60 text-purple-600 hover:bg-purple-100 border border-purple-400'
+                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
               }`}
               title={
                 !voiceAvailable
                   ? 'Voice available with Regulator plan'
                   : !canUseVoice
-                  ? `Voice limit reached (${voiceUsageToday}/${getVoiceLimit(userTier)}) - Upgrade to Integrator for unlimited`
+                  ? `Voice limit reached (${voiceUsageToday}/15) - Upgrade to Integrator for unlimited`
                   : audioEnabled
-                  ? `Voice On (${voiceUsageToday}/${getVoiceLimit(userTier)} used today)`
-                  : `Voice Off (${voiceUsageToday}/${getVoiceLimit(userTier)} used today)`
+                  ? `Voice On (${voiceUsageToday}/15 used today)`
+                  : `Voice Off (${voiceUsageToday}/15 used today)`
               }
             >
               <Volume2 size={20} />
@@ -318,7 +318,7 @@ export default function ChatPage() {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Share what's happening in your body..."
-                className="w-full px-5 py-3 bg-white/80 border border-purple-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent resize-none text-slate-800 placeholder-slate-500 shadow-sm"
+                className="w-full px-5 py-3 bg-white/70 border border-purple-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none text-slate-800 placeholder-slate-600 shadow-sm"
                 rows={1}
                 style={{
                   minHeight: '50px',
@@ -331,7 +331,7 @@ export default function ChatPage() {
             <button
               onClick={handleSendMessage}
               disabled={!input.trim() || isLoading}
-              className="px-6 py-3 bg-gradient-to-br from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 disabled:bg-gray-300 text-white rounded-xl transition-all disabled:cursor-not-allowed shadow-md flex items-center gap-2"
+              className="px-6 py-3 bg-gradient-to-br from-purple-500 to-fuchsia-500 hover:from-purple-600 hover:to-fuchsia-600 disabled:bg-gray-300 text-white rounded-xl transition-all disabled:cursor-not-allowed shadow-lg flex items-center gap-2"
             >
               {isLoading ? (
                 <Loader2 size={20} className="animate-spin" />
@@ -343,9 +343,9 @@ export default function ChatPage() {
 
           {/* Voice Usage Indicator */}
           {voiceAvailable && (
-            <div className="mt-2 text-xs text-slate-600 text-center">
+            <div className="mt-2 text-xs text-slate-700 text-center">
               {audioEnabled ? '🎙️ Voice responses enabled' : 'Voice responses off'} 
-              {userTier === 'regulator' && ` • ${voiceUsageToday}/20 used today`}
+              {userTier === 'regulator' && ` • ${voiceUsageToday}/15 used today`}
               {userTier === 'integrator' && ' • Unlimited voice'}
               {userTier === 'test' && ' • Unlimited voice (test)'}
             </div>

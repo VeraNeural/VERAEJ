@@ -708,5 +708,7 @@ className="absolute top-4 right-4 p-2 rounded-lg hover:bg-slate-100 transition-c
         height: 280px;
       }
     }
-  `}</style>
-</div>
+`}</style>
+    </div>
+  );
+}

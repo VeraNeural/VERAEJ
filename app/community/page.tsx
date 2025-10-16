@@ -16,6 +16,7 @@ interface Post {
   id: string;
   content: string;
   user_name: string;
+  user_id: string;
   created_at: string;
 }
 
@@ -27,6 +28,7 @@ export default function CommunityPage() {
   const [newPost, setNewPost] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [hasAccess, setHasAccess] = useState(true);
+  const [currentUserId, setCurrentUserId] = useState<string>('');
 
   useEffect(() => {
     checkAccess();
@@ -37,6 +39,12 @@ export default function CommunityPage() {
       loadPosts(selectedChannel.id);
     }
   }, [selectedChannel, hasAccess]);
+
+  useEffect(() => {
+    if (hasAccess) {
+      loadCurrentUser();
+    }
+  }, [hasAccess]);
 
   async function checkAccess() {
     try {
@@ -54,6 +62,18 @@ export default function CommunityPage() {
     } catch (error) {
       console.error('Failed to check access:', error);
       setIsLoading(false);
+    }
+  }
+
+  async function loadCurrentUser() {
+    try {
+      const res = await fetch('/api/auth/me');
+      if (res.ok) {
+        const data = await res.json();
+        setCurrentUserId(data.user.id);
+      }
+    } catch (error) {
+      console.error('Failed to load current user:', error);
     }
   }
 
@@ -107,6 +127,14 @@ export default function CommunityPage() {
     } catch (error) {
       console.error('Failed to post:', error);
     }
+  }
+
+  async function startConversation(recipientId: string, recipientName: string) {
+    // Generate conversation ID (sorted user IDs for consistency)
+    const conversationId = `${[currentUserId, recipientId].sort().join('_')}`;
+    
+    // Redirect to messages with conversation started
+    router.push(`/messages?conversation=${conversationId}&recipient=${recipientId}`);
   }
 
   if (isLoading) {
@@ -190,6 +218,12 @@ export default function CommunityPage() {
               VERA Community
             </h1>
           </div>
+          <Link
+            href="/messages"
+            className="px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-xl font-medium transition-all"
+          >
+            Messages
+          </Link>
         </div>
       </div>
 
@@ -268,11 +302,21 @@ export default function CommunityPage() {
                             {post.user_name?.charAt(0)?.toUpperCase() || 'U'}
                           </div>
                           <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2">
-                              <span className="font-medium text-slate-900">{post.user_name}</span>
-                              <span className="text-xs text-slate-500">
-                                {new Date(post.created_at).toLocaleString()}
-                              </span>
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium text-slate-900">{post.user_name}</span>
+                                <span className="text-xs text-slate-500">
+                                  {new Date(post.created_at).toLocaleString()}
+                                </span>
+                              </div>
+                              {post.user_id !== currentUserId && (
+                                <button
+                                  onClick={() => startConversation(post.user_id, post.user_name)}
+                                  className="text-sm text-purple-600 hover:text-purple-700 font-medium"
+                                >
+                                  Message
+                                </button>
+                              )}
                             </div>
                             <p className="text-slate-700 whitespace-pre-wrap">{post.content}</p>
                           </div>

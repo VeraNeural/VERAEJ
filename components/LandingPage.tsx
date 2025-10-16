@@ -284,67 +284,33 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Replace your Pricing section with this */}
+{/* Replace your Pricing section with this */}
 
 {/* Pricing - 3 Tiers */}
 <section className="py-24 px-6">
   <div className="max-w-7xl mx-auto">
     <div className="text-center mb-12">
       <h2 className="text-4xl font-light text-slate-900 mb-4">
-        Choose Your Path
+        Choose Your Path to Regulation
       </h2>
-      <p className="text-xl text-slate-600 mb-8 font-light">
-        Start free, grow when you're ready
+      <p className="text-xl text-slate-600 mb-2 font-light">
+        Start with a 7-day free trial
+      </p>
+      <p className="text-sm text-slate-500">
+        No charge until trial ends • Cancel anytime
       </p>
     </div>
 
-    <div className="grid lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-      {/* FREE TIER */}
-      <div className="bg-white rounded-3xl p-8 border border-slate-200">
+    <div className="grid lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+      {/* EXPLORER $19 */}
+      <div className="bg-white rounded-3xl p-8 border-2 border-slate-200 hover:border-purple-300 transition-all">
         <div className="mb-8">
-          <h3 className="text-xl font-normal text-slate-800 mb-2">Free</h3>
-          <div className="flex items-baseline gap-2">
-            <span className="text-5xl font-light text-slate-900">$0</span>
-          </div>
-          <p className="text-slate-600 text-sm mt-2 font-light">Try VERA today</p>
-        </div>
-
-        <ul className="space-y-4 mb-8">
-          {[
-            '10 messages per day',
-            '5 quick prompts per day',
-            'Daily journal notifications',
-            'Crisis resources',
-            'Brief pattern insights'
-          ].map((feature, idx) => (
-            <li key={idx} className="flex items-start gap-3">
-              <Check className="text-purple-400 flex-shrink-0 mt-0.5" size={20} />
-              <span className="text-slate-700 font-light">{feature}</span>
-            </li>
-          ))}
-        </ul>
-
-        <Link
-          href="/auth/signup"
-          className="block w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-900 rounded-xl font-normal transition-all text-center"
-        >
-          Start Free
-        </Link>
-      </div>
-
-      {/* EXPLORER $19 - MOST POPULAR */}
-      <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-3xl p-8 border-2 border-purple-200 relative shadow-lg transform scale-105">
-        <div className="absolute -top-3 left-8 bg-slate-900 text-white text-xs font-normal px-3 py-1 rounded-full">
-          MOST POPULAR
-        </div>
-        
-        <div className="mb-8">
-          <h3 className="text-xl font-normal text-purple-700 mb-2">Explorer</h3>
+          <h3 className="text-xl font-normal text-slate-800 mb-2">Explorer</h3>
           <div className="flex items-baseline gap-2 mb-1">
             <span className="text-5xl font-light text-slate-900">$19</span>
             <span className="text-slate-600 font-light">/month</span>
           </div>
-          <p className="text-purple-600 text-sm font-light">Full access for daily wellness</p>
+          <p className="text-purple-600 text-sm font-light">Perfect for daily wellness</p>
         </div>
 
         <ul className="space-y-4 mb-8">
@@ -354,64 +320,132 @@ export default function LandingPage() {
             'Full journal with prompts',
             'Daily check-in tracking',
             'View wellness protocols',
-            'Save all your chats'
+            'Save all your chats',
+            'Pattern insights'
           ].map((feature, idx) => (
             <li key={idx} className="flex items-start gap-3">
               <Check className="text-purple-500 flex-shrink-0 mt-0.5" size={20} />
-              <span className="text-slate-800 font-light">{feature}</span>
+              <span className="text-slate-700 font-light">{feature}</span>
             </li>
           ))}
         </ul>
 
         <Link
-          href={process.env.NEXT_PUBLIC_STRIPE_EXPLORER_LINK || '/auth/signup'}
+          href={process.env.NEXT_PUBLIC_STRIPE_EXPLORER_LINK || '/auth/signup?plan=explorer'}
           className="block w-full py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-normal transition-all text-center"
         >
-          Get Explorer
+          Start 7-Day Free Trial
         </Link>
+        <p className="text-xs text-slate-500 text-center mt-3">
+          Then $19/month • Cancel anytime
+        </p>
       </div>
 
-      {/* REGULATOR $39 */}
-      <div className="bg-white rounded-3xl p-8 border border-slate-200">
+      {/* REGULATOR $39 - MOST POPULAR */}
+      <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-3xl p-8 border-2 border-purple-300 relative shadow-xl transform scale-105">
+        <div className="absolute -top-3 left-8 bg-gradient-to-r from-purple-600 to-blue-600 text-white text-xs font-medium px-3 py-1 rounded-full">
+          MOST POPULAR
+        </div>
+        
         <div className="mb-8">
-          <h3 className="text-xl font-normal text-slate-800 mb-2">Regulator</h3>
+          <h3 className="text-xl font-normal text-purple-700 mb-2">Regulator</h3>
           <div className="flex items-baseline gap-2 mb-1">
             <span className="text-5xl font-light text-slate-900">$39</span>
             <span className="text-slate-600 font-light">/month</span>
           </div>
-          <p className="text-slate-600 text-sm font-light">Advanced nervous system tools</p>
+          <p className="text-purple-600 text-sm font-light">Advanced nervous system tools</p>
         </div>
 
         <ul className="space-y-4 mb-8">
           {[
-            'Everything in Explorer, plus:',
-            'Full Protocol feature — create & track wellness routines',
-            'Dashboard analytics & insights',
-            'Voice response feature',
-            'Deep pattern analysis',
-            'Priority email support'
+            { text: 'Everything in Explorer, plus:', bold: true },
+            { text: 'Full Protocol feature — create & track wellness routines', bold: false },
+            { text: 'Voice responses with ElevenLabs AI', bold: false, badge: 'NEW' },
+            { text: 'Dashboard analytics & insights', bold: false },
+            { text: 'Deep pattern analysis', bold: false },
+            { text: 'Priority email support (24h)', bold: false },
           ].map((feature, idx) => (
             <li key={idx} className="flex items-start gap-3">
-              <Check className="text-blue-500 flex-shrink-0 mt-0.5" size={20} />
-              <span className={`font-light ${idx === 0 ? 'font-medium text-slate-900' : 'text-slate-700'}`}>
-                {feature}
+              <Check className="text-purple-600 flex-shrink-0 mt-0.5" size={20} />
+              <div className="flex-1">
+                <span className={`${feature.bold ? 'font-medium text-slate-900' : 'font-light text-slate-800'}`}>
+                  {feature.text}
+                </span>
+                {feature.badge && (
+                  <span className="ml-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">
+                    {feature.badge}
+                  </span>
+                )}
+              </div>
+            </li>
+          ))}
+        </ul>
+
+        <Link
+          href={process.env.NEXT_PUBLIC_STRIPE_REGULATOR_LINK || '/auth/signup?plan=regulator'}
+          className="block w-full py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-xl font-normal transition-all text-center shadow-lg"
+        >
+          Start 7-Day Free Trial
+        </Link>
+        <p className="text-xs text-slate-600 text-center mt-3">
+          Then $39/month • Cancel anytime
+        </p>
+      </div>
+
+      {/* INTEGRATOR $99 - COMING SOON */}
+      <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-3xl p-8 border-2 border-slate-300 relative opacity-90">
+        <div className="absolute -top-3 left-8 bg-slate-700 text-white text-xs font-medium px-3 py-1 rounded-full">
+          COMING SOON
+        </div>
+        
+        <div className="mb-8">
+          <h3 className="text-xl font-normal text-slate-800 mb-2">Integrator</h3>
+          <div className="flex items-baseline gap-2 mb-1">
+            <span className="text-5xl font-light text-slate-900">$99</span>
+            <span className="text-slate-600 font-light">/month</span>
+          </div>
+          <p className="text-slate-600 text-sm font-light">For therapists & practitioners</p>
+        </div>
+
+        <ul className="space-y-4 mb-8">
+          {[
+            { text: 'Everything in Regulator, plus:', bold: true },
+            { text: 'Multi-client management', bold: false },
+            { text: 'Session notes & tracking', bold: false },
+            { text: 'Professional insights dashboard', bold: false },
+            { text: 'Client progress reports', bold: false },
+            { text: 'White-label options', bold: false },
+            { text: 'Priority phone support', bold: false },
+          ].map((feature, idx) => (
+            <li key={idx} className="flex items-start gap-3">
+              <Check className="text-slate-400 flex-shrink-0 mt-0.5" size={20} />
+              <span className={`${feature.bold ? 'font-medium text-slate-800' : 'font-light text-slate-600'}`}>
+                {feature.text}
               </span>
             </li>
           ))}
         </ul>
 
-        <Link
-          href={process.env.NEXT_PUBLIC_STRIPE_REGULATOR_LINK || '/auth/signup'}
-          className="block w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl font-normal transition-all text-center"
+        <button
+          disabled
+          className="w-full py-3 bg-slate-300 text-slate-500 rounded-xl font-normal cursor-not-allowed text-center"
         >
-          Get Regulator
-        </Link>
+          Coming Q1 2026
+        </button>
+        <p className="text-xs text-slate-500 text-center mt-3">
+          Join waitlist at support@veraneural.com
+        </p>
       </div>
     </div>
 
-    <p className="text-center text-slate-500 mt-8 text-sm font-light">
-      All plans include end-to-end encryption • Cancel anytime
-    </p>
+    <div className="mt-12 text-center">
+      <p className="text-slate-600 mb-2">
+        ✨ All plans include end-to-end encryption & HIPAA-compliant infrastructure
+      </p>
+      <p className="text-sm text-slate-500">
+        Questions? Email <a href="mailto:support@veraneural.com" className="text-purple-600 hover:text-purple-700 underline">support@veraneural.com</a>
+      </p>
+    </div>
   </div>
 </section>
 

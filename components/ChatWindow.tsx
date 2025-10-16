@@ -321,7 +321,7 @@ useEffect(() => {
         setVoiceUsageToday(prev => prev + 1);
       }
 
-    } catch (error) {
+   } catch (error) {
       console.error('Error sending message:', error);
       setIsTyping(false);
       const errorMessage: Message = {
@@ -333,6 +333,8 @@ useEffect(() => {
       };
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
+      // Increment message counter AFTER successful send
+      localStorage.setItem('message_count', (dailyCount + 1).toString());
       setIsLoading(false);
     }
   };

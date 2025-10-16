@@ -116,12 +116,12 @@ className="absolute top-4 right-4 p-2 rounded-lg hover:bg-slate-100 transition-c
           Sign In
         </Link>
         <Link 
-          <Link 
+         <Link 
   href="/auth/signup?plan=explorer"
-          className="px-6 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-normal transition-all shadow-md hover:shadow-lg"
-        >
-          Get Started
-        </Link>
+  className="px-6 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-normal transition-all shadow-md hover:shadow-lg"
+>
+  Get Started
+</Link>
       </div>
     </div>
   </header>

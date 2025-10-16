@@ -159,4 +159,200 @@ export default function DashboardPage() {
               </div>
               <button
                 onClick={handleSignOut}
-                className="p-2 text-slate-
+                className="p-2 text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition-all"
+                title="Sign Out"
+              >
+                <LogOut size={20} />
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-6 py-12">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-4xl font-bold text-slate-900 mb-2">Your Wellness Analytics</h1>
+            <p className="text-slate-600">Track your progress and insights over time</p>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setTimeRange('7d')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                timeRange === '7d'
+                  ? 'bg-purple-600 text-white shadow-md'
+                  : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+              }`}
+            >
+              7 Days
+            </button>
+            <button
+              onClick={() => setTimeRange('30d')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                timeRange === '30d'
+                  ? 'bg-purple-600 text-white shadow-md'
+                  : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+              }`}
+            >
+              30 Days
+            </button>
+          </div>
+        </div>
+
+        {!data ? (
+          <div className="text-center py-20">
+            <p className="text-slate-600 mb-6">No data available yet. Start using VERA to see your insights!</p>
+            <Link
+              href="/chat"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-xl font-medium"
+            >
+              Start Chatting
+            </Link>
+          </div>
+        ) : (
+          <div className="space-y-8">
+            {/* Key Metrics Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <StatCard
+                title="Avg Mood"
+                value={`${data.insights.avgMood.toFixed(1)}/10`}
+                icon={Heart}
+                trend={data.insights.moodTrend}
+                color="bg-rose-100 text-rose-600"
+              />
+              <StatCard
+                title="Avg Energy"
+                value={`${data.insights.avgEnergy.toFixed(1)}/10`}
+                icon={Zap}
+                trend={data.insights.energyTrend}
+                color="bg-yellow-100 text-yellow-600"
+              />
+              <StatCard
+                title="Avg Stress"
+                value={`${data.insights.avgStress.toFixed(1)}/10`}
+                icon={Brain}
+                color="bg-purple-100 text-purple-600"
+              />
+              <StatCard
+                title="Avg Sleep"
+                value={`${data.insights.avgSleep.toFixed(1)}h`}
+                icon={Moon}
+                color="bg-blue-100 text-blue-600"
+              />
+            </div>
+
+            {/* Activity Cards */}
+            <div className="grid md:grid-cols-3 gap-6">
+              {/* Check-in Streak */}
+              <div className="p-6 rounded-xl border bg-white border-slate-200 shadow-sm">
+                <div className="flex items-center gap-3 mb-4">
+                  <Calendar size={22} className="text-orange-600" />
+                  <span className="font-semibold text-slate-900">Check-in Streak</span>
+                </div>
+                <div className="text-4xl font-bold text-orange-600 mb-2">
+                  {data.checkIns.streak} days 🔥
+                </div>
+                <p className="text-sm text-slate-600">
+                  {data.checkIns.totalCheckins} total check-ins
+                </p>
+              </div>
+
+              {/* Journal Activity */}
+              <div className="p-6 rounded-xl border bg-white border-slate-200 shadow-sm">
+                <div className="flex items-center gap-3 mb-4">
+                  <BookOpen size={22} className="text-purple-600" />
+                  <span className="font-semibold text-slate-900">Journal Entries</span>
+                </div>
+                <div className="text-4xl font-bold text-purple-600 mb-2">
+                  {data.journal.entriesThisWeek}
+                </div>
+                <p className="text-sm text-slate-600">
+                  {data.journal.totalEntries} total entries
+                </p>
+              </div>
+
+              {/* Protocol Completion */}
+              <div className="p-6 rounded-xl border bg-white border-slate-200 shadow-sm">
+                <div className="flex items-center gap-3 mb-4">
+                  <CheckSquare size={22} className="text-green-600" />
+                  <span className="font-semibold text-slate-900">Protocol Progress</span>
+                </div>
+                <div className="text-4xl font-bold text-green-600 mb-2">
+                  {data.protocol.completionRate}%
+                </div>
+                <p className="text-sm text-slate-600">
+                  {data.protocol.completedItems} of {data.protocol.totalItems} completed
+                </p>
+              </div>
+            </div>
+
+            {/* Recent Trends */}
+            {data.checkIns.recentCheckins.length > 0 && (
+              <div className="p-6 rounded-xl border bg-white border-slate-200 shadow-sm">
+                <h4 className="font-semibold text-slate-900 mb-6">Recent Mood & Energy Trends</h4>
+                <div className="space-y-4">
+                  {data.checkIns.recentCheckins.slice(0, 7).reverse().map((checkin, idx) => (
+                    <div key={idx}>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm text-slate-600">
+                          {new Date(checkin.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                        </span>
+                        <div className="flex gap-6 text-sm">
+                          <span className="text-rose-600">Mood: {checkin.mood}</span>
+                          <span className="text-yellow-600">Energy: {checkin.energy}</span>
+                        </div>
+                      </div>
+                      <div className="flex gap-3">
+                        <div className="flex-1 h-3 bg-slate-100 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-rose-500 rounded-full transition-all"
+                            style={{ width: `${(checkin.mood / 10) * 100}%` }}
+                          />
+                        </div>
+                        <div className="flex-1 h-3 bg-slate-100 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-yellow-500 rounded-full transition-all"
+                            style={{ width: `${(checkin.energy / 10) * 100}%` }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* AI Insights */}
+            <div className="p-6 rounded-xl border bg-purple-50 border-purple-200">
+              <h4 className="font-semibold text-purple-900 mb-4">💡 VERA's Insights</h4>
+              <div className="space-y-3">
+                {data.insights.moodTrend === 'up' && (
+                  <p className="text-sm text-purple-800">
+                    ✨ Your mood has been improving over the past {timeRange === '7d' ? '7 days' : '30 days'}. Keep up the good work!
+                  </p>
+                )}
+                {data.insights.energyTrend === 'down' && (
+                  <p className="text-sm text-purple-800">
+                    💤 Your energy levels have been lower lately. Consider reviewing your sleep and protocol routines.
+                  </p>
+                )}
+                {data.checkIns.streak >= 7 && (
+                  <p className="text-sm text-purple-800">
+                    🔥 Amazing! You've maintained a {data.checkIns.streak}-day check-in streak. Consistency is key to nervous system regulation.
+                  </p>
+                )}
+                {data.protocol.completionRate < 50 && data.protocol.totalItems > 0 && (
+                  <p className="text-sm text-purple-800">
+                    📋 You have protocol items waiting. Completing them can help establish beneficial routines.
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
+    </div>
+  );
+}

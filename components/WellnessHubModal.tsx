@@ -225,18 +225,20 @@ export default function WellnessHubModal({ isOpen, onClose, darkMode, userId }: 
                       </p>
                     )}
                   </div>
-                  <Link
-                    href="/protocol"
-                    onClick={onClose}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all text-sm font-medium ${
-                      darkMode
-                        ? 'bg-purple-900/30 hover:bg-purple-900/50 text-purple-300 border border-purple-500/30'
-                        : 'bg-purple-100 hover:bg-purple-200 text-purple-700 border border-purple-200'
-                    }`}
-                  >
-                    View Full Protocol
-                    <ExternalLink size={16} />
-                  </Link>
+                 <button
+  onClick={() => {
+    onClose();
+    window.location.href = '/protocol';
+  }}
+  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all text-sm font-medium ${
+    darkMode
+      ? 'bg-purple-900/30 hover:bg-purple-900/50 text-purple-300 border border-purple-500/30'
+      : 'bg-purple-100 hover:bg-purple-200 text-purple-700 border border-purple-200'
+  }`}
+>
+  View Full Protocol
+  <ExternalLink size={16} />
+</button>
                 </div>
                 <PersonalProtocol 
                   darkMode={darkMode} 

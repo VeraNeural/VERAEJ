@@ -43,21 +43,19 @@ export default function ChatWindow() {
   const audioRef = useRef<HTMLAudioElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  const voiceAvailable = ['explorer', 'regulator', 'integrator', 'test'].includes(userTier);
+  const voiceAvailable = ['regulator', 'integrator', 'test'].includes(userTier);
   
-  const getVoiceLimit = (tier: string) => {
-    switch(tier) {
-      case 'integrator':
-      case 'test':
-        return Infinity;
-      case 'regulator':
-        return 20;
-      case 'explorer':
-        return Infinity;
-      default:
-        return 0;
-    }
-  };
+const getVoiceLimit = (tier: string) => {
+  switch(tier) {
+    case 'integrator':
+    case 'test':
+      return Infinity;
+    case 'regulator':
+      return 20;
+    default:
+      return 0;
+  }
+};
   
   const voiceLimit = getVoiceLimit(userTier);
   const canUseVoice = voiceUsageToday < voiceLimit;

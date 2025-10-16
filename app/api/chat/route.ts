@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
 import { cookies } from 'next/headers';
+import { query } from '@/lib/db';
 import Anthropic from '@anthropic-ai/sdk';
 
 const anthropic = new Anthropic({
@@ -71,73 +72,4 @@ export async function POST(request: NextRequest) {
       : 'I hear you.';
     console.log('✅ Claude responded with context');
 
-    // 5. Generate audio if enabled
-    let audioUrl = null;
-    console.log('🔍 Debug - audioEnabled:', audioEnabled);
-    console.log('🔍 Debug - Has API Key:', !!process.env.ELEVENLABS_API_KEY);
-    console.log('🔍 Debug - Has Voice ID:', !!process.env.ELEVENLABS_VOICE_ID);
-
-    if (audioEnabled && process.env.ELEVENLABS_API_KEY && process.env.ELEVENLABS_VOICE_ID) {
-      try {
-        console.log('🎙️ Generating audio...');
-        const audioResponse = await fetch(
-          `https://api.elevenlabs.io/v1/text-to-speech/${process.env.ELEVENLABS_VOICE_ID}`,
-          {
-            method: 'POST',
-            headers: {
-              'Accept': 'audio/mpeg',
-              'Content-Type': 'application/json',
-              'xi-api-key': process.env.ELEVENLABS_API_KEY,
-            },
-            body: JSON.stringify({
-              text: responseText,
-              model_id: 'eleven_monolingual_v1',
-              voice_settings: {
-                stability: 0.6,
-                similarity_boost: 0.8,
-                style: 0.5,
-                use_speaker_boost: true
-              }
-            })
-          }
-        );
-        if (audioResponse.ok) {
-          const audioBuffer = await audioResponse.arrayBuffer();
-          const base64Audio = Buffer.from(audioBuffer).toString('base64');
-          audioUrl = `data:audio/mpeg;base64,${base64Audio}`;
-          console.log('✅ Audio generated');
-        } else {
-          const errorText = await audioResponse.text();
-          console.error('❌ ElevenLabs error:', errorText);
-        }
-      } catch (audioError) {
-        console.error('❌ Audio generation error:', audioError);
-      }
-    }
-
-    // 6. Create or use existing session
-    let finalSessionId = sessionId;
-    if (!finalSessionId) {
-      // Create new session in database
-      const { db } = await import('@/lib/db');
-      const session = await db.createChatSession(payload.userId, 'New conversation');
-      finalSessionId = session.id;
-      console.log('✅ Created new session:', finalSessionId);
-    }
-
-    return NextResponse.json({
-      response: responseText,
-      audioUrl,
-      sessionId: finalSessionId,
-    }, { status: 200 });
-  } catch (error) {
-    console.error('❌ Chat API Error:', error);
-    if (error instanceof Error && error.message.includes('API key')) {
-      return NextResponse.json({ error: 'AI service configuration error' }, { status: 500 });
-    }
-    return NextResponse.json({
-      error: 'Failed to process message',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
-  }
-}
+    // 5.

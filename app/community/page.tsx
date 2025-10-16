@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ChevronDown } from 'lucide-react';
+import PollPost from '@/components/PollPost';
 
 interface Channel {
   id: string;
@@ -20,6 +21,11 @@ interface Post {
   user_id: string;
   created_at: string;
   is_pinned?: boolean;
+  post_type?: string;
+  poll_id?: string;
+  poll_question?: string;
+  poll_options?: any;
+  poll_closes_at?: string;
 }
 
 export default function CommunityPage() {
@@ -384,6 +390,7 @@ export default function CommunityPage() {
                     posts.map((post) => {
                       const isVera = post.user_name === 'VERA';
                       const isPinned = post.is_pinned;
+                      const isPoll = post.post_type === 'poll' && post.poll_id;
                       
                       return (
                         <div
@@ -399,7 +406,7 @@ export default function CommunityPage() {
                               📌 Pinned
                             </div>
                           )}
-                          <div className="flex items-start gap-3 md:gap-4">
+                          <div className="flex items-start gap-3 md:gap-4 mb-4">
                             <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center text-white font-medium text-sm flex-shrink-0 ${
                               isVera 
                                 ? 'bg-gradient-to-br from-purple-500 to-blue-500' 
@@ -424,9 +431,21 @@ export default function CommunityPage() {
                                   </button>
                                 )}
                               </div>
-                              <p className="text-slate-700 whitespace-pre-wrap text-sm md:text-base break-words">{post.content}</p>
+                              {!isPoll && (
+                                <p className="text-slate-700 whitespace-pre-wrap text-sm md:text-base break-words">{post.content}</p>
+                              )}
                             </div>
                           </div>
+
+                          {/* Poll Component */}
+                          {isPoll && post.poll_id && post.poll_question && post.poll_options && (
+                            <PollPost
+                              pollId={post.poll_id}
+                              question={post.poll_question}
+                              options={post.poll_options}
+                              closesAt={post.poll_closes_at || null}
+                            />
+                          )}
                         </div>
                       );
                     })

@@ -331,16 +331,20 @@ export default function ChatWindow() {
   };
 
   const handleVoiceToggle = () => {
-    if (!voiceAvailable) {
-      alert('🎙️ Voice responses available with Explorer plan ($19/month)');
-      return;
-    }
-    if (!canUseVoice) {
-      alert(`Voice limit reached for today. Upgrade to Integrator for unlimited voice!`);
-      return;
-    }
-    setAudioEnabled(!audioEnabled);
-  };
+if (!voiceAvailable) {
+  if (window.confirm('🎙️ Voice responses available with Regulator plan ($39/month)\n\nGo to upgrade page?')) {
+    window.location.href = 'https://buy.stripe.com/5kQ00j6N93z9dIZ26N8bS0s';
+  }
+  return;
+}
+
+// Line 338-341
+if (!canUseVoice) {
+  if (window.confirm('Voice limit reached (20/day)\n\nUpgrade to Integrator for unlimited voice?\n\n$99/month')) {
+    window.location.href = '/pricing'; // or direct Integrator Stripe link when you have it
+  }
+  return;
+}
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {

@@ -317,7 +317,7 @@ className="absolute top-4 right-4 p-2 rounded-lg hover:bg-slate-100 transition-c
           </ul>
 
           
-           href="/auth/signup?plan=explorer"
+          <a href="/auth/signup?plan=explorer"
   className="block w-full py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-normal transition-all text-center"
 >
   Start 7-Day Free Trial
@@ -368,7 +368,7 @@ className="absolute top-4 right-4 p-2 rounded-lg hover:bg-slate-100 transition-c
           </ul>
 
           
-           href="/auth/signup?plan=regulator"
+          <a href="/auth/signup?plan=regulator"
   className="block w-full py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-xl font-normal transition-all text-center shadow-lg"
 >
   Start 7-Day Free Trial

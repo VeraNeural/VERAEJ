@@ -264,6 +264,21 @@ export default function SidePanel({ isOpen, onClose, darkMode, currentSessionId,
                 Community
               </Link>
             )}
+
+            {/* Messages Link - Only for Regulator+ */}
+            {(userTier === 'regulator' || userTier === 'integrator') && (
+              <Link 
+                href="/messages"
+                onClick={onClose}
+                className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  darkMode 
+                    ? 'hover:bg-slate-800 text-slate-300' 
+                    : 'hover:bg-slate-100 text-slate-700'
+                }`}
+              >
+                Messages
+              </Link>
+            )}
             
             {/* Dynamic Upgrade Link Based on Tier */}
             {userTier === 'explorer' && (

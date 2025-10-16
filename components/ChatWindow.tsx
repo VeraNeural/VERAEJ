@@ -949,7 +949,7 @@ export default function ChatWindow() {
           50% { opacity: 0.8; }
         }
       `}</style>
-       {trialExpired && showUpgradeModal && UpgradeModal()}}
+       {trialExpired && showUpgradeModal && UpgradeModal()}
     </div>
   );
 }

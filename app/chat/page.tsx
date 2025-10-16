@@ -188,21 +188,21 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gradient-to-br from-[#F5F3FF] via-[#FAF5FF] to-[#FDF4FF]">
+    <div className="flex flex-col h-screen bg-gradient-to-br from-purple-100 via-pink-50 to-blue-100">
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-xl border-b border-purple-200/30 px-6 py-4">
+      <header className="bg-white/70 backdrop-blur-xl border-b border-purple-300/40 px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
               onClick={() => setShowSidePanel(true)}
-              className="p-2 hover:bg-purple-50 rounded-lg transition-colors"
+              className="p-2 hover:bg-purple-100/60 rounded-lg transition-colors"
             >
               <Menu size={24} className="text-slate-700" />
             </button>
             <div className="flex items-center gap-3">
               <div className="relative">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-blue-500" />
-                <div className="absolute inset-0 w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-blue-500 animate-pulse opacity-30" />
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500" />
+                <div className="absolute inset-0 w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 animate-pulse opacity-40" />
               </div>
               <div>
                 <h1 className="text-xl font-normal text-slate-800">VERA</h1>
@@ -214,7 +214,7 @@ export default function ChatPage() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => setShowWellnessHub(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-white/80 hover:bg-purple-50 rounded-xl transition-all text-slate-700 border border-purple-200/50 shadow-sm"
+              className="flex items-center gap-2 px-4 py-2 bg-white/70 hover:bg-purple-100/60 rounded-xl transition-all text-slate-700 border border-purple-300/50 shadow-sm"
             >
               <span className="text-sm font-medium">Wellness Hub</span>
             </button>
@@ -226,7 +226,7 @@ export default function ChatPage() {
       <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6">
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full max-w-2xl mx-auto text-center px-4">
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-400 to-blue-500 flex items-center justify-center mb-6 shadow-lg" />
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mb-6 shadow-lg" />
             <h2 className="text-3xl font-light text-slate-800 mb-3">
               I'm VERA. I'm here for you.
             </h2>
@@ -242,7 +242,7 @@ export default function ChatPage() {
                   <button
                     key={index}
                     onClick={() => handleQuickPrompt(prompt.text)}
-                    className="px-4 py-2.5 rounded-xl bg-white/90 hover:bg-purple-50 border border-purple-200/50 transition-all text-slate-700 text-sm shadow-sm"
+                    className="px-4 py-2.5 rounded-xl bg-white/80 hover:bg-purple-100/70 border border-purple-300/50 transition-all text-slate-700 text-sm shadow-sm"
                   >
                     {prompt.label}
                   </button>
@@ -260,8 +260,8 @@ export default function ChatPage() {
                 <div
                   className={`max-w-[80%] rounded-2xl px-5 py-4 ${
                     message.role === 'user'
-                      ? 'bg-purple-100/80 text-slate-800 shadow-sm'
-                      : 'bg-white/90 text-slate-800 shadow-sm border border-purple-200'
+                      ? 'bg-purple-200/70 text-slate-800 shadow-sm'
+                      : 'bg-white/80 text-slate-800 shadow-sm border border-purple-300/40'
                   }`}
                 >
                   <div className="text-[15px] leading-relaxed whitespace-pre-wrap">
@@ -284,7 +284,7 @@ export default function ChatPage() {
       </div>
 
       {/* Input Area */}
-      <div className="border-t border-purple-200/30 bg-white/80 backdrop-blur-xl px-6 py-4">
+      <div className="border-t border-purple-300/40 bg-white/70 backdrop-blur-xl px-6 py-4">
         <div className="max-w-4xl mx-auto">
           <div className="flex gap-3 items-end">
             {/* Voice Toggle */}
@@ -293,9 +293,9 @@ export default function ChatPage() {
               disabled={!voiceAvailable}
               className={`p-3 rounded-xl transition-all ${
                 audioEnabled
-                  ? 'bg-purple-500 text-white shadow-lg'
+                  ? 'bg-gradient-to-br from-purple-500 to-pink-500 text-white shadow-lg'
                   : voiceAvailable
-                  ? 'bg-white/80 text-purple-600 hover:bg-purple-50 border border-purple-200'
+                  ? 'bg-white/70 text-purple-600 hover:bg-purple-100/60 border border-purple-300'
                   : 'bg-gray-100 text-gray-400 cursor-not-allowed'
               }`}
               title={
@@ -318,7 +318,7 @@ export default function ChatPage() {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Share what's happening in your body..."
-                className="w-full px-5 py-3 bg-white border border-purple-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent resize-none text-slate-800 placeholder-slate-500 shadow-sm"
+                className="w-full px-5 py-3 bg-white/80 border border-purple-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent resize-none text-slate-800 placeholder-slate-500 shadow-sm"
                 rows={1}
                 style={{
                   minHeight: '50px',
@@ -331,7 +331,7 @@ export default function ChatPage() {
             <button
               onClick={handleSendMessage}
               disabled={!input.trim() || isLoading}
-              className="px-6 py-3 bg-purple-500 hover:bg-purple-600 disabled:bg-gray-300 text-white rounded-xl transition-all disabled:cursor-not-allowed shadow-sm flex items-center gap-2"
+              className="px-6 py-3 bg-gradient-to-br from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 disabled:bg-gray-300 text-white rounded-xl transition-all disabled:cursor-not-allowed shadow-sm flex items-center gap-2"
             >
               {isLoading ? (
                 <Loader2 size={20} className="animate-spin" />

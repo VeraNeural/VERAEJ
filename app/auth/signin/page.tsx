@@ -35,6 +35,18 @@ export default function SignInPage() {
         throw new Error(data.error || 'Sign in failed');
       }
 
+      // ✅ CHECK SUBSCRIPTION STATUS
+      const hasActiveSubscription = data.user?.stripe_subscription_id && 
+        ['active', 'trialing'].includes(data.user?.stripe_subscription_status);
+
+      if (!hasActiveSubscription) {
+        // No subscription - send to Stripe
+        console.log('❌ No active subscription, redirecting to checkout');
+        window.location.href = 'https://buy.stripe.com/14AcN50oL7PpgVbdPv8bS0r';
+        return;
+      }
+
+      // ✅ Has subscription - proceed to app
       if (!data.user?.orientation_completed) {
         router.push('/orientation');
       } else {
@@ -114,7 +126,7 @@ export default function SignInPage() {
 
           <p className="mt-6 text-center text-sm text-slate-600">
             Don't have an account?{' '}
-            <Link href="/auth/signup" className="text-purple-600 hover:text-purple-700 font-medium">
+            <Link href="/auth/signup?plan=explorer" className="text-purple-600 hover:text-purple-700 font-medium">
               Create account
             </Link>
           </p>

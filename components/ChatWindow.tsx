@@ -469,9 +469,6 @@ export default function ChatWindow() {
     </div>
   );
   
-  return (
-    <div className={`flex flex-col h-screen transition-all duration-700 ${themeClasses.bg} ${themeClasses.font}`}>
-
       {/* HEADER */}
       <div className={`backdrop-blur-xl border-b px-6 py-4 shadow-sm transition-all duration-500 ${themeClasses.header}`}>
         <div className="flex items-center justify-between max-w-5xl mx-auto">

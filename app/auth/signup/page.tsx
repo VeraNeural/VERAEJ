@@ -95,18 +95,17 @@ function SignUpForm() {
 
       if (data.user?.id) {
         localStorage.setItem('userId', data.user.id);
-        localStorage.setItem('subscription_tier', data.user.subscription_tier || 'explorer');
-        localStorage.setItem('subscription_status', data.user.subscription_status || 'trial');
+        localStorage.setItem('subscription_tier', 'explorer');
+        localStorage.setItem('subscription_status', 'incomplete');
         console.log('✅ User ID saved to localStorage:', data.user.id);
       }
 
-      if (plan === 'explorer' || plan === 'regulator') {
-        const stripeLink = stripeLinks[plan as 'explorer' | 'regulator'];
-        console.log('🔄 Redirecting to Stripe:', plan);
-        window.location.href = stripeLink;
-      } else {
-        router.push('/orientation');
-      }
+      // ✅ ALWAYS redirect to Stripe - default to Explorer plan
+      const selectedPlan = plan === 'regulator' ? 'regulator' : 'explorer';
+      const stripeLink = stripeLinks[selectedPlan];
+
+      console.log('🔄 Redirecting to Stripe:', selectedPlan);
+      window.location.href = stripeLink;
       
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
@@ -241,7 +240,7 @@ function SignUpForm() {
               disabled={isLoading || !allGood || !passwordsMatch || !acceptedTerms || !email || !password || !confirmPassword || !name}
               className="w-full py-3 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white rounded-xl font-medium disabled:opacity-50 shadow-lg"
             >
-              {isLoading ? 'Creating Account...' : plan ? 'Continue to Payment' : 'Start Free'}
+              {isLoading ? 'Creating Account...' : 'Continue to Payment'}
             </button>
           </form>
 

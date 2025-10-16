@@ -185,7 +185,7 @@ export default function EventsPage() {
                             className="px-6 py-3 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white rounded-xl font-medium transition-all"
                           >
                             Join Event
-                          </a>
+                          &lt;a
                         )}
                         <button
                           onClick={() => handleRSVP(event.id, 'unregister')}
@@ -244,7 +244,7 @@ export default function EventsPage() {
                       className="inline-block px-6 py-3 bg-purple-500 hover:bg-purple-600 text-white rounded-xl font-medium transition-all"
                     >
                       Watch Recording
-                    </a>
+                    &lt;a
                   )}
                 </div>
               ))

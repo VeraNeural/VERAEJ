@@ -481,12 +481,13 @@ export default function ChatPage() {
           </div>
         </div>
 
-        {/* Wellness Hub Modal */}
-        {showWellnessHub && (
+        {/* Wellness Hub Modal - FIXED: Added userId and darkMode props */}
+        {showWellnessHub && user && (
           <WellnessHub
             isOpen={showWellnessHub}
             onClose={() => setShowWellnessHub(false)}
-            userTier={userTier}
+            userId={user.id}
+            darkMode={darkMode}
           />
         )}
 

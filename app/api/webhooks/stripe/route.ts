@@ -2,11 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import { query } from '@/lib/db';
 
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function POST(req: NextRequest) {
   try {
+    const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
     const body = await req.text();
     const headersList = await headers();
     const signature = headersList.get('stripe-signature');

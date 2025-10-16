@@ -250,19 +250,6 @@ export default function SidePanel({ isOpen, onClose, darkMode, currentSessionId,
               Dashboard
             </Link>
 
-              {/* Rituals Link - For all users */}
-            <Link 
-              href="/rituals"
-              onClick={onClose}
-              className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                darkMode 
-                  ? 'hover:bg-slate-800 text-slate-300' 
-                  : 'hover:bg-slate-100 text-slate-700'
-              }`}
-            >
-              Daily Ritual
-            </Link>
-
             {/* Community Link - Only for Regulator+ */}
             {(userTier === 'regulator' || userTier === 'integrator') && (
               <Link 
@@ -341,4 +328,5 @@ export default function SidePanel({ isOpen, onClose, darkMode, currentSessionId,
     </>
   );
 }
+
 

@@ -286,20 +286,24 @@ export default function LandingPage() {
           margin-top: 80px;
         }
 
-        .hero-presence {
-          width: 500px;
-          height: 500px;
-          margin: 2rem auto;
-          position: relative;
-          animation: presenceAlive 8s infinite ease-in-out;
-        }
+       .hero-presence {
+  width: 500px;
+  height: 500px;
+  margin: 2rem auto;
+  position: relative;
+  animation: presenceAlive 6s infinite ease-in-out;
+}
 
-        @keyframes presenceAlive {
-          0%, 100% { transform: scale(1) rotate(0deg); }
-          25% { transform: scale(1.1) rotate(90deg); }
-          50% { transform: scale(1.05) rotate(180deg); }
-          75% { transform: scale(1.1) rotate(270deg); }
-        }
+       @keyframes presenceAlive {
+  0%, 100% { 
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  50% { 
+    transform: scale(1.08);
+    opacity: 1;
+  }
+}
 
         .presence-core {
           width: 100%;

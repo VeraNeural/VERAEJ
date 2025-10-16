@@ -331,7 +331,7 @@ export default function LandingPage() {
         </ul>
 
         <Link
-          href={process.env.NEXT_PUBLIC_STRIPE_EXPLORER_LINK || '/auth/signup?plan=explorer'}
+          href="https://buy.stripe.com/test_YOUR_ACTUAL_EXPLORER_LINK_HERE"
           className="block w-full py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-normal transition-all text-center"
         >
           Start 7-Day Free Trial

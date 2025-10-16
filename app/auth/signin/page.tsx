@@ -36,8 +36,8 @@ export default function SignInPage() {
       }
 
       // ✅ CHECK SUBSCRIPTION STATUS
-      const hasActiveSubscription = data.user?.stripe_subscription_id && 
-        ['active', 'trialing'].includes(data.user?.stripe_subscription_status);
+      const hasActiveSubscription = data.user?.subscription_status === 'active' || 
+  data.user?.subscription_status === 'trial';
 
       if (!hasActiveSubscription) {
         // No subscription - send to Stripe

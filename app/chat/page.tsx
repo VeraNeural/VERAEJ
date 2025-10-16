@@ -306,6 +306,14 @@ export default function ChatPage() {
             opacity: 0.2;
           }
         }
+
+        /* Compact audio player */
+        audio {
+          height: 32px;
+        }
+        audio::-webkit-media-controls-panel {
+          background-color: rgba(71, 85, 105, 0.5);
+        }
       `}</style>
 
       <div className="flex flex-col h-screen bg-gradient-to-br from-indigo-200 via-purple-200 to-blue-200 relative">
@@ -388,12 +396,14 @@ export default function ChatPage() {
                       {message.role === 'assistant' ? stripMarkdown(message.content) : message.content}
                     </div>
                     {message.audioUrl && (
-                      <audio 
-                        controls 
-                        className="mt-3 w-full opacity-90"
-                        src={message.audioUrl}
-                        autoPlay
-                      />
+                      <div className="mt-2">
+                        <audio 
+                          controls 
+                          className="h-8 max-w-[250px] opacity-80"
+                          src={message.audioUrl}
+                          autoPlay
+                        />
+                      </div>
                     )}
                   </div>
                 </div>

@@ -68,19 +68,22 @@ export default function SidePanel({ isOpen, onClose, darkMode, currentSessionId,
     }
   };
 
-  const handleSignOut = async () => {
-    try {
-      const response = await fetch('/api/auth/signout', {
-        method: 'POST',
-      });
-      
-      if (response.ok) {
-        router.push('/auth/signin');
-      }
-    } catch (error) {
-      console.error('Sign out error:', error);
+ const handleSignOut = async () => {
+  try {
+    const response = await fetch('/api/auth/me', {
+      method: 'DELETE',
+    });
+    
+    if (response.ok) {
+      // Clear local storage
+      localStorage.clear();
+      // Redirect to home page
+      window.location.href = '/';
     }
-  };
+  } catch (error) {
+    console.error('Sign out error:', error);
+  }
+};
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -263,3 +266,4 @@ export default function SidePanel({ isOpen, onClose, darkMode, currentSessionId,
     </>
   );
 }
+

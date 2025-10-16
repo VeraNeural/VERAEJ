@@ -31,7 +31,7 @@ function SuccessContent() {
           }
           // Redirect to chat after 3 seconds
           setTimeout(() => {
-            router.push('/chat');
+            router.push('/orientation');
           }, 3000);
         } else {
           setStatus('error');
@@ -89,7 +89,7 @@ function SuccessContent() {
         </div>
         <h1 className="text-4xl font-light text-slate-900 mb-2">Welcome to VERA! ✨</h1>
         <p className="text-xl text-slate-600 mb-2">Your 7-day free trial has started</p>
-        <p className="text-sm text-slate-500 mb-6">Redirecting you to chat...</p>
+        <p className="text-sm text-slate-500 mb-6">Redirecting you to get started...</p>
         
         <div className="mt-8 p-4 bg-white rounded-xl border border-purple-200 max-w-md mx-auto">
           <p className="text-sm text-slate-600">

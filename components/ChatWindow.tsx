@@ -1,7 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
-import Link from 'next/link'; // <-- CORRECTED IMPORT
+import { useState, useEffect, useRef } from 'react';
 import { Send, Menu, Volume2, VolumeX, AlertCircle, X, Heart, Compass, Wind, Loader2, Sparkles, Zap } from 'lucide-react';
 import SidePanel from './SidePanel';
 import WellnessHubModal from './WellnessHubModal';
@@ -43,9 +42,9 @@ export default function ChatWindow() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const MESSAGE_LIMIT = userTier === 'free' ? 10 : Infinity; 
-  const PROMPT_LIMIT = userTier === 'free' ? 5 : Infinity; 
+
   const voiceAvailable = ['explorer', 'regulator', 'integrator', 'test'].includes(userTier);
+  
   const getVoiceLimit = (tier: string) => {
     switch(tier) {
       case 'integrator':
@@ -59,6 +58,7 @@ export default function ChatWindow() {
         return 0;
     }
   };
+  
   const voiceLimit = getVoiceLimit(userTier);
   const canUseVoice = voiceUsageToday < voiceLimit;
 
@@ -133,9 +133,11 @@ export default function ChatWindow() {
         };
     }
   };
+  
+  const themeClasses = getThemeClasses();
   const themeClasses = getThemeClasses();
 
-  const scrollToBottom = () => {
+ const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
@@ -151,69 +153,50 @@ export default function ChatWindow() {
         let tier = 'free';
         let expired = false;
         
-        // Check trial status
-useEffect(() => {
-  const fetchUserData = async () => {
-    try {
-      const response = await fetch('/api/auth/me');
-      if (!response.ok) throw new Error('Not authenticated');
-      
-      const data = await response.json();
-      const user = data.user;
-      
-      let tier = 'free';
-      let expired = false;
-      
-      // Check trial status
-      if (user.subscription_status === 'trial') {
-        const trialEndsAt = new Date(user.trial_ends_at);
-        const now = new Date();
-        
-        if (now < trialEndsAt) {
-          // Trial still active
-          tier = user.subscription_tier || 'explorer';
-        } else {
-          // Trial expired
-          expired = true;
-          setTrialExpired(true);
+        if (user.subscription_status === 'trial') {
+          const trialEndsAt = new Date(user.trial_ends_at);
+          const now = new Date();
           
-          // Only show modal if not dismissed today
-          const dismissedToday = localStorage.getItem('upgrade_modal_dismissed');
-          const today = new Date().toDateString();
-          
-          if (dismissedToday !== today) {
-            setShowUpgradeModal(true);
+          if (now < trialEndsAt) {
+            tier = user.subscription_tier || 'explorer';
+          } else {
+            expired = true;
+            setTrialExpired(true);
+            
+            const dismissedToday = localStorage.getItem('upgrade_modal_dismissed');
+            const today = new Date().toDateString();
+            
+            if (dismissedToday !== today) {
+              setShowUpgradeModal(true);
+            }
           }
+        } else if (user.subscription_status === 'active') {
+          tier = user.subscription_tier || 'explorer';
         }
-      } else if (user.subscription_status === 'active') {
-        // Paid subscription
-        tier = user.subscription_tier || 'explorer';
+        
+        if (user.test_mode) tier = 'test';
+        
+        setUserTier(tier);
+        setUserId(user.id);
+        
+      } catch (error) {
+        console.error('Failed to fetch user data:', error);
+        setUserTier('free');
       }
-      
-      if (user.test_mode) tier = 'test';
-      
-      setUserTier(tier);
-      setUserId(user.id);
-      
-    } catch (error) {
-      console.error('Failed to fetch user data:', error);
-      setUserTier('free');
-    }
-  };
-  
-  fetchUserData();
-}, []);
+    };
+    
+    fetchUserData();
+  }, []);
 
   useEffect(() => {
     const fetchVoiceUsage = async () => {
       if (!voiceAvailable) return;
       try {
         const response = await fetch('/api/voice-usage');
-        if (!response.ok) return; // gracefully handle missing route
+        if (!response.ok) return;
         const data = await response.json();
         setVoiceUsageToday(data.usageToday || 0);
       } catch (error) {
-        // Don't block, just log
         console.error('Failed to fetch voice usage:', error);
       }
     };
@@ -234,33 +217,25 @@ useEffect(() => {
     }
   }, [messages]);
 
- const sendMessage = async (customMessage?: string) => {
-  const messageToSend = customMessage || input.trim();
-  if (!messageToSend || isLoading) return;
+  const sendMessage = async (customMessage?: string) => {
+    const messageToSend = customMessage || input.trim();
+    if (!messageToSend || isLoading) return;
 
-  // NEW: Check 100 messages/day limit for ALL users
-  const today = new Date().toDateString();
-  const storedDate = localStorage.getItem('message_count_date');
-  const storedCount = parseInt(localStorage.getItem('message_count') || '0');
-  
-  let dailyCount = storedCount;
-  
-  // Reset counter if it's a new day
-  if (storedDate !== today) {
-    dailyCount = 0;
-    localStorage.setItem('message_count_date', today);
-  }
-  
-  // Check if hit 100 messages today
-  if (dailyCount >= 100) {
-    alert('You\'ve had 100 conversations with VERA today! 💜\n\nLet\'s give your nervous system a rest. See you tomorrow!');
-    return;
-  }
-
-  // Continue with rest of function...
-  if (!customMessage) setInput('');
-  setIsLoading(true);
-  setIsTyping(true);
+    const today = new Date().toDateString();
+    const storedDate = localStorage.getItem('message_count_date');
+    const storedCount = parseInt(localStorage.getItem('message_count') || '0');
+    
+    let dailyCount = storedCount;
+    
+    if (storedDate !== today) {
+      dailyCount = 0;
+      localStorage.setItem('message_count_date', today);
+    }
+    
+    if (dailyCount >= 100) {
+      alert('You\'ve had 100 conversations with VERA today! 💜\n\nLet\'s give your nervous system a rest. See you tomorrow!');
+      return;
+    }
 
     if (!customMessage) setInput('');
     setIsLoading(true);
@@ -321,7 +296,7 @@ useEffect(() => {
         setVoiceUsageToday(prev => prev + 1);
       }
 
-   } catch (error) {
+    } catch (error) {
       console.error('Error sending message:', error);
       setIsTyping(false);
       const errorMessage: Message = {
@@ -333,7 +308,6 @@ useEffect(() => {
       };
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
-      // Increment message counter AFTER successful send
       localStorage.setItem('message_count', (dailyCount + 1).toString());
       setIsLoading(false);
     }
@@ -348,8 +322,8 @@ useEffect(() => {
   };
 
   const handleQuickAction = (action: keyof typeof quickMessages) => {
-    if (userTier === 'free' && promptCount >= PROMPT_LIMIT) {
-      alert('You\'ve reached your daily limit of 5 quick prompts. Upgrade to Explorer ($29/month) for unlimited prompts!\n\nVisit veraneural.com/pricing to upgrade.');
+    if (userTier === 'free' && promptCount >= 5) {
+      alert('You\'ve reached your daily limit of 5 quick prompts. Upgrade to Explorer ($19/month) for unlimited prompts!\n\nVisit veraneural.com/pricing to upgrade.');
       return;
     }
     
@@ -359,7 +333,7 @@ useEffect(() => {
 
   const handleVoiceToggle = () => {
     if (!voiceAvailable) {
-      alert('🎙️ Voice responses available with Explorer plan ($29/month)');
+      alert('🎙️ Voice responses available with Explorer plan ($19/month)');
       return;
     }
     if (!canUseVoice) {
@@ -383,17 +357,11 @@ useEffect(() => {
   };
 
   const handleLoadChat = async (sessionId: string) => {
-    console.log('🔵 Loading chat:', sessionId);
-    
     try {
       const response = await fetch(`/api/sessions/${sessionId}/messages`);
-      console.log('🔵 Response status:', response.status);
       
       if (response.ok) {
         const data = await response.json();
-        console.log('🔵 Loaded messages:', data.messages);
-        
-        // Convert timestamp strings to Date objects
         const loadedMessages = (data.messages || []).map((msg: any) => ({
           ...msg,
           timestamp: new Date(msg.timestamp)
@@ -401,10 +369,9 @@ useEffect(() => {
         
         setMessages(loadedMessages);
         setCurrentSessionId(sessionId);
-        console.log('✅ Messages loaded successfully');
       }
     } catch (error) {
-      console.error('❌ Failed to load chat:', error);
+      console.error('Failed to load chat:', error);
     }
   };
 
@@ -434,79 +401,91 @@ useEffect(() => {
     });
   };
 
-const UpgradeModal = () => (
-  <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-    <div className={`rounded-3xl p-8 max-w-2xl shadow-2xl ${
-      theme === 'dark' || theme === 'night' ? 'bg-slate-900 border border-purple-500/30' : 'bg-white'
-    }`}>
-      <div className="text-center mb-6">
-        <div className="w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-          <Sparkles className="w-8 h-8 text-purple-600 dark:text-purple-400" />
-        </div>
-        <h2 className={`text-3xl font-bold mb-2 ${theme === 'dark' || theme === 'night' ? 'text-white' : 'text-slate-900'}`}>
-          Your 7-Day Trial Has Ended
-        </h2>
-        <p className={`text-lg ${theme === 'dark' || theme === 'night' ? 'text-slate-300' : 'text-slate-600'}`}>
-          Continue your journey with VERA
-        </p>
-      </div>
-
-      <div className="grid md:grid-cols-2 gap-4 mb-6">
-        <div className="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-6 border-2 border-purple-200 dark:border-purple-700">
-          <h3 className="text-xl font-semibold text-purple-900 dark:text-purple-300 mb-2">
-            Explorer
-          </h3>
-          <div className="text-3xl font-bold text-slate-900 dark:text-white mb-3">
-            $19<span className="text-lg font-normal text-slate-600 dark:text-slate-400">/month</span>
-          </div>
-          <ul className="space-y-2 text-sm text-slate-700 dark:text-slate-300 mb-4">
-            <li>• Unlimited conversations</li>
-            <li>• Full journal access</li>
-            <li>• Daily check-ins</li>
-            <li>• View protocols</li>
-          </ul>
-          
-            href="https://buy.stripe.com/14AcN50oL7PpgVbdPv8bS0r"
-            className="block w-full py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium text-center transition-all"
+const UpgradeModal = () => {
+    if (!trialExpired || !showUpgradeModal) return null;
+    
+    return (
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className={`rounded-3xl p-8 max-w-2xl shadow-2xl ${
+          theme === 'dark' || theme === 'night' ? 'bg-slate-900 border border-purple-500/30' : 'bg-white'
+        }`}>
+          <button
+            onClick={() => {
+              setShowUpgradeModal(false);
+              localStorage.setItem('upgrade_modal_dismissed', new Date().toDateString());
+            }}
+            className="absolute top-4 right-4 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
           >
-            Choose Explorer
-          </a>
-        </div>
-
-        <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-xl p-6 border-2 border-blue-300 dark:border-blue-700">
-          <div className="text-xs bg-blue-600 text-white px-2 py-1 rounded-full inline-block mb-2">
-            RECOMMENDED
-          </div>
-          <h3 className="text-xl font-semibold text-blue-900 dark:text-blue-300 mb-2">
-            Regulator
-          </h3>
-          <div className="text-3xl font-bold text-slate-900 dark:text-white mb-3">
-            $39<span className="text-lg font-normal text-slate-600 dark:text-slate-400">/month</span>
-          </div>
-          <ul className="space-y-2 text-sm text-slate-700 dark:text-slate-300 mb-4">
-            <li>• Everything in Explorer</li>
-            <li>• Full Protocol editing</li>
-            <li>• Voice responses 🎙️</li>
-            <li>• Dashboard analytics</li>
-          </ul>
+            <X size={24} />
+          </button>
           
-            href="https://buy.stripe.com/5kQ00j6N93z9dIZ26N8bS0s"
-            className="block w-full py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg font-medium text-center transition-all"
-          >
-            Choose Regulator
-          </a>
+          <div className="text-center mb-6">
+            <div className="w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Sparkles className="w-8 h-8 text-purple-600 dark:text-purple-400" />
+            </div>
+            <h2 className={`text-3xl font-bold mb-2 ${theme === 'dark' || theme === 'night' ? 'text-white' : 'text-slate-900'}`}>
+              Your 7-Day Trial Has Ended
+            </h2>
+            <p className={`text-lg ${theme === 'dark' || theme === 'night' ? 'text-slate-300' : 'text-slate-600'}`}>
+              Continue your journey with VERA
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-4 mb-6">
+            <div className="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-6 border-2 border-purple-200 dark:border-purple-700">
+              <h3 className="text-xl font-semibold text-purple-900 dark:text-purple-300 mb-2">Explorer</h3>
+              <div className="text-3xl font-bold text-slate-900 dark:text-white mb-3">
+                $19<span className="text-lg font-normal text-slate-600 dark:text-slate-400">/month</span>
+              </div>
+              <ul className="space-y-2 text-sm text-slate-700 dark:text-slate-300 mb-4">
+                <li>• Unlimited conversations</li>
+                <li>• Full journal access</li>
+                <li>• Daily check-ins</li>
+                <li>• View protocols</li>
+              </ul>
+              
+                href="https://buy.stripe.com/14AcN50oL7PpgVbdPv8bS0r"
+                className="block w-full py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium text-center transition-all"
+              >
+                Choose Explorer
+              </a>
+            </div>
+
+            <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-xl p-6 border-2 border-blue-300 dark:border-blue-700">
+              <div className="text-xs bg-blue-600 text-white px-2 py-1 rounded-full inline-block mb-2">
+                RECOMMENDED
+              </div>
+              <h3 className="text-xl font-semibold text-blue-900 dark:text-blue-300 mb-2">Regulator</h3>
+              <div className="text-3xl font-bold text-slate-900 dark:text-white mb-3">
+                $39<span className="text-lg font-normal text-slate-600 dark:text-slate-400">/month</span>
+              </div>
+              <ul className="space-y-2 text-sm text-slate-700 dark:text-slate-300 mb-4">
+                <li>• Everything in Explorer</li>
+                <li>• Full Protocol editing</li>
+                <li>• Voice responses 🎙️</li>
+                <li>• Dashboard analytics</li>
+              </ul>
+              
+                href="https://buy.stripe.com/5kQ00j6N93z9dIZ26N8bS0s"
+                className="block w-full py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg font-medium text-center transition-all"
+              >
+                Choose Regulator
+              </a>
+            </div>
+          </div>
+
+          <p className="text-center text-sm text-slate-500 dark:text-slate-400">
+            Need help deciding? Email <a href="mailto:support@veraneural.com" className="text-purple-600 hover:text-purple-700 underline">support@veraneural.com</a>
+          </p>
         </div>
       </div>
-
-      <p className="text-center text-sm text-slate-500 dark:text-slate-400">
-        Need help deciding? Email <a href="mailto:support@veraneural.com" className="text-purple-600 hover:text-purple-700 underline">support@veraneural.com</a>
-      </p>
-    </div>
-  </div>
-);
+    );
+  };
 
   return (
     <div className={`flex flex-col h-screen transition-all duration-700 ${themeClasses.bg} ${themeClasses.font}`}>
+      <UpgradeModal />
+      
       {/* HEADER */}
       <div className={`backdrop-blur-xl border-b px-6 py-4 shadow-sm transition-all duration-500 ${themeClasses.header}`}>
         <div className="flex items-center justify-between max-w-5xl mx-auto">
@@ -515,13 +494,14 @@ const UpgradeModal = () => (
               <div className="w-3 h-3 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 animate-pulse" />
               <div className="absolute inset-0 w-3 h-3 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 animate-ping opacity-30" />
             </div>
-            <h1 className={`text-2xl font-normal bg-gradient-to-r from-rose-400 via-purple-400 to-blue-400 text-transparent bg-clip-text tracking-wide`}>
+            <h1 className="text-2xl font-normal bg-gradient-to-r from-rose-400 via-purple-400 to-blue-400 text-transparent bg-clip-text tracking-wide">
               VERA
             </h1>
             <span className={`text-xs px-2 py-1 rounded-full ${theme === 'neuro' ? 'bg-amber-200 text-amber-900' : theme === 'night' ? 'bg-zinc-800 text-zinc-300' : 'bg-purple-100 text-purple-700'}`}>
               evolving
             </span>
           </div>
+          
           <div className="flex items-center gap-2">
             <button
               onClick={cycleTheme}
@@ -538,6 +518,7 @@ const UpgradeModal = () => (
             >
               {theme === 'light' ? 'Light' : theme === 'dark' ? 'Dark' : theme === 'night' ? 'Night' : 'Neuro'}
             </button>
+
             <button
               onClick={() => setShowWellnessHub(true)}
               className={`p-2 rounded-xl transition-all border ${
@@ -553,6 +534,7 @@ const UpgradeModal = () => (
             >
               <Sparkles size={20} />
             </button>
+
             <button
               onClick={() => setSidePanelOpen(!sidePanelOpen)}
               className={`p-2 rounded-xl transition-all border ${
@@ -568,6 +550,7 @@ const UpgradeModal = () => (
             >
               <Menu size={20} />
             </button>
+            
             <button
               onClick={() => setShowCrisisModal(true)}
               className="w-10 h-10 rounded-full transition-all bg-red-900 hover:bg-red-800 shadow-lg"
@@ -581,7 +564,7 @@ const UpgradeModal = () => (
       {showCrisisModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className={`rounded-3xl p-8 max-w-2xl shadow-2xl ${
-            theme === 'light' ? 'bg-white' : theme === 'dark' ? 'bg-slate-900 border border-rose-500/30' : theme === 'night' ? 'bg-zinc-950 border border-zinc-800' : 'bg-white border-2 border-red-500'
+            theme === 'light' ? 'bg-white' : theme === 'dark' ? 'bg-slate-900 border border-rose-500/30' : theme === 'night' ? 'bg-zinc-950 border border-zinc-800' : 'bg-white border-2 border-red-400'
           }`}>
             <div className="flex justify-between items-start mb-6">
               <h2 className={`text-3xl font-bold ${theme === 'dark' || theme === 'night' ? 'text-white' : 'text-slate-900'}`}>
@@ -596,6 +579,7 @@ const UpgradeModal = () => (
                 <X size={24} />
               </button>
             </div>
+            
             <div className="space-y-6">
               <div className={`p-6 rounded-2xl border-2 ${theme === 'dark' || theme === 'night' ? 'bg-rose-900/30 border-rose-500/50' : 'bg-red-50 border-red-200'}`}>
                 <p className={`text-xl font-bold mb-3 ${theme === 'dark' || theme === 'night' ? 'text-rose-300' : 'text-red-700'}`}>
@@ -608,26 +592,18 @@ const UpgradeModal = () => (
                   Suicide & Crisis Lifeline • US/Canada • 24/7 • Free & Confidential
                 </p>
               </div>
+
               <div className={`p-6 rounded-2xl ${theme === 'dark' || theme === 'night' ? 'bg-purple-900/30' : theme === 'neuro' ? 'bg-amber-50' : 'bg-purple-50'}`}>
                 <p className={`font-bold mb-4 ${theme === 'dark' || theme === 'night' ? 'text-purple-300' : theme === 'neuro' ? 'text-amber-900' : 'text-purple-700'}`}>
                   More Crisis Resources
                 </p>
                 <ul className={`space-y-3 text-sm ${theme === 'dark' || theme === 'night' ? 'text-slate-300' : 'text-slate-700'}`}>
                   <li>• <strong>Crisis Text Line:</strong> Text HOME to 741741</li>
-                  <li>• <strong>SAMHSA Helpline:</strong> 1-800-662-4357 (Substance abuse & mental health)</li>
+                  <li>• <strong>SAMHSA Helpline:</strong> 1-800-662-4357</li>
                   <li>• <strong>Domestic Violence:</strong> 1-800-799-7233</li>
-                  <li>• <strong>Trevor Project (LGBTQ+ Youth):</strong> 1-866-488-7386</li>
+                  <li>• <strong>Trevor Project (LGBTQ+):</strong> 1-866-488-7386</li>
                   <li>• <strong>Veterans Crisis Line:</strong> 988 then press 1</li>
-                  <li>• <strong>International:</strong> <a href="https://findahelpline.com" target="_blank" rel="noopener noreferrer" className="underline">findahelpline.com</a></li>
                 </ul>
-              </div>
-              <div className={`p-4 rounded-xl text-xs ${theme === 'dark' || theme === 'night' ? 'bg-slate-800 text-slate-400' : 'bg-slate-100 text-slate-600'}`}>
-                <p className="font-semibold mb-2">⚠️ Important Disclaimer</p>
-                <p>
-                  VERA is NOT a medical device, therapist, or crisis intervention service. 
-                  She complements professional care but does not replace it. If you are in immediate danger, 
-                  please call 911 or your local emergency services.
-                </p>
               </div>
             </div>
           </div>
@@ -640,14 +616,8 @@ const UpgradeModal = () => (
           {messages.length === 0 && (
             <div className="flex flex-col items-center justify-center h-full py-16">
               <div className="text-center space-y-6">
-                <div className="central-orb-container-small">
-                  <div className="central-orb-small">
-                    <div className="inner-glow"></div>
-                    <div className="orbital-ring ring1"></div>
-                    <div className="orbital-ring ring2"></div>
-                    <div className="orbital-ring ring3"></div>
-                  </div>
-                </div>
+                <div className="w-32 h-32 mx-auto rounded-full bg-gradient-to-br from-purple-400 via-blue-400 to-purple-400 animate-pulse opacity-80" />
+                
                 <h2 className={`text-3xl font-bold ${themeClasses.text}`}>
                   I'm here. I see you.
                 </h2>
@@ -657,6 +627,7 @@ const UpgradeModal = () => (
               </div>
             </div>
           )}
+          
           {messages.map((msg) => (
             <div 
               key={msg.id} 
@@ -683,17 +654,19 @@ const UpgradeModal = () => (
               </div>
             </div>
           ))}
+          
           {isTyping && (
             <div className="flex justify-start animate-fade-in">
               <div className={`px-6 py-4 rounded-2xl shadow-md ${themeClasses.assistant} border`}>
                 <div className="flex gap-1.5">
-                  <div className={`w-2.5 h-2.5 rounded-full animate-bounce ${theme === 'light' ? 'bg-slate-400' : theme === 'dark' || theme === 'night' ? 'bg-purple-400' : 'bg-amber-500'}`}></div>
-                  <div className={`w-2.5 h-2.5 rounded-full animate-bounce ${theme === 'light' ? 'bg-slate-400' : theme === 'dark' || theme === 'night' ? 'bg-purple-400' : 'bg-amber-500'}`}></div>
-                  <div className={`w-2.5 h-2.5 rounded-full animate-bounce ${theme === 'light' ? 'bg-slate-400' : theme === 'dark' || theme === 'night' ? 'bg-purple-400' : 'bg-amber-500'}`}></div>
+                  <div className={`w-2.5 h-2.5 rounded-full animate-bounce ${theme === 'light' ? 'bg-slate-400' : theme === 'dark' || theme === 'night' ? 'bg-purple-400' : 'bg-amber-500'}`} style={{animationDelay: '0ms'}}></div>
+                  <div className={`w-2.5 h-2.5 rounded-full animate-bounce ${theme === 'light' ? 'bg-slate-400' : theme === 'dark' || theme === 'night' ? 'bg-purple-400' : 'bg-amber-500'}`} style={{animationDelay: '150ms'}}></div>
+                  <div className={`w-2.5 h-2.5 rounded-full animate-bounce ${theme === 'light' ? 'bg-slate-400' : theme === 'dark' || theme === 'night' ? 'bg-purple-400' : 'bg-amber-500'}`} style={{animationDelay: '300ms'}}></div>
                 </div>
               </div>
             </div>
           )}
+          
           <div ref={messagesEndRef} />
         </div>
       </div>
@@ -768,6 +741,7 @@ const UpgradeModal = () => (
               Redirect
             </button>
           </div>
+
           <div className="flex gap-3 items-end">
             <textarea
               ref={inputRef}
@@ -798,6 +772,7 @@ const UpgradeModal = () => (
               )}
             </button>
           </div>
+
           <div className="flex items-center justify-between">
             <button
               onClick={handleVoiceToggle}
@@ -826,6 +801,7 @@ const UpgradeModal = () => (
                     : 'Voice Off'}
               </span>
             </button>
+
             <p className={`text-xs ${theme === 'dark' || theme === 'night' ? 'text-slate-400' : theme === 'neuro' ? 'text-slate-600' : 'text-slate-500'}`}>
               Press Enter to send
             </p>
@@ -833,7 +809,6 @@ const UpgradeModal = () => (
         </div>
       </div>
 
-      {/* SIDE PANEL, WELLNESS MODAL, AUDIO */}
       <SidePanel 
         isOpen={sidePanelOpen} 
         onClose={() => setSidePanelOpen(false)} 
@@ -842,6 +817,7 @@ const UpgradeModal = () => (
         onNewChat={handleNewChat}
         onLoadChat={handleLoadChat}
       />
+
       {userId && (
         <WellnessHubModal
           isOpen={showWellnessHub}
@@ -850,132 +826,34 @@ const UpgradeModal = () => (
           userId={userId}
         />
       )}
-      <audio ref={audioRef} className="hidden" />
 
-      {/* STYLES */}
+      <audio ref={audioRef} className="hidden" />
+      
       <style jsx>{`
         @keyframes fade-in {
-            from {
-              opacity: 0;
-              transform: translateY(10px);
-            }
-            to {
-              opacity: 1;
-              transform: translateY(0);
-            }
+          from {
+            opacity: 0;
+            transform: translateY(10px);
           }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
 
-          .animate-fade-in {
-            animation: fade-in 0.4s ease-out;
-          }
+        .animate-fade-in {
+          animation: fade-in 0.4s ease-out;
+        }
 
-          .scrollbar-hide {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-          }
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
 
-          .scrollbar-hide::-webkit-scrollbar {
-            display: none;
-          }
-
-          .central-orb-container-small {
-            width: 200px;
-            height: 200px;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 2rem auto;
-          }
-
-          .central-orb-small {
-            width: 160px;
-            height: 160px;
-            border-radius: 50%;
-            background: radial-gradient(circle at 35% 35%, 
-              #93C5FD 0%, 
-              #A78BFA 25%, 
-              #8B5CF6 50%, 
-              #4C1D95 75%),
-              radial-gradient(circle at 70% 70%, 
-              #EC4899 0%, 
-              transparent 50%);
-            position: relative;
-            animation: orbBreathe 8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-            box-shadow: 
-              inset 0 0 60px rgba(255, 255, 255, 0.9),
-              0 0 120px rgba(167, 139, 250, 0.6),
-              0 0 100px rgba(139, 92, 246, 0.5),
-              0 0 80px rgba(236, 72, 153, 0.3),
-              0 20px 60px rgba(0, 0, 0, 0.3);
-          }
-
-          @keyframes orbBreathe {
-            0%, 100% { 
-              transform: scale(1) rotate(0deg); 
-              filter: brightness(1);
-            }
-            50% { 
-              transform: scale(1.12) rotate(5deg); 
-              filter: brightness(1.15);
-            }
-          }
-
-          .orbital-ring {
-            position: absolute;
-            border: 1px solid;
-            border-radius: 50%;
-            animation: ringPulse 4s ease-in-out infinite;
-            pointer-events: none;
-          }
-
-          .ring1 {
-            inset: -15px;
-            border-color: rgba(184, 167, 232, 0.3);
-            animation-delay: 0s;
-          }
-
-          .ring2 {
-            inset: -30px;
-            border-color: rgba(232, 155, 155, 0.2);
-            animation-delay: 2s;
-          }
-
-          .ring3 {
-            inset: -45px;
-            border-color: rgba(232, 180, 208, 0.15);
-            animation-delay: 4s;
-          }
-
-          @keyframes ringPulse {
-            0%, 100% { 
-              opacity: 0.3; 
-              transform: scale(1); 
-            }
-            50% { 
-              opacity: 0.6; 
-              transform: scale(1.05); 
-            }
-          }
-
-          .inner-glow {
-            position: absolute;
-            inset: 20%;
-            border-radius: 50%;
-            background: radial-gradient(circle at center,
-              rgba(255, 255, 255, 0.8) 0%,
-              rgba(255, 255, 255, 0.4) 30%,
-              transparent 70%);
-            animation: innerPulse 6s ease-in-out infinite;
-            pointer-events: none;
-          }
-
-          @keyframes innerPulse {
-            0%, 100% { opacity: 0.5; }
-            50% { opacity: 0.8; }
-          }
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
       `}</style>
-      {trialExpired && showUpgradeModal && UpgradeModal()}
     </div>
   );
 }

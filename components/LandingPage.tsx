@@ -380,7 +380,7 @@ export default function LandingPage() {
         </ul>
 
         
-          href="https://buy.stripe.com/5kQ00j6N93z9dIZ26N8bS0s"
+          <a href="https://buy.stripe.com/5kQ00j6N93z9dIZ26N8bS0s"
           className="block w-full py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-xl font-normal transition-all text-center shadow-lg"
         >
           Start 7-Day Free Trial

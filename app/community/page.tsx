@@ -155,7 +155,7 @@ export default function CommunityPage() {
 
             <div className="space-y-4">
               <Link
-                href="https://buy.stripe.com/YOUR_REGULATOR_LINK"
+                href="https://buy.stripe.com/5kQ00j6N93z9dIZ26N8bS0s""
                 className="block w-full py-4 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white rounded-xl font-medium transition-all shadow-lg"
               >
                 Upgrade to Regulator - $39/month

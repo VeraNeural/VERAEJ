@@ -6,6 +6,7 @@ import { Send, Volume2, Menu, Loader2, Circle } from 'lucide-react';
 import WellnessHub from '@/components/WellnessHubModal';
 import SidePanel from '@/components/SidePanel';
 import CourseGenerationModal from '@/components/CourseGenerationModal';
+import NotificationsPanel from '@/components/NotificationsPanel';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -335,6 +336,7 @@ export default function ChatPage() {
             </div>
 
             <div className="flex items-center gap-2">
+              <NotificationsPanel />
               <button
                 onClick={() => setShowCourseGeneration(true)}
                 className="px-3 py-2 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 rounded-lg transition-all text-white shadow-sm text-sm font-medium flex items-center gap-1"

@@ -8,8 +8,9 @@ import MainNavigation from '@/components/MainNavigation';
 import CourseGenerationModal from '@/components/CourseGenerationModal';
 import NotificationsPanel from '@/components/NotificationsPanel';
 
-// ADD THIS LINE to fix the build error
 export const dynamic = 'force-dynamic';
+
+export default function ChatPage() {
 
 export default function ChatPage() {
   const router = useRouter();

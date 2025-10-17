@@ -109,10 +109,15 @@ export default function MainNavigation({ isOpen, onClose, currentPage }: MainNav
     onClose();
   };
 
-  const handleNewChat = () => {
-    router.push('/chat');
-    onClose();
-  };
+const handleNewChat = () => {
+  // Clear session from URL and reload chat page
+  router.push('/chat');
+  router.refresh(); // Force refresh
+  onClose();
+  
+  // Also reload the page to clear state
+  window.location.href = '/chat';
+};
 
   const handleSignOut = async () => {
     try {

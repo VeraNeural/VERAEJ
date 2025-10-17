@@ -397,21 +397,22 @@ export default function MainNavigation({ isOpen, onClose, currentPage }: MainNav
             </div>
           )}
 
-          {/* Regulator → Integrator */}
+          {/* Regulator → Integrator (LOCKED) */}
           {isRegulator && !isIntegrator && (
             <div className="bg-gradient-to-r from-purple-900/30 to-pink-900/30 rounded-lg p-3 mt-2 border border-purple-500/20">
               <p className="text-purple-300 text-sm font-medium mb-1 flex items-center gap-1">
                 <Crown size={14} />
-                Unlock Integrator
+                Integrator - Coming Soon
               </p>
               <p className="text-slate-400 text-xs mb-2">
                 Unlimited Voice, Custom Courses, Body Decoding & White Label
               </p>
               <button
-                onClick={() => router.push('/pricing')}
-                className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white text-sm py-2 rounded-lg transition-all font-medium"
+                disabled
+                className="w-full bg-slate-600 text-slate-300 text-sm py-2 rounded-lg cursor-not-allowed font-medium flex items-center justify-center gap-2"
               >
-                Upgrade to Integrator - $99/mo
+                <Lock size={14} />
+                In Development
               </button>
             </div>
           )}

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Send, Volume2, Menu, Loader2 } from 'lucide-react';
+import { Send, Volume2, Menu, Loader2, Circle } from 'lucide-react';
 import WellnessHub from '@/components/WellnessHubModal';
 import SidePanel from '@/components/SidePanel';
 import CourseGenerationModal from '@/components/CourseGenerationModal';
@@ -324,11 +324,13 @@ export default function ChatPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <button
-                onClick={() => setShowSidePanel(true)}
-                className="p-2 hover:bg-slate-700/60 rounded-lg transition-colors"
-              >
-                <Menu size={24} className="text-slate-200" />
-              </button>
+                <button
+  onClick={() => setShowCourseGeneration(true)}
+  className="px-3 py-2 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 rounded-lg transition-all text-white shadow-sm text-sm font-medium flex items-center gap-1"
+>
+  <Circle size={16} className="fill-white" />
+  Create Course
+</button>
               <div className="flex items-center gap-3">
                 <div className="relative">
                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-blue-400" />

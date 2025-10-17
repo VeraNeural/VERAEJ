@@ -88,45 +88,40 @@ export default function MainNavigation({ isOpen, onClose, currentPage }: MainNav
     }
   };
 
-  const handleDeleteChat = async (sessionId: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!confirm('Delete this conversation?')) return;
+const handleDeleteChat = async (sessionId: string, e: React.MouseEvent) => {
+  e.stopPropagation();
+  if (!confirm('Delete this conversation?')) return;
 
-    try {
-      const response = await fetch(`/api/sessions?id=${sessionId}`, {
-        method: 'DELETE',
-      });
-      if (response.ok) {
-        setChatSessions(chatSessions.filter(s => s.id !== sessionId));
-      }
-    } catch (error) {
-      console.error('Failed to delete chat:', error);
+  try {
+    const response = await fetch(`/api/sessions?id=${sessionId}`, {
+      method: 'DELETE',
+    });
+    if (response.ok) {
+      setChatSessions(chatSessions.filter(s => s.id !== sessionId));
     }
-  };
+  } catch (error) {
+    console.error('Failed to delete chat:', error);
+  }
+};
 
-  const handleLoadChat = (sessionId: string) => {
-    router.push(`/chat?session=${sessionId}`);
-    onClose();
-  };
+const handleLoadChat = (sessionId: string) => {
+  router.push(`/chat?session=${sessionId}`);
+  onClose();
+};
 
 const handleNewChat = () => {
-  // Clear session from URL and reload chat page
-  router.push('/chat');
-  router.refresh(); // Force refresh
-  onClose();
-  
-  // Also reload the page to clear state
+  // Force a complete page reload to clear session
   window.location.href = '/chat';
 };
 
-  const handleSignOut = async () => {
-    try {
-      await fetch('/api/auth/signout', { method: 'POST' });
-      router.push('/auth/signin');
-    } catch (error) {
-      console.error('Sign out failed:', error);
-    }
-  };
+const handleSignOut = async () => {
+  try {
+    await fetch('/api/auth/signout', { method: 'POST' });
+    router.push('/auth/signin');
+  } catch (error) {
+    console.error('Sign out failed:', error);
+  }
+};
 
   const navigate = (path: string) => {
     router.push(path);

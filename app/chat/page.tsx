@@ -339,25 +339,16 @@ export default function ChatPage() {
             <div className="flex items-center gap-2">
               <NotificationsPanel />
               <button
-                onClick={() => setShowCourseGeneration(true)}
-                className="px-3 py-2 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 rounded-lg transition-all text-white shadow-sm text-sm font-medium flex items-center gap-1"
-              >
-                <Circle size={16} className="fill-white" />
-                Create Course
-              </button>
-              <button
-                onClick={() => router.push('/community')}
-                className="px-3 py-2 bg-slate-700/60 hover:bg-slate-600/60 rounded-lg transition-all text-slate-200 border border-slate-600/50 shadow-sm text-sm font-medium"
-              >
-                Community
-              </button>
-              <button
-                onClick={() => setShowWellnessHub(true)}
-                className="px-3 py-2 bg-slate-700/60 hover:bg-slate-600/60 rounded-lg transition-all text-slate-200 border border-slate-600/50 shadow-sm text-sm font-medium"
-              >
-                Tools
-              </button>
-            </div>
+                <div className="flex items-center gap-2">
+  <NotificationsPanel />
+  <button
+    onClick={() => setShowCourseGeneration(true)}
+    className="px-3 py-2 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 rounded-lg transition-all text-white shadow-sm text-sm font-medium flex items-center gap-1"
+  >
+    <Circle size={16} className="fill-white" />
+    Create Course
+  </button>
+</div>
           </div>
         </header>
 

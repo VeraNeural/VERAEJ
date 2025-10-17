@@ -11,8 +11,6 @@ import NotificationsPanel from '@/components/NotificationsPanel';
 export const dynamic = 'force-dynamic';
 
 export default function ChatPage() {
-
-export default function ChatPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [messages, setMessages] = useState<Array<{ role: string; content: string }>>([]);

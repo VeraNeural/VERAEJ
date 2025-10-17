@@ -38,7 +38,6 @@ model chat_sessions {
   @@index([user_id], map: "idx_chat_sessions_user_id")
 }
 
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model check_ins {
   id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   user_id    String    @db.Uuid
@@ -183,7 +182,6 @@ model daily_check_ins_simple {
   @@index([user_id, date(sort: Desc)], map: "idx_daily_check_ins_user_date")
 }
 
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model daily_checkins {
   id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   user_id    String    @db.VarChar(255)
@@ -501,6 +499,7 @@ model users {
   email_updates                                       Boolean?                 @default(false)
   privacy_mode                                        Boolean?                 @default(false)
   is_admin                                            Boolean?                 @default(false)
+  is_system_user                                      Boolean?                 @default(false)
   created_at                                          DateTime?                @default(now()) @db.Timestamp(6)
   updated_at                                          DateTime?                @default(now()) @db.Timestamp(6)
   password                                            String?                  @db.VarChar(255)
@@ -526,6 +525,7 @@ model users {
   files                                               files[]
   journal_entries                                     journal_entries[]
   messages                                            messages[]
+  notifications_relation                              notifications[]
   password_reset_tokens                               password_reset_tokens[]
   poll_votes                                          poll_votes[]
   post_comments                                       post_comments[]
@@ -558,7 +558,7 @@ model notifications {
   read       Boolean?  @default(false)
   created_at DateTime? @default(now()) @db.Timestamp(6)
   sent_at    DateTime? @db.Timestamp(6)
-  users      users     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  users      users     @relation(fields: [user_id], references: [id], onDelete: Cascade, name: "notifications_relation")
   
   @@index([user_id])
   @@index([type])

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { query } from '@/lib/db';
+import { prisma } from '@/lib/prisma';
 import { requireAuth } from '@/lib/auth';
 
 // GET - Fetch comments for a post
@@ -17,23 +17,29 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Post ID required' }, { status: 400 });
     }
 
-    const commentsResult = await query(
-      `SELECT 
-        pc.id,
-        pc.content,
-        pc.created_at,
-        u.name as user_name,
-        u.id as user_id
-       FROM post_comments pc
-       JOIN users u ON pc.user_id = u.id
-       WHERE pc.post_id = $1
-       ORDER BY pc.created_at ASC`,
-      [postId]
-    );
-
-    return NextResponse.json({
-      comments: commentsResult.rows,
+    const comments = await prisma.post_comments.findMany({
+      where: { post_id: postId },
+      include: {
+        users: {
+          select: {
+            id: true,
+            name: true,
+          }
+        }
+      },
+      orderBy: { created_at: 'asc' }
     });
+
+    // Transform to match expected format
+    const formattedComments = comments.map(comment => ({
+      id: comment.id,
+      content: comment.content,
+      created_at: comment.created_at,
+      user_name: comment.users?.name || 'Unknown',
+      user_id: comment.user_id,
+    }));
+
+    return NextResponse.json({ comments: formattedComments });
   } catch (error) {
     console.error('Error fetching comments:', error);
     return NextResponse.json(
@@ -60,24 +66,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const commentResult = await query(
-      `INSERT INTO post_comments (post_id, user_id, content)
-       VALUES ($1, $2, $3)
-       RETURNING id, content, created_at`,
-      [postId, user.userId, content.trim()]
-    );
-
-    // Get user name
-    const userResult = await query(
-      'SELECT name FROM users WHERE id = $1',
-      [user.userId]
-    );
+    const comment = await prisma.post_comments.create({
+      data: {
+        post_id: postId,
+        user_id: user.userId,
+        content: content.trim(),
+      },
+      include: {
+        users: {
+          select: {
+            name: true,
+          }
+        }
+      }
+    });
 
     return NextResponse.json({
       comment: {
-        ...commentResult.rows[0],
-        user_name: userResult.rows[0].name,
-        user_id: user.userId,
+        id: comment.id,
+        content: comment.content,
+        created_at: comment.created_at,
+        user_name: comment.users?.name || 'Unknown',
+        user_id: comment.user_id,
       },
     });
   } catch (error) {

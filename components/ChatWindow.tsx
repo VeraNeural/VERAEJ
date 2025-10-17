@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Send, Menu, Volume2, VolumeX, AlertCircle, X, Heart, Compass, Wind, Loader2, Sparkles, Zap } from 'lucide-react';
 import SidePanel from './SidePanel';
 import WellnessHubModal from './WellnessHubModal';
+import NotificationsPanel from '@/components/NotificationsPanel';
 
 interface Message {
   id: string;
@@ -480,7 +481,9 @@ return (
               title="Switch theme"
             >
               {theme === 'light' ? 'Light' : theme === 'dark' ? 'Dark' : theme === 'night' ? 'Night' : 'Neuro'}
-            </button>
+           </button>
+
+            <NotificationsPanel />
 
             <button
               onClick={() => setShowWellnessHub(true)}

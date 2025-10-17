@@ -18,9 +18,11 @@ export async function POST(req: NextRequest) {
     const signature = headersList.get('stripe-signature');
     
     if (!signature) {
+      console.error('❌ No signature in webhook');
       return NextResponse.json({ error: 'No signature' }, { status: 400 });
     }
     
+    // Verify webhook signature
     let event;
     try {
       event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
@@ -31,9 +33,14 @@ export async function POST(req: NextRequest) {
     
     console.log('✅ Stripe webhook received:', event.type);
     
+    // Handle different event types
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object;
+        
+        console.log('💳 Checkout session completed:', session.id);
+        
+        // Get customer email
         const customerEmail = session.customer_email || session.customer_details?.email;
         
         if (!customerEmail) {
@@ -41,17 +48,23 @@ export async function POST(req: NextRequest) {
           break;
         }
         
-        // Determine tier
+        console.log('📧 Customer email:', customerEmail);
+        
+        // Determine tier from metadata or amount
         let tier = 'explorer';
+        
         if (session.metadata?.tier) {
           tier = session.metadata.tier;
         } else {
           const amount = session.amount_total;
-          if (amount === 3900) tier = 'regulator';
+          if (amount === 1900) tier = 'explorer';
+          else if (amount === 3900) tier = 'regulator';
           else if (amount === 9900) tier = 'integrator';
         }
         
-        // Get user
+        console.log('🎯 Tier:', tier);
+        
+        // Get user from database
         const userResult = await query(
           'SELECT id, name, email FROM users WHERE email = $1',
           [customerEmail]
@@ -63,8 +76,9 @@ export async function POST(req: NextRequest) {
         }
         
         const user = userResult.rows[0];
+        console.log('👤 User found:', user.name);
         
-        // Update user - trial converted to ACTIVE subscription
+        // Update user in database
         await query(
           `UPDATE users 
            SET subscription_tier = $1,
@@ -76,60 +90,72 @@ export async function POST(req: NextRequest) {
           [tier, session.customer, customerEmail]
         );
         
-        console.log(`✅ Trial converted to ACTIVE: ${customerEmail} - ${tier.toUpperCase()}`);
+        console.log(`✅ User upgraded: ${customerEmail} - ${tier.toUpperCase()}`);
         
-        // Email to USER
+        // Send email to USER
         try {
-          await resend.emails.send({
-            from: 'VERA <support@veraneural.com>',
+          console.log('📧 Sending welcome email to user...');
+          
+          const emailResult = await resend.emails.send({
+            from: 'VERA <support@veraneural.com>', // ← Make sure this domain is verified in Resend
             to: customerEmail,
-            subject: `Your ${tier.charAt(0).toUpperCase() + tier.slice(1)} subscription is now active! 🎉`,
+            subject: `Welcome to VERA ${tier.charAt(0).toUpperCase() + tier.slice(1)}! 🎉`,
             html: `
-              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                <h1 style="color: #8b5cf6;">Welcome to VERA ${tier.charAt(0).toUpperCase() + tier.slice(1)}, ${user.name}! 🌟</h1>
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                <h1 style="color: #8b5cf6;">Welcome to VERA, ${user.name}! 🌟</h1>
                 <p style="font-size: 16px; color: #475569;">
-                  Your 7-day trial has ended and your payment was successful! Your <strong>${tier.charAt(0).toUpperCase() + tier.slice(1)}</strong> subscription is now active.
+                  Your payment was successful! You now have access to <strong>${tier.charAt(0).toUpperCase() + tier.slice(1)}</strong> tier.
                 </p>
                 <div style="background: #f1f5f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                  <h2 style="color: #8b5cf6; margin-top: 0;">Continue your journey</h2>
-                  <p style="color: #475569;">VERA is here for you 24/7. Keep exploring, regulating, and growing.</p>
+                  <h2 style="color: #8b5cf6; margin-top: 0;">What's next?</h2>
+                  <ul style="color: #475569; line-height: 1.8;">
+                    <li>Start chatting with VERA anytime, 24/7</li>
+                    <li>Explore your ${tier} features</li>
+                    <li>Access wellness tools and resources</li>
+                  </ul>
                 </div>
                 <a href="https://veraneural.com/chat" style="display: inline-block; background: #8b5cf6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; margin: 20px 0;">
-                  Continue to Chat →
+                  Start Chatting with VERA →
                 </a>
                 <p style="color: #94a3b8; font-size: 14px; margin-top: 30px;">
-                  Questions? Reply to this email anytime.
+                  Need help? Reply to this email or visit our support page.
                 </p>
               </div>
             `,
           });
-          console.log('✅ Subscription confirmation email sent');
-        } catch (emailError) {
+          
+          console.log('✅ Welcome email sent to user:', emailResult);
+        } catch (emailError: any) {
           console.error('❌ Failed to send user email:', emailError);
+          console.error('Email error details:', emailError.message);
         }
         
-        // Email to ADMIN
+        // Send email to ADMIN (YOU)
         try {
-          await resend.emails.send({
-            from: 'VERA Notifications <notifications@veraneural.com>',
-            to: 'your-admin-email@example.com', // REPLACE WITH YOUR EMAIL
-            subject: `💰 Trial Converted! ${tier.toUpperCase()} - ${user.name}`,
+          console.log('📧 Sending notification email to admin...');
+          
+          const adminEmailResult = await resend.emails.send({
+            from: 'VERA Notifications <notifications@veraneural.com>', // ← Make sure this domain is verified
+            to: 'eva@evaleka.com', // ← REPLACE WITH YOUR ACTUAL EMAIL
+            subject: `💰 New ${tier.toUpperCase()} Subscription!`,
             html: `
               <div style="font-family: Arial, sans-serif;">
-                <h2 style="color: #10b981;">🎉 Trial Converted to Paid!</h2>
+                <h2 style="color: #10b981;">🎉 New Payment Received!</h2>
                 <div style="background: #f0fdf4; padding: 15px; border-radius: 8px; border-left: 4px solid #10b981;">
                   <p><strong>Customer:</strong> ${user.name} (${customerEmail})</p>
                   <p><strong>Tier:</strong> ${tier.toUpperCase()}</p>
                   <p><strong>Amount:</strong> $${(session.amount_total / 100).toFixed(2)}</p>
-                  <p><strong>Stripe Customer:</strong> ${session.customer}</p>
+                  <p><strong>Stripe Customer ID:</strong> ${session.customer}</p>
                   <p><strong>Time:</strong> ${new Date().toLocaleString()}</p>
                 </div>
               </div>
             `,
           });
-          console.log('✅ Admin notification sent');
-        } catch (emailError) {
+          
+          console.log('✅ Admin notification sent:', adminEmailResult);
+        } catch (emailError: any) {
           console.error('❌ Failed to send admin email:', emailError);
+          console.error('Email error details:', emailError.message);
         }
         
         break;
@@ -137,6 +163,7 @@ export async function POST(req: NextRequest) {
       
       case 'customer.subscription.updated': {
         const subscription = event.data.object;
+        
         await query(
           `UPDATE users 
            SET subscription_status = $1,
@@ -144,12 +171,14 @@ export async function POST(req: NextRequest) {
            WHERE stripe_customer_id = $2`,
           [subscription.status, subscription.customer]
         );
+        
         console.log('✅ Subscription updated:', subscription.customer);
         break;
       }
       
       case 'customer.subscription.deleted': {
         const subscription = event.data.object;
+        
         await query(
           `UPDATE users 
            SET subscription_status = 'canceled',
@@ -157,6 +186,7 @@ export async function POST(req: NextRequest) {
            WHERE stripe_customer_id = $1`,
           [subscription.customer]
         );
+        
         console.log('✅ Subscription canceled:', subscription.customer);
         break;
       }

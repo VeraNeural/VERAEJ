@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { Send, Volume2, Menu, Loader2 } from 'lucide-react';
 import WellnessHub from '@/components/WellnessHubModal';
 import MainNavigation from '@/components/MainNavigation';
@@ -12,7 +12,6 @@ export const dynamic = 'force-dynamic';
 
 export default function ChatPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [messages, setMessages] = useState<Array<{ role: string; content: string }>>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -24,20 +23,12 @@ export default function ChatPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Load session from URL on mount
-  useEffect(() => {
-    const sessionFromUrl = searchParams.get('session');
-    if (sessionFromUrl) {
-      loadSession(sessionFromUrl);
-    }
-  }, [searchParams]);
-
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Check auth on mount - COMMENTED OUT THE ORIENTATION CHECK
+  // Check auth on mount
   useEffect(() => {
     checkAuth();
   }, []);
@@ -49,8 +40,6 @@ export default function ChatPage() {
         router.push('/auth/signin');
         return;
       }
-
-      // Removed orientation check - this was causing the redirect loop
     } catch (error) {
       console.error('Auth check failed:', error);
       router.push('/auth/signin');

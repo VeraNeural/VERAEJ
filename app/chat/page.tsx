@@ -47,17 +47,11 @@ export default function ChatPage() {
 
   const voiceAvailable = ['regulator', 'integrator', 'test'].includes(userTier);
   
-  const getVoiceLimit = (tier: string) => {
-    switch(tier) {
-      case 'integrator':
-      case 'test':
-        return Infinity;
-      case 'regulator':
-        return 20;
-      default:
-        return 0;
-    }
-  };
+ import { hasFeatureAccess, getVoiceLimit } from '@/lib/tiers';
+
+// Remove the getVoiceLimit function entirely - we're importing it
+
+const voiceAvailable = hasFeatureAccess(userTier as any, 'voice_responses');
 
   const canUseVoice = voiceUsageToday < getVoiceLimit(userTier);
 
@@ -117,7 +111,7 @@ export default function ChatPage() {
       setUser(data.user);
       setUserTier(data.user.subscription_tier);
       
-      if (['regulator', 'integrator', 'test'].includes(data.user.subscription_tier)) {
+      if (hasFeatureAccess(data.user.subscription_tier, 'voice_responses')) {
         const usageResponse = await fetch('/api/voice-usage');
         if (usageResponse.ok) {
           const usageData = await usageResponse.json();

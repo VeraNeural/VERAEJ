@@ -359,7 +359,10 @@ async function handleReaction(postId: string, reactionType: string) {
     );
   }
 
+  }
+  
   return (
+    <>
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50">
       {/* Header */}
       <div className="bg-white/90 backdrop-blur-xl border-b border-purple-100 sticky top-0 z-10">

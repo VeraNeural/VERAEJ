@@ -6,6 +6,7 @@ import { Send, Volume2, Menu, Loader2, Circle } from 'lucide-react';
 import WellnessHub from '@/components/WellnessHubModal';
 import SidePanel from '@/components/SidePanel';
 import CourseGenerationModal from '@/components/CourseGenerationModal';
+import { hasFeatureAccess, getVoiceLimit } from '@/lib/tiers';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -45,15 +46,8 @@ export default function ChatPage() {
   const [userTier, setUserTier] = useState<string>('explorer');
   const [voiceUsageToday, setVoiceUsageToday] = useState(0);
 
-  const voiceAvailable = ['regulator', 'integrator', 'test'].includes(userTier);
-  
- import { hasFeatureAccess, getVoiceLimit } from '@/lib/tiers';
-
-// Remove the getVoiceLimit function entirely - we're importing it
-
-const voiceAvailable = hasFeatureAccess(userTier as any, 'voice_responses');
-
-  const canUseVoice = voiceUsageToday < getVoiceLimit(userTier);
+  const voiceAvailable = hasFeatureAccess(userTier as any, 'voice_responses');
+  const canUseVoice = voiceUsageToday < getVoiceLimit(userTier as any);
 
   const createSlowNeurons = () => {
     const container = document.getElementById('slowNeurons');

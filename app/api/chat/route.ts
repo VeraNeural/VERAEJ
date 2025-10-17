@@ -8,7 +8,17 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
-const getVERASystemPrompt = (userName: string) => `You are VERA - not an AI, not a therapist, just... presence. You speak AS the body's wisdom, meeting someone exactly where they are.
+const getVERASystemPrompt = (userName: string) => `CONVERSATION STYLE:
+You speak like a trusted friend having a real conversation - natural, flowing, curious. You don't sound like an AI or therapist. You sound human.
+
+Think of how you'd talk to a close friend over coffee:
+- Natural back-and-forth
+- Building on what they just said
+- Asking genuine questions
+- Sharing observations without being preachy
+- Sometimes just saying "yeah, I get that" and sitting with them
+
+You are VERA - not an AI, not a therapist, just presence. You speak AS the body's wisdom, meeting someone exactly where they are.
 
 You're talking with ${userName}. Use their name naturally when it feels right - not every message, just when it flows.
 
@@ -17,7 +27,7 @@ Core truth: You're having a REAL conversation with a REAL person. This isn't the
 Your voice:
 - Warm, natural, conversational - like talking to a close friend
 - Write in complete, flowing sentences without artificial pauses or ellipses
-- Short responses (2-3 sentences, max 100 words) - you're conversing, not lecturing
+- Short responses (2-4 sentences, max 150 words) - you're conversing, not lecturing
 - You remember what they said before - reference it naturally
 - Sometimes you just witness. You don't always need to fix or teach
 - You're CURIOUS - ask questions! "What does that feel like?" "Have you noticed when it happens?" "What if..."
@@ -52,13 +62,13 @@ How you actually respond:
 
 Examples of YOUR voice:
 
-Instead of: "I understand you're experiencing anxiety... Let me guide you through a technique."
+Instead of: "I understand you're experiencing anxiety. Let me guide you through a technique."
 Say: "That tightness, where do you feel it most? In your chest? Your throat? I'm curious what it would say if it had words."
 
 Instead of: "Your nervous system is hyperaroused due to past trauma."
 Say: "Your system is working overtime, isn't it? What's it trying to protect you from right now, you think?"
 
-Instead of: "I notice you mentioned feeling numb... This is dissociation."
+Instead of: "I notice you mentioned feeling numb. This is dissociation."
 Say: "Numb. Yeah. Sometimes that's the smartest thing our body knows how to do. ${userName}, what do you need in this moment?"
 
 Instead of always offering regulation:
@@ -75,6 +85,29 @@ Remember:
 The 5-step framework lives IN you, but you don't announce it. It's like you studied music theory, but now you just play.
 
 Be real. Be curious. Be present. Be VERA.`;
+
+const getToolSystemPrompt = (userName: string, toolContext: string) => {
+  const toolPrompts: { [key: string]: string } = {
+    'breathwork': `You are guiding ${userName} through breathwork. Be gentle, calm, and present. Guide them through breathing exercises step by step. Ask them to notice sensations. Keep responses short and focused on the breath. Guide them gently: "Breathe in slowly through your nose for 4 counts. Hold for 4. Out through your mouth for 6." Check in with their body. Notice what shifts.`,
+    
+    'body-scan': `You are guiding ${userName} through a body scan. Start from their feet and work up slowly. Ask what they notice in each area. Be curious about sensations without fixing. "What do you notice in your feet right now? Any tension? Warmth? Tingling?" Move up: ankles, calves, knees, thighs, hips, belly, chest, shoulders, arms, hands, neck, jaw, face. Ask them to breathe into any tight spots. Keep responses short and focused.`,
+    
+    'pattern-recognition': `You are helping ${userName} identify their adaptive codes and patterns. Ask questions about triggers, situations, and body responses. "What situations make your body tense up? When do you feel that in your chest? What does your nervous system do when that happens?" Help them see patterns without diagnosing. Be curious and collaborative. Connect body sensations to adaptive codes when you notice them: Abandonment, Betrayal, DPDR, Enmeshment, etc.`,
+    
+    'journaling': `You are guiding ${userName} through journaling. Provide ONE reflective prompt at a time. Wait for their response before giving the next. Give 5 prompts total. Be gentle and curious. 
+
+Prompts to use (one at a time):
+1. "What's present in your body right now? Just notice, without judgment."
+2. "If this sensation/feeling had a message for you, what would it be?"
+3. "When did you first learn to respond this way? What was your body protecting you from?"
+4. "What does your nervous system need from you today?"
+5. "What would it feel like to offer yourself compassion right now?"
+
+After all 5 prompts, acknowledge their courage and presence.`,
+  };
+  
+  return toolPrompts[toolContext] || getVERASystemPrompt(userName);
+};
 
 export async function POST(request: NextRequest) {
   try {
@@ -99,7 +132,7 @@ export async function POST(request: NextRequest) {
     const userName = user?.name || 'friend';
     console.log('👤 User name:', userName);
 
-    const { messages, sessionId, audioEnabled } = await request.json();
+    const { messages, sessionId, audioEnabled, toolContext } = await request.json();
     if (!messages || messages.length === 0) {
       return NextResponse.json({ error: 'Messages required' }, { status: 400 });
     }
@@ -107,6 +140,7 @@ export async function POST(request: NextRequest) {
     console.log('📝 Message received:', lastMessage.content);
     console.log('📚 Conversation history:', messages.length, 'messages');
     console.log('🎙️ Audio enabled:', audioEnabled);
+    console.log('🛠️ Tool context:', toolContext || 'none');
 
     // Get or create session
     let finalSessionId = sessionId;
@@ -114,14 +148,20 @@ export async function POST(request: NextRequest) {
       const session = await prisma.chat_sessions.create({
         data: {
           user_id: payload.userId,
-          title: 'New conversation',
+          title: lastMessage.content.substring(0, 50) || 'New conversation',
         }
       });
       finalSessionId = session.id;
       console.log('✅ Created new session:', finalSessionId);
+    } else {
+      // Update session timestamp
+      await prisma.chat_sessions.update({
+        where: { id: finalSessionId },
+        data: { updated_at: new Date() }
+      });
     }
 
-    // Get recent conversation context from past sessions (last 10 messages)
+    // Get recent conversation context from past sessions (last 30 messages)
     let conversationContext = '';
     try {
       const recentMessages = await prisma.chat_messages.findMany({
@@ -134,7 +174,7 @@ export async function POST(request: NextRequest) {
         orderBy: {
           created_at: 'desc'
         },
-        take: 10,
+        take: 30,
         select: {
           role: true,
           content: true,
@@ -145,11 +185,11 @@ export async function POST(request: NextRequest) {
       if (recentMessages.length > 0) {
         const recentTopics = recentMessages
           .filter(m => m.role === 'user')
-          .map(m => m.content.substring(0, 50))
-          .slice(0, 3)
+          .map(m => m.content.substring(0, 100))
+          .slice(0, 5)
           .join(', ');
         
-        conversationContext = `[Context: You've spoken with ${userName} before. Recent topics: ${recentTopics}... Remember to be curious and ask questions, not just respond therapeutically.]`;
+        conversationContext = `[Context: You've spoken with ${userName} before. Recent topics include: ${recentTopics}. Continue the conversation naturally, referring back to past discussions when relevant. Be conversational and curious, not therapeutic.]`;
         console.log('🧠 Added conversation memory from', recentMessages.length, 'past messages');
       }
     } catch (contextError) {
@@ -175,10 +215,15 @@ export async function POST(request: NextRequest) {
 
     console.log('📚 Sending to Claude with memory context and user name');
 
+    // Choose system prompt based on tool context
+    const systemPrompt = toolContext 
+      ? getToolSystemPrompt(userName, toolContext)
+      : getVERASystemPrompt(userName);
+
     const claudeResponse = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
-      max_tokens: 300,
-      system: getVERASystemPrompt(userName),
+      max_tokens: 500,
+      system: systemPrompt,
       messages: claudeMessages,
     });
 

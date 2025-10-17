@@ -21,12 +21,11 @@ const quickPrompts = [
   { label: 'Numb', text: 'I feel disconnected and numb' },
 ];
 
-// Utility function to strip markdown formatting
 const stripMarkdown = (text: string) => {
   return text
-    .replace(/\*\*(.*?)\*\*/g, '$1')  // Remove bold **text**
-    .replace(/\*(.*?)\*/g, '$1')      // Remove italic *text*
-    .replace(/`(.*?)`/g, '$1');       // Remove code `text`
+    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/\*(.*?)\*/g, '$1')
+    .replace(/`(.*?)`/g, '$1');
 };
 
 export default function ChatPage() {
@@ -36,13 +35,12 @@ export default function ChatPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showWellnessHub, setShowWellnessHub] = useState(false);
   const [showSidePanel, setShowSidePanel] = useState(false);
+  const [showCourseGeneration, setShowCourseGeneration] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [darkMode] = useState(false);
-  const [showCourseGeneration, setShowCourseGeneration] = useState(false);
 
-  // Voice state
   const [audioEnabled, setAudioEnabled] = useState(false);
   const [userTier, setUserTier] = useState<string>('explorer');
   const [voiceUsageToday, setVoiceUsageToday] = useState(0);
@@ -69,7 +67,6 @@ export default function ChatPage() {
 
     container.innerHTML = '';
 
-    // Create slow-moving neurons (40 neurons - subtle)
     for (let i = 0; i < 40; i++) {
       const neuron = document.createElement('div');
       neuron.className = 'slow-neuron';
@@ -89,7 +86,6 @@ export default function ChatPage() {
       container.appendChild(neuron);
     }
 
-    // Add consciousness waves (very slow and subtle)
     for (let i = 0; i < 3; i++) {
       const wave = document.createElement('div');
       wave.className = 'slow-consciousness-wave';
@@ -237,11 +233,10 @@ export default function ChatPage() {
   };
 
   return (
-  <div className="relative">
-    {/* Slow-Moving Neurons Background */}
-    <div className="slow-neurons-container" id="slowNeurons"></div>
+    <div className="relative">
+      <div className="slow-neurons-container" id="slowNeurons"></div>
 
-    <style dangerouslySetInnerHTML={{ __html: `
+      <style dangerouslySetInnerHTML={{ __html: `
         .slow-neurons-container {
           position: fixed;
           width: 100%;
@@ -309,28 +304,24 @@ export default function ChatPage() {
           }
         }
 
-        /* Compact audio player */
         audio {
           height: 32px;
         }
         audio::-webkit-media-controls-panel {
           background-color: rgba(71, 85, 105, 0.5);
         }
-      `}</style>
+      ` }} />
 
       <div className="flex flex-col h-screen bg-gradient-to-br from-indigo-200 via-purple-200 to-blue-200 relative">
-        {/* Header */}
         <header className="bg-slate-800/80 backdrop-blur-xl border-b border-slate-700/50 px-6 py-4 relative z-10">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <button
-                <button
-  onClick={() => setShowCourseGeneration(true)}
-  className="px-3 py-2 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 rounded-lg transition-all text-white shadow-sm text-sm font-medium flex items-center gap-1"
->
-  <Circle size={16} className="fill-white" />
-  Create Course
-</button>
+                onClick={() => setShowSidePanel(true)}
+                className="p-2 hover:bg-slate-700/60 rounded-lg transition-colors"
+              >
+                <Menu size={24} className="text-slate-200" />
+              </button>
               <div className="flex items-center gap-3">
                 <div className="relative">
                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-blue-400" />
@@ -345,12 +336,12 @@ export default function ChatPage() {
 
             <div className="flex items-center gap-2">
               <button
-  onClick={() => setShowCourseGeneration(true)}
-  className="px-3 py-2 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 rounded-lg transition-all text-white shadow-sm text-sm font-medium flex items-center gap-1"
->
-  <Sparkles size={16} />
-  Create Course
-</button>
+                onClick={() => setShowCourseGeneration(true)}
+                className="px-3 py-2 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 rounded-lg transition-all text-white shadow-sm text-sm font-medium flex items-center gap-1"
+              >
+                <Circle size={16} className="fill-white" />
+                Create Course
+              </button>
               <button
                 onClick={() => router.push('/community')}
                 className="px-3 py-2 bg-slate-700/60 hover:bg-slate-600/60 rounded-lg transition-all text-slate-200 border border-slate-600/50 shadow-sm text-sm font-medium"
@@ -367,7 +358,6 @@ export default function ChatPage() {
           </div>
         </header>
 
-        {/* Chat Area */}
         <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6 relative z-10">
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full max-w-2xl mx-auto text-center px-4">
@@ -379,7 +369,6 @@ export default function ChatPage() {
                 Share what's happening in your body, and we'll explore it together. There's no rush, no judgment - just presence.
               </p>
 
-              {/* Quick Prompts */}
               <div className="w-full max-w-xl">
                 <p className="text-sm text-slate-700 mb-4">Not sure where to start? Try one of these:</p>
                 <div className="flex gap-2 flex-wrap justify-center">
@@ -430,11 +419,9 @@ export default function ChatPage() {
           )}
         </div>
 
-        {/* Input Area */}
         <div className="border-t border-slate-700/50 bg-slate-800/80 backdrop-blur-xl px-6 py-4 relative z-10">
           <div className="max-w-4xl mx-auto">
             <div className="flex gap-3 items-end">
-              {/* Voice Toggle - Smaller and cleaner */}
               <button
                 onClick={handleVoiceToggle}
                 disabled={!voiceAvailable}
@@ -458,7 +445,6 @@ export default function ChatPage() {
                 <Volume2 size={18} />
               </button>
 
-              {/* Input Field */}
               <div className="flex-1 relative">
                 <textarea
                   value={input}
@@ -474,7 +460,6 @@ export default function ChatPage() {
                 />
               </div>
 
-              {/* Send Button */}
               <button
                 onClick={handleSendMessage}
                 disabled={!input.trim() || isLoading}
@@ -488,7 +473,6 @@ export default function ChatPage() {
               </button>
             </div>
 
-            {/* Voice Usage Indicator - Smaller */}
             {voiceAvailable && audioEnabled && (
               <div className="mt-2 text-xs text-slate-400 text-center">
                 Voice enabled
@@ -498,7 +482,6 @@ export default function ChatPage() {
           </div>
         </div>
 
-        {/* Wellness Hub Modal */}
         {showWellnessHub && user && (
           <WellnessHub
             isOpen={showWellnessHub}
@@ -508,7 +491,6 @@ export default function ChatPage() {
           />
         )}
 
-        {/* Side Panel */}
         <SidePanel
           isOpen={showSidePanel}
           onClose={() => setShowSidePanel(false)}
@@ -516,16 +498,15 @@ export default function ChatPage() {
           currentSessionId={currentSessionId}
           onNewChat={handleNewChat}
           onLoadChat={handleLoadChat}
-
-          {/* Course Generation Modal */}
-{showCourseGeneration && (
-  <CourseGenerationModal
-    isOpen={showCourseGeneration}
-    onClose={() => setShowCourseGeneration(false)}
-  />
-)}
         />
+
+        {showCourseGeneration && (
+          <CourseGenerationModal
+            isOpen={showCourseGeneration}
+            onClose={() => setShowCourseGeneration(false)}
+          />
+        )}
       </div>
-</div>
+    </div>
   );
 }

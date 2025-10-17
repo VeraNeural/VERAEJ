@@ -272,54 +272,51 @@ export default function SignUpPage() {
                 </button>
               </div>
 
-              {/* Integrator */}
-              <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-6 shadow-xl border border-purple-100 hover:border-purple-300 transition-all">
-                <h3 className="text-xl font-medium text-slate-900 mb-2">Integrator</h3>
-                <div className="mb-4">
-                  <span className="text-3xl font-bold text-slate-900">$99</span>
-                  <span className="text-slate-600">/month</span>
-                </div>
-                <ul className="space-y-3 mb-6">
-                  <li className="flex items-start gap-2 text-slate-700">
-                    <Check size={20} className="text-green-500 flex-shrink-0 mt-0.5" />
-                    <span className="text-sm">Everything in Regulator</span>
-                  </li>
-                  <li className="flex items-start gap-2 text-slate-700">
-                    <Check size={20} className="text-green-500 flex-shrink-0 mt-0.5" />
-                    <span className="text-sm">Unlimited voice</span>
-                  </li>
-                  <li className="flex items-start gap-2 text-slate-700">
-                    <Check size={20} className="text-green-500 flex-shrink-0 mt-0.5" />
-                    <span className="text-sm">Custom courses</span>
-                  </li>
-                  <li className="flex items-start gap-2 text-slate-700">
-                    <Check size={20} className="text-green-500 flex-shrink-0 mt-0.5" />
-                    <span className="text-sm">White label options</span>
-                  </li>
-                </ul>
-                <button
-                  onClick={() => handleTierSelect('integrator')}
-                  disabled={loading}
-                  className="w-full bg-slate-900 hover:bg-slate-800 text-white py-3 rounded-xl font-normal transition-all disabled:bg-slate-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
-                  {loading && formData.tier === 'integrator' ? (
-                    <>
-                      <Loader2 size={18} className="animate-spin" />
-                      Processing...
-                    </>
-                  ) : (
-                    'Start Free Trial'
-                  )}
-                </button>
-              </div>
-            </div>
-
-            <p className="text-center text-sm text-slate-500 mt-8">
-              💳 Card required • 7 days free • Cancel anytime
-            </p>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
+              {/* Integrator - LOCKED */}
+<div className="bg-white/80 backdrop-blur-sm rounded-3xl p-6 shadow-xl border border-purple-100 relative opacity-75">
+  {/* Coming Soon Badge */}
+  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-slate-500 text-white text-xs px-3 py-1 rounded-full">
+    Coming Soon
+  </div>
+  
+  <h3 className="text-xl font-medium text-slate-900 mb-2">Integrator</h3>
+  <div className="mb-4">
+    <span className="text-3xl font-bold text-slate-900">$99</span>
+    <span className="text-slate-600">/month</span>
+  </div>
+  <ul className="space-y-3 mb-6">
+    <li className="flex items-start gap-2 text-slate-700">
+      <Check size={20} className="text-green-500 flex-shrink-0 mt-0.5" />
+      <span className="text-sm">Everything in Regulator</span>
+    </li>
+    <li className="flex items-start gap-2 text-slate-700">
+      <Check size={20} className="text-green-500 flex-shrink-0 mt-0.5" />
+      <span className="text-sm">Unlimited voice</span>
+    </li>
+    <li className="flex items-start gap-2 text-slate-700">
+      <Check size={20} className="text-green-500 flex-shrink-0 mt-0.5" />
+      <span className="text-sm">Custom courses</span>
+    </li>
+    <li className="flex items-start gap-2 text-slate-700">
+      <Check size={20} className="text-green-500 flex-shrink-0 mt-0.5" />
+      <span className="text-sm">White label options</span>
+    </li>
+    <li className="flex items-start gap-2 text-slate-700">
+      <Check size={20} className="text-green-500 flex-shrink-0 mt-0.5" />
+      <span className="text-sm">Priority support</span>
+    </li>
+  </ul>
+  
+  {/* Locked Button */}
+  <button
+    disabled
+    className="w-full bg-slate-400 text-white py-3 rounded-xl font-normal cursor-not-allowed flex items-center justify-center gap-2"
+  >
+    <Lock size={18} />
+    Coming Soon
+  </button>
+  
+  <p className="text-xs text-slate-500 text-center mt-3">
+    Building something special. Join waitlist below.
+  </p>
+</div>

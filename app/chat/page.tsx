@@ -138,7 +138,7 @@ export default function ChatPage() {
 
   const handleVoiceToggle = () => {
     if (!voiceAvailable) {
-      if (window.confirm('🎙️ Voice responses available with Regulator plan ($39/month)\n\n20 voice responses per day\n\nGo to upgrade page?')) {
+      if (window.confirm('Voice responses available with Regulator plan ($39/month)\n\n20 voice responses per day\n\nGo to upgrade page?')) {
         window.location.href = 'https://buy.stripe.com/5kQ00j6N93z9dIZ26N8bS0s';
       }
       return;
@@ -339,12 +339,24 @@ export default function ChatPage() {
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => router.push('/courses')}
+                className="px-3 py-2 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 rounded-lg transition-all text-white shadow-sm text-sm font-medium"
+              >
+                Courses
+              </button>
+              <button
+                onClick={() => router.push('/community')}
+                className="px-3 py-2 bg-slate-700/60 hover:bg-slate-600/60 rounded-lg transition-all text-slate-200 border border-slate-600/50 shadow-sm text-sm font-medium"
+              >
+                Community
+              </button>
               <button
                 onClick={() => setShowWellnessHub(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-slate-700/60 hover:bg-slate-600/60 rounded-xl transition-all text-slate-200 border border-slate-600/50 shadow-sm"
+                className="px-3 py-2 bg-slate-700/60 hover:bg-slate-600/60 rounded-lg transition-all text-slate-200 border border-slate-600/50 shadow-sm text-sm font-medium"
               >
-                <span className="text-sm font-medium">Wellness Hub</span>
+                Tools
               </button>
             </div>
           </div>
@@ -474,14 +486,14 @@ export default function ChatPage() {
             {/* Voice Usage Indicator - Smaller */}
             {voiceAvailable && audioEnabled && (
               <div className="mt-2 text-xs text-slate-400 text-center">
-                🎙️ Voice enabled
+                Voice enabled
                 {userTier === 'regulator' && ` • ${voiceUsageToday}/20 today`}
               </div>
             )}
           </div>
         </div>
 
-        {/* Wellness Hub Modal - FIXED: Added userId and darkMode props */}
+        {/* Wellness Hub Modal */}
         {showWellnessHub && user && (
           <WellnessHub
             isOpen={showWellnessHub}

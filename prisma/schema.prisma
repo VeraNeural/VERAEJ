@@ -525,7 +525,7 @@ model users {
   files                                               files[]
   journal_entries                                     journal_entries[]
   messages                                            messages[]
-  user_notifications                              notifications[]
+  user_notifications                                  notifications[]  @relation("user_notifications")
   password_reset_tokens                               password_reset_tokens[]
   poll_votes                                          poll_votes[]
   post_comments                                       post_comments[]
@@ -558,7 +558,7 @@ model notifications {
   read       Boolean?  @default(false)
   created_at DateTime? @default(now()) @db.Timestamp(6)
   sent_at    DateTime? @db.Timestamp(6)
-  users      users     @relation(fields: [user_id], references: [id], onDelete: Cascade, name: "notifications_relation")
+  users      users     @relation("user_notifications", fields: [user_id], references: [id], onDelete: Cascade)
   
   @@index([user_id])
   @@index([type])

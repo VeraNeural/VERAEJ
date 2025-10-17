@@ -105,21 +105,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-```
-
----
-
-### **3. Verify Your File Structure:**
-
-Make sure you have:
-```
-app/
-  api/
-    stripe/
-      create-checkout/
-        route.ts          ← Should exist here
-      webhook/
-        route.ts
-    auth/
-      signup/
-        route.ts          ← Should exist here

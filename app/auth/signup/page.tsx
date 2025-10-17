@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { UserPlus, Mail, Lock, User, AlertCircle, Loader2, Check } from 'lucide-react';
+import { UserPlus, Mail, Lock, User, AlertCircle, Loader2, Check, Crown } from 'lucide-react';
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -31,6 +31,12 @@ export default function SignUpPage() {
   };
 
   const handleTierSelect = async (tier: string) => {
+    // Block Integrator selection
+    if (tier === 'integrator') {
+      setError('Integrator tier is coming soon! Please choose Explorer or Regulator.');
+      return;
+    }
+
     setFormData({ ...formData, tier });
     setError('');
     setLoading(true);
@@ -273,50 +279,86 @@ export default function SignUpPage() {
               </div>
 
               {/* Integrator - LOCKED */}
-<div className="bg-white/80 backdrop-blur-sm rounded-3xl p-6 shadow-xl border border-purple-100 relative opacity-75">
-  {/* Coming Soon Badge */}
-  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-slate-500 text-white text-xs px-3 py-1 rounded-full">
-    Coming Soon
-  </div>
-  
-  <h3 className="text-xl font-medium text-slate-900 mb-2">Integrator</h3>
-  <div className="mb-4">
-    <span className="text-3xl font-bold text-slate-900">$99</span>
-    <span className="text-slate-600">/month</span>
-  </div>
-  <ul className="space-y-3 mb-6">
-    <li className="flex items-start gap-2 text-slate-700">
-      <Check size={20} className="text-green-500 flex-shrink-0 mt-0.5" />
-      <span className="text-sm">Everything in Regulator</span>
-    </li>
-    <li className="flex items-start gap-2 text-slate-700">
-      <Check size={20} className="text-green-500 flex-shrink-0 mt-0.5" />
-      <span className="text-sm">Unlimited voice</span>
-    </li>
-    <li className="flex items-start gap-2 text-slate-700">
-      <Check size={20} className="text-green-500 flex-shrink-0 mt-0.5" />
-      <span className="text-sm">Custom courses</span>
-    </li>
-    <li className="flex items-start gap-2 text-slate-700">
-      <Check size={20} className="text-green-500 flex-shrink-0 mt-0.5" />
-      <span className="text-sm">White label options</span>
-    </li>
-    <li className="flex items-start gap-2 text-slate-700">
-      <Check size={20} className="text-green-500 flex-shrink-0 mt-0.5" />
-      <span className="text-sm">Priority support</span>
-    </li>
-  </ul>
-  
-  {/* Locked Button */}
-  <button
-    disabled
-    className="w-full bg-slate-400 text-white py-3 rounded-xl font-normal cursor-not-allowed flex items-center justify-center gap-2"
-  >
-    <Lock size={18} />
-    Coming Soon
-  </button>
-  
-  <p className="text-xs text-slate-500 text-center mt-3">
-    Building something special. Join waitlist below.
-  </p>
-</div>
+              <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-6 shadow-xl border border-purple-100 relative opacity-75">
+                {/* Coming Soon Badge */}
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-slate-500 text-white text-xs px-3 py-1 rounded-full">
+                  Coming Soon
+                </div>
+                
+                <h3 className="text-xl font-medium text-slate-900 mb-2">Integrator</h3>
+                <div className="mb-4">
+                  <span className="text-3xl font-bold text-slate-900">$99</span>
+                  <span className="text-slate-600">/month</span>
+                </div>
+                <ul className="space-y-3 mb-6">
+                  <li className="flex items-start gap-2 text-slate-700">
+                    <Check size={20} className="text-green-500 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm">Everything in Regulator</span>
+                  </li>
+                  <li className="flex items-start gap-2 text-slate-700">
+                    <Check size={20} className="text-green-500 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm">Unlimited voice</span>
+                  </li>
+                  <li className="flex items-start gap-2 text-slate-700">
+                    <Check size={20} className="text-green-500 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm">Custom courses</span>
+                  </li>
+                  <li className="flex items-start gap-2 text-slate-700">
+                    <Check size={20} className="text-green-500 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm">White label options</span>
+                  </li>
+                  <li className="flex items-start gap-2 text-slate-700">
+                    <Check size={20} className="text-green-500 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm">Priority support</span>
+                  </li>
+                </ul>
+                
+                {/* Locked Button */}
+                <button
+                  disabled
+                  className="w-full bg-slate-400 text-white py-3 rounded-xl font-normal cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  <Lock size={18} />
+                  Coming Soon
+                </button>
+                
+                <p className="text-xs text-slate-500 text-center mt-3">
+                  Building something special. Join waitlist below.
+                </p>
+              </div>
+            </div>
+
+            <p className="text-center text-sm text-slate-500 mt-8">
+              💳 Card required • 7 days free • Cancel anytime
+            </p>
+
+            {/* Integrator Waitlist */}
+            <div className="mt-12 max-w-2xl mx-auto">
+              <div className="bg-gradient-to-br from-purple-900/20 to-pink-900/20 rounded-2xl p-8 border border-purple-300/30">
+                <div className="text-center">
+                  <Crown size={32} className="text-purple-400 mx-auto mb-4" />
+                  <h3 className="text-2xl font-light text-slate-900 mb-2">
+                    Interested in Integrator?
+                  </h3>
+                  <p className="text-slate-600 mb-6">
+                    Join the waitlist and be the first to know when it launches
+                  </p>
+                  <div className="flex gap-3 max-w-md mx-auto">
+                    <input
+                      type="email"
+                      placeholder="your@email.com"
+                      className="flex-1 px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-300 focus:border-transparent text-slate-900 placeholder:text-slate-400"
+                    />
+                    <button className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-xl font-normal transition-all">
+                      Join Waitlist
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

@@ -1,16 +1,15 @@
 'use client';
 
-import React, { useState, useEffect, useRef, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { Send, Volume2, Menu, Loader2 } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
+import { Send, Volume2, Menu, Loader2, Circle } from 'lucide-react';
 import WellnessHub from '@/components/WellnessHubModal';
 import MainNavigation from '@/components/MainNavigation';
 import CourseGenerationModal from '@/components/CourseGenerationModal';
 import NotificationsPanel from '@/components/NotificationsPanel';
 
-function ChatContent() {
+export default function ChatPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [messages, setMessages] = useState<Array<{ role: string; content: string }>>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -22,64 +21,10 @@ function ChatContent() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Load session from URL on mount
-  useEffect(() => {
-    const sessionFromUrl = searchParams.get('session');
-    if (sessionFromUrl) {
-      loadSession(sessionFromUrl);
-    }
-  }, [searchParams]);
-
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
-
-  // Check auth on mount
-  useEffect(() => {
-    checkAuth();
-  }, []);
-
-  const checkAuth = async () => {
-    try {
-      const response = await fetch('/api/auth/me');
-      if (!response.ok) {
-        router.push('/auth/signin');
-        return;
-      }
-
-      const data = await response.json();
-      
-      // If orientation not completed, redirect
-      if (!data.user.orientation_completed) {
-        router.push('/orientation');
-        return;
-      }
-    } catch (error) {
-      console.error('Auth check failed:', error);
-      router.push('/auth/signin');
-    }
-  };
-
-  const loadSession = async (sessionIdToLoad: string) => {
-    try {
-      console.log('📚 Loading session:', sessionIdToLoad);
-      setLoading(true);
-      
-      // Fetch messages for this session
-      const response = await fetch(`/api/sessions/${sessionIdToLoad}/messages`);
-      if (response.ok) {
-        const data = await response.json();
-        setMessages(data.messages || []);
-        setSessionId(sessionIdToLoad);
-        console.log('✅ Loaded', data.messages.length, 'messages');
-      }
-    } catch (error) {
-      console.error('❌ Failed to load session:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const sendMessage = async () => {
     if (!input.trim() || loading) return;
@@ -109,8 +54,6 @@ function ChatContent() {
       // Update session ID if new session was created
       if (data.sessionId && !sessionId) {
         setSessionId(data.sessionId);
-        // Update URL without reloading
-        router.replace(`/chat?session=${data.sessionId}`, { scroll: false });
       }
 
       setMessages(prev => [...prev, { role: 'assistant', content: data.response }]);
@@ -337,18 +280,5 @@ function ChatContent() {
         <CourseGenerationModal onClose={() => setShowCourseGeneration(false)} />
       )}
     </div>
-  );
-}
-
-// Wrap in Suspense boundary
-export default function ChatPage() {
-  return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-        <Loader2 className="animate-spin text-purple-500" size={32} />
-      </div>
-    }>
-      <ChatContent />
-    </Suspense>
   );
 }

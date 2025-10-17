@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ChevronDown, MessageCircle, Send, Heart, Lightbulb, Sparkles, ThumbsUp } from 'lucide-react';
 import PollPost from '@/components/PollPost';
+import UserProfileModal from '@/components/UserProfileModal';
 
 interface Channel {
   id: string;
@@ -60,6 +61,8 @@ export default function CommunityPage() {
   const [showChannelDropdown, setShowChannelDropdown] = useState(false);
   const [reactions, setReactions] = useState<Record<string, Reaction[]>>({});
   const [userReactions, setUserReactions] = useState<Record<string, string | null>>({});
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [showProfileModal, setShowProfileModal] = useState(false);
   
   // Comments state
   const [expandedPostId, setExpandedPostId] = useState<string | null>(null);
@@ -97,6 +100,11 @@ useEffect(() => {
     loadReactions(post.id);
   });
 }, [posts]);
+
+  function openProfile(userId: string) {
+  setSelectedUserId(userId);
+  setShowProfileModal(true);
+}
 
   async function checkAccess() {
     try {
@@ -566,7 +574,12 @@ async function handleReaction(postId: string, reactionType: string) {
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-start justify-between mb-2 gap-2">
                                   <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-2 min-w-0">
-                                    <span className="font-medium text-slate-900 text-sm md:text-base truncate">{post.user_name}</span>
+                                    <button
+  onClick={() => openProfile(post.user_id)}
+  className="font-medium text-slate-900 hover:text-purple-600 text-sm md:text-base truncate transition-colors"
+>
+  {post.user_name}
+</button>
                                     <span className="text-xs text-slate-500">
                                       {new Date(post.created_at).toLocaleString()}
                                     </span>
@@ -709,5 +722,22 @@ async function handleReaction(postId: string, reactionType: string) {
         </div>
       </div>
     </div>
+</div>
+      </div>
+    </div>
+
+    {/* User Profile Modal */}
+    {showProfileModal && selectedUserId && (
+      <UserProfileModal
+        userId={selectedUserId}
+        isOpen={showProfileModal}
+        onClose={() => setShowProfileModal(false)}
+        onMessage={startConversation}
+      />
+    )}
+  </div>
+);
+}
+    
   );
 }

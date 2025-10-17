@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   X, 
-  LayoutDashboard, 
   MessageCircle, 
   BookOpen, 
   Users, 
@@ -88,40 +87,40 @@ export default function MainNavigation({ isOpen, onClose, currentPage }: MainNav
     }
   };
 
-const handleDeleteChat = async (sessionId: string, e: React.MouseEvent) => {
-  e.stopPropagation();
-  if (!confirm('Delete this conversation?')) return;
+  const handleDeleteChat = async (sessionId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!confirm('Delete this conversation?')) return;
 
-  try {
-    const response = await fetch(`/api/sessions?id=${sessionId}`, {
-      method: 'DELETE',
-    });
-    if (response.ok) {
-      setChatSessions(chatSessions.filter(s => s.id !== sessionId));
+    try {
+      const response = await fetch(`/api/sessions?id=${sessionId}`, {
+        method: 'DELETE',
+      });
+      if (response.ok) {
+        setChatSessions(chatSessions.filter(s => s.id !== sessionId));
+      }
+    } catch (error) {
+      console.error('Failed to delete chat:', error);
     }
-  } catch (error) {
-    console.error('Failed to delete chat:', error);
-  }
-};
+  };
 
-const handleLoadChat = (sessionId: string) => {
-  router.push(`/chat?session=${sessionId}`);
-  onClose();
-};
+  const handleLoadChat = (sessionId: string) => {
+    router.push(`/chat?session=${sessionId}`);
+    onClose();
+  };
 
-const handleNewChat = () => {
-  // Force a complete page reload to clear session
-  window.location.href = '/chat';
-};
+  const handleNewChat = () => {
+    // Force a complete page reload to clear session
+    window.location.href = '/chat';
+  };
 
-const handleSignOut = async () => {
-  try {
-    await fetch('/api/auth/signout', { method: 'POST' });
-    router.push('/auth/signin');
-  } catch (error) {
-    console.error('Sign out failed:', error);
-  }
-};
+  const handleSignOut = async () => {
+    try {
+      await fetch('/api/auth/signout', { method: 'POST' });
+      router.push('/auth/signin');
+    } catch (error) {
+      console.error('Sign out failed:', error);
+    }
+  };
 
   const navigate = (path: string) => {
     router.push(path);
@@ -228,19 +227,6 @@ const handleSignOut = async () => {
           </button>
 
           <div className="h-px bg-slate-700 my-2" />
-
-          {/* Dashboard */}
-          <button
-            onClick={() => navigate('/dashboard')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
-              currentPage === 'dashboard'
-                ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
-                : 'text-slate-300 hover:bg-slate-800'
-            }`}
-          >
-            <LayoutDashboard size={20} />
-            <span className="font-medium">Dashboard</span>
-          </button>
 
           {/* Chat with History */}
           <div>

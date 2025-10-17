@@ -15,7 +15,11 @@ import {
   Lock,
   Bell,
   Sparkles,
-  Crown
+  Crown,
+  Plus,
+  ChevronDown,
+  ChevronRight,
+  Trash2
 } from 'lucide-react';
 
 interface MainNavigationProps {
@@ -24,14 +28,24 @@ interface MainNavigationProps {
   currentPage?: string;
 }
 
+interface ChatSession {
+  id: string;
+  title: string;
+  updated_at: string;
+}
+
 export default function MainNavigation({ isOpen, onClose, currentPage }: MainNavigationProps) {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
+  const [showChatHistory, setShowChatHistory] = useState(true);
+  const [loadingChats, setLoadingChats] = useState(false);
 
   useEffect(() => {
     fetchUser();
     fetchNotifications();
+    fetchChatSessions();
   }, []);
 
   const fetchUser = async () => {
@@ -59,6 +73,47 @@ export default function MainNavigation({ isOpen, onClose, currentPage }: MainNav
     }
   };
 
+  const fetchChatSessions = async () => {
+    setLoadingChats(true);
+    try {
+      const response = await fetch('/api/sessions');
+      if (response.ok) {
+        const data = await response.json();
+        setChatSessions(data.sessions || []);
+      }
+    } catch (error) {
+      console.error('Failed to fetch chat sessions:', error);
+    } finally {
+      setLoadingChats(false);
+    }
+  };
+
+  const handleDeleteChat = async (sessionId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!confirm('Delete this conversation?')) return;
+
+    try {
+      const response = await fetch(`/api/sessions?id=${sessionId}`, {
+        method: 'DELETE',
+      });
+      if (response.ok) {
+        setChatSessions(chatSessions.filter(s => s.id !== sessionId));
+      }
+    } catch (error) {
+      console.error('Failed to delete chat:', error);
+    }
+  };
+
+  const handleLoadChat = (sessionId: string) => {
+    router.push(`/chat?session=${sessionId}`);
+    onClose();
+  };
+
+  const handleNewChat = () => {
+    router.push('/chat');
+    onClose();
+  };
+
   const handleSignOut = async () => {
     try {
       await fetch('/api/auth/signout', { method: 'POST' });
@@ -71,6 +126,21 @@ export default function MainNavigation({ isOpen, onClose, currentPage }: MainNav
   const navigate = (path: string) => {
     router.push(path);
     onClose();
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return date.toLocaleDateString();
   };
 
   const tier = user?.subscription_tier || 'explorer';
@@ -137,168 +207,4 @@ export default function MainNavigation({ isOpen, onClose, currentPage }: MainNav
 
         {/* Navigation */}
         <nav className="p-4 space-y-1">
-          {/* Notifications */}
-          <button
-            onClick={() => navigate('/notifications')}
-            className={`w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg transition-all ${
-              currentPage === 'notifications'
-                ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
-                : 'text-slate-300 hover:bg-slate-800'
-            }`}
-          >
-            <div className="flex items-center gap-3">
-              <Bell size={20} />
-              <span className="font-medium">Notifications</span>
-            </div>
-            {unreadCount > 0 && (
-              <span className="bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
-                {unreadCount > 9 ? '9+' : unreadCount}
-              </span>
-            )}
-          </button>
-
-          <div className="h-px bg-slate-700 my-2" />
-
-          {/* Dashboard */}
-          <button
-            onClick={() => navigate('/dashboard')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
-              currentPage === 'dashboard'
-                ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
-                : 'text-slate-300 hover:bg-slate-800'
-            }`}
-          >
-            <LayoutDashboard size={20} />
-            <span className="font-medium">Dashboard</span>
-          </button>
-
-          {/* Chat */}
-          <button
-            onClick={() => navigate('/chat')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
-              currentPage === 'chat'
-                ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
-                : 'text-slate-300 hover:bg-slate-800'
-            }`}
-          >
-            <MessageCircle size={20} />
-            <span className="font-medium">Chat with VERA</span>
-          </button>
-
-          {/* Tools */}
-          <button
-            onClick={() => navigate('/tools')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
-              currentPage === 'tools'
-                ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
-                : 'text-slate-300 hover:bg-slate-800'
-            }`}
-          >
-            <Wrench size={20} />
-            <span className="font-medium">Tools</span>
-          </button>
-
-          <div className="h-px bg-slate-700 my-2" />
-
-          {/* REGULATOR+ FEATURES */}
-          
-          {/* Courses */}
-          <button
-            onClick={() => isRegulator ? navigate('/courses') : null}
-            disabled={!isRegulator}
-            className={`w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg transition-all ${
-              !isRegulator
-                ? 'text-slate-500 cursor-not-allowed'
-                : currentPage === 'courses'
-                ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
-                : 'text-slate-300 hover:bg-slate-800'
-            }`}
-          >
-            <div className="flex items-center gap-3">
-              <BookOpen size={20} />
-              <span className="font-medium">Courses</span>
-            </div>
-            {!isRegulator && <Lock size={16} className="text-slate-600" />}
-          </button>
-
-          {/* Community */}
-          <button
-            onClick={() => isRegulator ? navigate('/community') : null}
-            disabled={!isRegulator}
-            className={`w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg transition-all ${
-              !isRegulator
-                ? 'text-slate-500 cursor-not-allowed'
-                : currentPage === 'community'
-                ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
-                : 'text-slate-300 hover:bg-slate-800'
-            }`}
-          >
-            <div className="flex items-center gap-3">
-              <Users size={20} />
-              <span className="font-medium">Community</span>
-            </div>
-            {!isRegulator && <Lock size={16} className="text-slate-600" />}
-          </button>
-
-          {/* Messages */}
-          <button
-            onClick={() => isRegulator ? navigate('/messages') : null}
-            disabled={!isRegulator}
-            className={`w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg transition-all ${
-              !isRegulator
-                ? 'text-slate-500 cursor-not-allowed'
-                : currentPage === 'messages'
-                ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
-                : 'text-slate-300 hover:bg-slate-800'
-            }`}
-          >
-            <div className="flex items-center gap-3">
-              <Mail size={20} />
-              <span className="font-medium">Messages</span>
-            </div>
-            {!isRegulator && <Lock size={16} className="text-slate-600" />}
-          </button>
-
-          {!isRegulator && (
-            <div className="bg-gradient-to-r from-blue-900/30 to-purple-900/30 rounded-lg p-3 mt-2 border border-blue-500/20">
-              <p className="text-blue-300 text-sm font-medium mb-1">Unlock More</p>
-              <p className="text-slate-400 text-xs mb-2">
-                Upgrade to Regulator for Courses, Community, and Voice
-              </p>
-              <button
-                onClick={() => router.push('/pricing')}
-                className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white text-sm py-2 rounded-lg transition-all"
-              >
-                Upgrade Now
-              </button>
-            </div>
-          )}
-
-          <div className="h-px bg-slate-700 my-2" />
-
-          {/* Settings */}
-          <button
-            onClick={() => navigate('/settings')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
-              currentPage === 'settings'
-                ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
-                : 'text-slate-300 hover:bg-slate-800'
-            }`}
-          >
-            <Settings size={20} />
-            <span className="font-medium">Settings</span>
-          </button>
-
-          {/* Sign Out */}
-          <button
-            onClick={handleSignOut}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-red-400 hover:bg-red-900/20"
-          >
-            <LogOut size={20} />
-            <span className="font-medium">Sign Out</span>
-          </button>
-        </nav>
-      </div>
-    </>
-  );
-}
+          {

@@ -241,7 +241,7 @@ export default function ChatPage() {
       {/* Slow-Moving Neurons Background */}
       <div className="slow-neurons-container" id="slowNeurons"></div>
 
-      <style jsx global>{`
+      <style dangerouslySetInnerHTML={{ __html: `
         .slow-neurons-container {
           position: fixed;
           width: 100%;

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Heart, Lightbulb, Sparkles, ThumbsUp } from 'lucide-react';
+import { ChevronDown, MessageCircle, Send, Heart, Lightbulb, Sparkles, ThumbsUp } from 'lucide-react';
 import PollPost from '@/components/PollPost';
 
 interface Channel {

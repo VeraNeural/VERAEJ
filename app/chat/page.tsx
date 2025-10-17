@@ -237,11 +237,11 @@ export default function ChatPage() {
   };
 
   return (
-    <>
-      {/* Slow-Moving Neurons Background */}
-      <div className="slow-neurons-container" id="slowNeurons"></div>
+  <div className="relative">
+    {/* Slow-Moving Neurons Background */}
+    <div className="slow-neurons-container" id="slowNeurons"></div>
 
-      <style dangerouslySetInnerHTML={{ __html: `
+    <style dangerouslySetInnerHTML={{ __html: `
         .slow-neurons-container {
           position: fixed;
           width: 100%;
@@ -526,6 +526,6 @@ export default function ChatPage() {
 )}
         />
       </div>
-    </>
+</div>
   );
 }

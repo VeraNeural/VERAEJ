@@ -103,10 +103,10 @@ export default function MainNavigation({ isOpen, onClose, currentPage }: MainNav
     }
   };
 
-  const handleLoadChat = (sessionId: string) => {
-    router.push(`/chat?session=${sessionId}`);
-    onClose();
-  };
+ const handleLoadChat = (sessionId: string) => {
+  window.location.href = `/chat?session=${sessionId}`;
+  onClose();
+};
 
   const handleNewChat = () => {
     // Force a complete page reload to clear session
@@ -203,30 +203,6 @@ export default function MainNavigation({ isOpen, onClose, currentPage }: MainNav
             </div>
           )}
         </div>
-
-        {/* Navigation */}
-        <nav className="p-4 space-y-1">
-          {/* Notifications */}
-          <button
-            onClick={() => navigate('/notifications')}
-            className={`w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg transition-all ${
-              currentPage === 'notifications'
-                ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
-                : 'text-slate-300 hover:bg-slate-800'
-            }`}
-          >
-            <div className="flex items-center gap-3">
-              <Bell size={20} />
-              <span className="font-medium">Notifications</span>
-            </div>
-            {unreadCount > 0 && (
-              <span className="bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
-                {unreadCount > 9 ? '9+' : unreadCount}
-              </span>
-            )}
-          </button>
-
-          <div className="h-px bg-slate-700 my-2" />
 
           {/* Chat with History */}
           <div>

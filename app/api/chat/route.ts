@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
 import { cookies } from 'next/headers';
-import { query } from '@/lib/db';
+import { prisma } from '@/lib/prisma';
 import Anthropic from '@anthropic-ai/sdk';
 
 const anthropic = new Anthropic({
@@ -89,34 +89,55 @@ export async function POST(request: NextRequest) {
     console.log('📚 Conversation history:', messages.length, 'messages');
     console.log('🎙️ Audio enabled:', audioEnabled);
 
-    // Get recent conversation context (last 5 messages from previous sessions)
+    // Get or create session
+    let finalSessionId = sessionId;
+    if (!finalSessionId) {
+      const session = await prisma.chat_sessions.create({
+        data: {
+          user_id: payload.userId,
+          title: 'New conversation',
+        }
+      });
+      finalSessionId = session.id;
+      console.log('✅ Created new session:', finalSessionId);
+    }
+
+    // Get recent conversation context from past sessions (last 10 messages)
     let conversationContext = '';
     try {
-      const recentResult = await query(
-        `SELECT content, role, created_at 
-         FROM messages 
-         WHERE user_id = $1 
-         AND session_id != $2 
-         ORDER BY created_at DESC 
-         LIMIT 5`,
-        [payload.userId, sessionId || '00000000-0000-0000-0000-000000000000']
-      );
+      const recentMessages = await prisma.chat_messages.findMany({
+        where: {
+          user_id: payload.userId,
+          NOT: {
+            session_id: finalSessionId
+          }
+        },
+        orderBy: {
+          created_at: 'desc'
+        },
+        take: 10,
+        select: {
+          role: true,
+          content: true,
+          created_at: true,
+        }
+      });
 
-      if (recentResult.rows && recentResult.rows.length > 0) {
-        const recentTopics = recentResult.rows
-          .filter((m: any) => m.role === 'user')
-          .map((m: any) => m.content.substring(0, 50))
+      if (recentMessages.length > 0) {
+        const recentTopics = recentMessages
+          .filter(m => m.role === 'user')
+          .map(m => m.content.substring(0, 50))
+          .slice(0, 3)
           .join(', ');
         
-        conversationContext = `[Context: You've spoken with this person before. Recent topics they mentioned: ${recentTopics}...]`;
-        console.log('🧠 Added conversation memory:', conversationContext);
+        conversationContext = `[Context: You've spoken with this person before. Recent topics: ${recentTopics}...]`;
+        console.log('🧠 Added conversation memory from', recentMessages.length, 'past messages');
       }
     } catch (contextError) {
       console.error('⚠️ Could not fetch conversation context:', contextError);
-      // Continue without context - not critical
     }
 
-    // Map messages with optional context
+    // Map messages with context
     const claudeMessages = conversationContext 
       ? [
           {
@@ -145,13 +166,37 @@ export async function POST(request: NextRequest) {
     const responseText = claudeResponse.content[0].type === 'text'
       ? claudeResponse.content[0].text
       : 'I hear you.';
-    console.log('✅ Claude responded with context');
+    console.log('✅ Claude responded');
 
+    // SAVE BOTH USER AND ASSISTANT MESSAGES
+    try {
+      // Save user message
+      await prisma.chat_messages.create({
+        data: {
+          session_id: finalSessionId,
+          user_id: payload.userId,
+          role: 'user',
+          content: lastMessage.content,
+        }
+      });
+
+      // Save assistant response
+      await prisma.chat_messages.create({
+        data: {
+          session_id: finalSessionId,
+          user_id: payload.userId,
+          role: 'assistant',
+          content: responseText,
+        }
+      });
+
+      console.log('✅ Messages saved to database - VERA will remember this!');
+    } catch (saveError) {
+      console.error('❌ Failed to save messages:', saveError);
+    }
+
+    // Handle audio generation
     let audioUrl = null;
-    console.log('🔍 Debug - audioEnabled:', audioEnabled);
-    console.log('🔍 Debug - Has API Key:', !!process.env.ELEVENLABS_API_KEY);
-    console.log('🔍 Debug - Has Voice ID:', !!process.env.ELEVENLABS_VOICE_ID);
-
     if (audioEnabled && process.env.ELEVENLABS_API_KEY && process.env.ELEVENLABS_VOICE_ID) {
       try {
         console.log('🎙️ Generating audio...');
@@ -176,21 +221,20 @@ export async function POST(request: NextRequest) {
             })
           }
         );
+
         if (audioResponse.ok) {
           const audioBuffer = await audioResponse.arrayBuffer();
           const base64Audio = Buffer.from(audioBuffer).toString('base64');
           audioUrl = `data:audio/mpeg;base64,${base64Audio}`;
           console.log('✅ Audio generated');
           
-          try {
-            await query(
-              `INSERT INTO voice_usage (user_id) VALUES ($1)`,
-              [payload.userId]
-            );
-            console.log('✅ Voice usage tracked');
-          } catch (trackError) {
-            console.error('⚠️ Failed to track voice usage:', trackError);
-          }
+          // Track voice usage with Prisma
+          await prisma.voice_usage.create({
+            data: {
+              user_id: payload.userId,
+            }
+          });
+          console.log('✅ Voice usage tracked');
         } else {
           const errorText = await audioResponse.text();
           console.error('❌ ElevenLabs error:', errorText);
@@ -198,16 +242,6 @@ export async function POST(request: NextRequest) {
       } catch (audioError) {
         console.error('❌ Audio generation error:', audioError);
       }
-    }
-
-    let finalSessionId = sessionId;
-    if (!finalSessionId) {
-      const sessionResult = await query(
-        `INSERT INTO chat_sessions (user_id, title) VALUES ($1, $2) RETURNING id`,
-        [payload.userId, 'New conversation']
-      );
-      finalSessionId = sessionResult.rows[0].id;
-      console.log('✅ Created new session:', finalSessionId);
     }
 
     return NextResponse.json({

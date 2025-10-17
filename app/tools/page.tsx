@@ -2,12 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Loader2, X } from 'lucide-react';
+import { Loader2, X, Lock } from 'lucide-react';
 
 export default function ToolsPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [selectedTool, setSelectedTool] = useState<string | null>(null);
+  const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -17,6 +18,8 @@ export default function ToolsPage() {
           router.push('/auth/signin');
           return;
         }
+        const data = await response.json();
+        setUser(data.user);
         setIsLoading(false);
       } catch (error) {
         console.error('Auth check failed:', error);
@@ -35,35 +38,57 @@ export default function ToolsPage() {
     );
   }
 
+  const tier = user?.subscription_tier || 'explorer';
+  const isExplorer = tier === 'explorer';
+  const isRegulator = ['regulator', 'integrator', 'test'].includes(tier);
+
   const tools = [
+    {
+      id: 'dashboard',
+      title: 'Wellness Dashboard',
+      description: 'Track your nervous system patterns and progress over time',
+      color: 'from-emerald-400 to-teal-400',
+      locked: isExplorer,
+      requiresTier: 'Regulator',
+    },
     {
       id: 'breathwork',
       title: 'Breathwork',
       description: 'VERA guides you through breathwork to regulate your nervous system',
       color: 'from-cyan-400 to-blue-400',
+      locked: false,
     },
     {
       id: 'body-scan',
       title: 'Body Scan',
       description: 'VERA helps you scan your body and notice what needs attention',
       color: 'from-rose-400 to-pink-400',
+      locked: false,
     },
     {
       id: 'pattern-recognition',
       title: 'Pattern Recognition',
       description: 'VERA works with you to identify your adaptive codes and patterns',
       color: 'from-purple-400 to-indigo-400',
+      locked: false,
     },
     {
       id: 'journaling',
       title: 'Journaling with VERA',
       description: 'VERA guides you through 5 reflective journal prompts daily',
       color: 'from-amber-400 to-orange-400',
+      locked: false,
     },
   ];
 
-  const openTool = (toolId: string) => {
-    setSelectedTool(toolId);
+  const openTool = (toolId: string, locked: boolean) => {
+    if (locked) return; // Don't open if locked
+    
+    if (toolId === 'dashboard') {
+      router.push('/dashboard');
+    } else {
+      setSelectedTool(toolId);
+    }
   };
 
   const closeTool = () => {
@@ -97,27 +122,55 @@ export default function ToolsPage() {
 
         <div className="grid md:grid-cols-2 gap-6">
           {tools.map((tool) => (
-            <button
-              key={tool.id}
-              onClick={() => openTool(tool.id)}
-              className="group relative bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 border border-slate-700/50 hover:border-purple-500/50 transition-all text-left"
-            >
-              {/* Orb */}
-              <div className="relative w-20 h-20 mb-6">
-                <div className={`absolute inset-0 rounded-full bg-gradient-to-br ${tool.color} animate-pulse opacity-80`} />
-                <div 
-                  className={`absolute inset-2 rounded-full bg-gradient-to-br ${tool.color} animate-pulse`}
-                  style={{ animationDelay: '0.5s' }}
-                />
-              </div>
+            <div key={tool.id} className="relative">
+              <button
+                onClick={() => openTool(tool.id, tool.locked || false)}
+                disabled={tool.locked}
+                className={`group relative w-full bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 border transition-all text-left ${
+                  tool.locked
+                    ? 'border-slate-700/50 opacity-60 cursor-not-allowed'
+                    : 'border-slate-700/50 hover:border-purple-500/50'
+                }`}
+              >
+                {/* Orb */}
+                <div className="relative w-20 h-20 mb-6">
+                  <div className={`absolute inset-0 rounded-full bg-gradient-to-br ${tool.color} animate-pulse opacity-80`} />
+                  <div 
+                    className={`absolute inset-2 rounded-full bg-gradient-to-br ${tool.color} animate-pulse`}
+                    style={{ animationDelay: '0.5s' }}
+                  />
+                  {tool.locked && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-slate-900/80 rounded-full">
+                      <Lock size={24} className="text-slate-400" />
+                    </div>
+                  )}
+                </div>
 
-              <h3 className="text-xl font-medium text-white mb-2">{tool.title}</h3>
-              <p className="text-slate-400">{tool.description}</p>
+                <h3 className="text-xl font-medium text-white mb-2">{tool.title}</h3>
+                <p className="text-slate-400">{tool.description}</p>
 
-              <div className="mt-4 text-purple-400 group-hover:text-purple-300 text-sm font-medium">
-                Start Session
-              </div>
-            </button>
+                {tool.locked ? (
+                  <div className="mt-4">
+                    <p className="text-sm text-slate-500 mb-2">
+                      Requires {tool.requiresTier} tier
+                    </p>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        router.push('/pricing');
+                      }}
+                      className="text-purple-400 hover:text-purple-300 text-sm font-medium"
+                    >
+                      Upgrade to unlock
+                    </button>
+                  </div>
+                ) : (
+                  <div className="mt-4 text-purple-400 group-hover:text-purple-300 text-sm font-medium">
+                    Start Session
+                  </div>
+                )}
+              </button>
+            </div>
           ))}
         </div>
       </div>
@@ -130,12 +183,11 @@ export default function ToolsPage() {
   );
 }
 
-// Tool Modal Component
+// Tool Modal Component (same as before)
 function ToolModal({ toolId, onClose }: { toolId: string; onClose: () => void }) {
   const [messages, setMessages] = useState<Array<{ role: string; content: string }>>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [sessionStarted, setSessionStarted] = useState(false);
 
   useEffect(() => {
     startSession();
@@ -154,7 +206,6 @@ function ToolModal({ toolId, onClose }: { toolId: string; onClose: () => void })
     const initialMessage = toolPrompts[toolId] || "Hi! How can I support you today?";
     
     setMessages([{ role: 'assistant', content: initialMessage }]);
-    setSessionStarted(true);
     setLoading(false);
   };
 

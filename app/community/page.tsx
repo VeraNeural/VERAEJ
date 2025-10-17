@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { ChevronDown, MessageCircle, Send, Heart, Lightbulb, Sparkles, ThumbsUp } from 'lucide-react';
 import PollPost from '@/components/PollPost';
 import UserProfileModal from '@/components/UserProfileModal';
+import { hasFeatureAccess } from '@/lib/tiers';
 
 interface Channel {
   id: string;

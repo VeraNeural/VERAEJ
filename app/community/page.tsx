@@ -738,9 +738,6 @@ async function handleReaction(postId: string, reactionType: string) {
         onMessage={startConversation}
       />
     )}
-  </div>
+  </>
 );
-}
-    
-  );
 }

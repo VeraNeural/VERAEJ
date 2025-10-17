@@ -6,7 +6,10 @@ export async function POST(request: NextRequest) {
   try {
     console.log('📨 Signup request received');
     
-    const { name, email, password, tier } = await request.json();
+    const body = await request.json();
+    console.log('📦 Request body:', body);
+    
+    const { name, email, password, tier } = body;
     
     // Validate input
     if (!name || !email || !password || !tier) {

@@ -19,26 +19,18 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 
-    // Get today's date range
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-
-    // Count voice usage for today
-    const count = await prisma.voice_usage.count({
-      where: {
-        user_id: payload.userId,
-        created_at: {
-          gte: today,
-          lt: tomorrow,
-        }
-      }
+    const user = await prisma.users.findUnique({
+      where: { id: payload.userId },
+      select: { subscription_tier: true }
     });
 
-    return NextResponse.json({ count }, { status: 200 });
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
+    return NextResponse.json({ tier: user.subscription_tier }, { status: 200 });
   } catch (error) {
-    console.error('Voice usage error:', error);
-    return NextResponse.json({ error: 'Failed to get voice usage' }, { status: 500 });
+    console.error('Get tier error:', error);
+    return NextResponse.json({ error: 'Failed to get tier' }, { status: 500 });
   }
 }

@@ -1,274 +1,325 @@
 'use client';
 
-import { Suspense, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { UserPlus, Mail, Lock, User, AlertCircle, Loader2, Check } from 'lucide-react';
 
-function SignUpForm() {
+export default function SignUpPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const plan = searchParams.get('plan');
-  
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [step, setStep] = useState(1); // Step 1: Info, Step 2: Choose Tier
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    tier: '',
+  });
   const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const hasLength = password.length >= 8;
-  const hasLower = /[a-z]/.test(password);
-  const hasUpper = /[A-Z]/.test(password);
-  const hasNumber = /[0-9]/.test(password);
-  const passwordsMatch = password === confirmPassword && confirmPassword.length > 0;
-  const allGood = hasLength && hasLower && hasUpper && hasNumber;
-
-  const stripeLinks = {
-    explorer: 'https://buy.stripe.com/14AcN50oL7PpgVbdPv8bS0r',
-    regulator: 'https://buy.stripe.com/5kQ00j6N93z9dIZ26N8bS0s'
+  const handleContinue = () => {
+    if (!formData.name || !formData.email || !formData.password) {
+      setError('Please fill in all fields');
+      return;
+    }
+    if (formData.password.length < 8) {
+      setError('Password must be at least 8 characters');
+      return;
+    }
+    setError('');
+    setStep(2);
   };
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  const handleTierSelect = async (tier: string) => {
+    setFormData({ ...formData, tier });
     setError('');
-
-    if (!name) {
-      setError('Please enter your name');
-      return;
-    }
-
-    if (!email) {
-      setError('Please enter your email address');
-      return;
-    }
-
-    if (!password) {
-      setError('Please create a password');
-      return;
-    }
-
-    if (!confirmPassword) {
-      setError('Please confirm your password');
-      return;
-    }
-
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError('Please enter a valid email address');
-      return;
-    }
-
-    if (!allGood) {
-      setError('Password must meet all requirements');
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
-
-    if (!acceptedTerms) {
-      setError('Please accept the terms to continue');
-      return;
-    }
-
-    setIsLoading(true);
+    setLoading(true);
 
     try {
-      const res = await fetch('/api/auth/signup', {
+      // Step 1: Create account
+      const signupResponse = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ ...formData, tier }),
       });
 
-      const data = await res.json();
+      const signupData = await signupResponse.json();
 
-      if (!res.ok) {
-        if (data.error?.includes('already exists') || data.error?.includes('already registered')) {
-          setError('This email is already registered. Please sign in instead.');
-        } else {
-          throw new Error(data.error || 'Signup failed');
-        }
+      if (!signupResponse.ok) {
+        setError(signupData.error || 'Failed to create account');
+        setLoading(false);
         return;
       }
 
-      if (data.user?.id) {
-        localStorage.setItem('userId', data.user.id);
-        localStorage.setItem('subscription_tier', 'explorer');
-        localStorage.setItem('subscription_status', 'incomplete');
-        console.log('✅ User ID saved to localStorage:', data.user.id);
+      console.log('✅ Account created:', signupData.user);
+
+      // Step 2: Create Stripe Checkout Session
+      const checkoutResponse = await fetch('/api/stripe/create-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      const checkoutData = await checkoutResponse.json();
+
+      if (!checkoutResponse.ok) {
+        setError(checkoutData.error || 'Failed to create checkout session');
+        setLoading(false);
+        return;
       }
 
-      // ✅ ALWAYS redirect to Stripe - default to Explorer plan
-      const selectedPlan = plan === 'regulator' ? 'regulator' : 'explorer';
-      const stripeLink = stripeLinks[selectedPlan];
+      console.log('✅ Redirecting to Stripe checkout...');
 
-      console.log('🔄 Redirecting to Stripe:', selectedPlan);
-      window.location.href = stripeLink;
-      
+      // Step 3: Redirect to Stripe
+      window.location.href = checkoutData.url;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
-    } finally {
-      setIsLoading(false);
+      console.error('Signup error:', err);
+      setError('Something went wrong. Please try again.');
+      setLoading(false);
     }
-  }
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-6">
-        <div className="text-center">
-          <Link href="/">
-            <h1 className="text-3xl font-normal bg-gradient-to-r from-rose-400 via-purple-400 to-blue-400 text-transparent bg-clip-text">
-              VERA
-            </h1>
-          </Link>
-          <p className="text-slate-600 mt-2">Begin your journey with me</p>
-          {plan && (
-            <p className="text-sm text-purple-600 mt-1">
-              Creating account for <strong>{plan === 'explorer' ? 'Explorer' : 'Regulator'}</strong> plan
-            </p>
-          )}
+    <div className="min-h-screen bg-gradient-to-br from-[#faf8fc] via-[#f5f0fa] to-[#fef5fb] flex items-center justify-center p-6">
+      <div className="max-w-4xl w-full">
+        {/* Logo/Brand */}
+        <div className="text-center mb-8">
+          <div className="w-20 h-20 mx-auto mb-4 relative">
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-400 via-blue-400 to-purple-400 animate-pulse opacity-80" />
+            <div 
+              className="absolute inset-3 rounded-full bg-gradient-to-br from-purple-300 to-blue-300 animate-pulse" 
+              style={{ animationDelay: '0.5s' }}
+            />
+          </div>
+          <h1 className="text-3xl font-light text-slate-900 mb-2">Start your journey with VERA</h1>
+          <p className="text-slate-600 font-light">7 days free, then continue with your chosen plan</p>
         </div>
 
-        <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-purple-100 p-8">
-          <h2 className="text-2xl font-light text-slate-900 mb-6">Create Account</h2>
+        {/* Progress Indicator */}
+        <div className="flex items-center justify-center gap-2 mb-8">
+          <div className={`h-2 w-16 rounded-full transition-all ${step >= 1 ? 'bg-purple-500' : 'bg-slate-200'}`} />
+          <div className={`h-2 w-16 rounded-full transition-all ${step >= 2 ? 'bg-purple-500' : 'bg-slate-200'}`} />
+        </div>
 
-          {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
-              <p className="text-sm text-red-800">{error}</p>
-              {error.includes('already registered') && (
-                <Link href="/auth/signin" className="text-sm text-purple-600 hover:text-purple-700 font-medium mt-2 inline-block">
-                  Go to Sign In →
+        {/* Step 1: Account Info */}
+        {step === 1 && (
+          <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-xl border border-purple-100 max-w-md mx-auto">
+            <h2 className="text-2xl font-light text-slate-900 mb-6">Create your account</h2>
+
+            {error && (
+              <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3 mb-5">
+                <AlertCircle size={20} className="text-red-600 flex-shrink-0 mt-0.5" />
+                <p className="text-red-800 text-sm">{error}</p>
+              </div>
+            )}
+
+            <div className="space-y-4">
+              {/* Name */}
+              <div>
+                <label className="block text-slate-700 font-normal mb-2">Full Name</label>
+                <div className="relative">
+                  <User size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="John Doe"
+                    className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-300 focus:border-transparent text-slate-900 placeholder:text-slate-400"
+                  />
+                </div>
+              </div>
+
+              {/* Email */}
+              <div>
+                <label className="block text-slate-700 font-normal mb-2">Email</label>
+                <div className="relative">
+                  <Mail size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    placeholder="your@email.com"
+                    className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-300 focus:border-transparent text-slate-900 placeholder:text-slate-400"
+                  />
+                </div>
+              </div>
+
+              {/* Password */}
+              <div>
+                <label className="block text-slate-700 font-normal mb-2">Password</label>
+                <div className="relative">
+                  <Lock size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    type="password"
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    placeholder="At least 8 characters"
+                    className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-300 focus:border-transparent text-slate-900 placeholder:text-slate-400"
+                  />
+                </div>
+              </div>
+
+              <button
+                onClick={handleContinue}
+                className="w-full bg-slate-900 hover:bg-slate-800 text-white py-3 rounded-xl font-normal transition-all flex items-center justify-center gap-2"
+              >
+                Continue
+              </button>
+            </div>
+
+            <div className="mt-6 text-center">
+              <p className="text-slate-600 text-sm">
+                Already have an account?{' '}
+                <Link href="/auth/signin" className="text-purple-600 hover:text-purple-700 font-medium">
+                  Sign in
                 </Link>
-              )}
+              </p>
             </div>
-          )}
+          </div>
+        )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Name</label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-slate-900 placeholder:text-slate-400"
-                placeholder="Your name"
-                disabled={isLoading}
-                required
-              />
-            </div>
+        {/* Step 2: Choose Tier */}
+        {step === 2 && (
+          <div>
+            <h2 className="text-2xl font-light text-slate-900 mb-2 text-center">Choose your plan</h2>
+            <p className="text-slate-600 text-center mb-8">All plans include a 7-day free trial</p>
 
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Email</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-slate-900 placeholder:text-slate-400"
-                placeholder="your@email.com"
-                disabled={isLoading}
-                required
-              />
-            </div>
+            {error && (
+              <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3 mb-6 max-w-2xl mx-auto">
+                <AlertCircle size={20} className="text-red-600 flex-shrink-0 mt-0.5" />
+                <p className="text-red-800 text-sm">{error}</p>
+              </div>
+            )}
 
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Password</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-slate-900 placeholder:text-slate-400"
-                placeholder="Create password"
-                disabled={isLoading}
-                required
-              />
-
-              {password && (
-                <div className="mt-3 text-xs space-y-1">
-                  <div className={hasLength ? 'text-green-600' : 'text-slate-400'}>
-                    {hasLength ? '✓' : '○'} 8+ characters
-                  </div>
-                  <div className={hasUpper ? 'text-green-600' : 'text-slate-400'}>
-                    {hasUpper ? '✓' : '○'} Uppercase letter
-                  </div>
-                  <div className={hasLower ? 'text-green-600' : 'text-slate-400'}>
-                    {hasLower ? '✓' : '○'} Lowercase letter
-                  </div>
-                  <div className={hasNumber ? 'text-green-600' : 'text-slate-400'}>
-                    {hasNumber ? '✓' : '○'} Number
-                  </div>
+            <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+              {/* Explorer */}
+              <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-6 shadow-xl border border-purple-100 hover:border-purple-300 transition-all">
+                <h3 className="text-xl font-medium text-slate-900 mb-2">Explorer</h3>
+                <div className="mb-4">
+                  <span className="text-3xl font-bold text-slate-900">$19</span>
+                  <span className="text-slate-600">/month</span>
                 </div>
-              )}
-            </div>
+                <ul className="space-y-3 mb-6">
+                  <li className="flex items-start gap-2 text-slate-700">
+                    <Check size={20} className="text-green-500 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm">Chat with VERA 24/7</span>
+                  </li>
+                  <li className="flex items-start gap-2 text-slate-700">
+                    <Check size={20} className="text-green-500 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm">Basic nervous system tools</span>
+                  </li>
+                  <li className="flex items-start gap-2 text-slate-700">
+                    <Check size={20} className="text-green-500 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm">Voice (10/day)</span>
+                  </li>
+                </ul>
+                <button
+                  onClick={() => handleTierSelect('explorer')}
+                  disabled={loading}
+                  className="w-full bg-slate-900 hover:bg-slate-800 text-white py-3 rounded-xl font-normal transition-all disabled:bg-slate-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {loading && formData.tier === 'explorer' ? (
+                    <>
+                      <Loader2 size={18} className="animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    'Start Free Trial'
+                  )}
+                </button>
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Confirm Password</label>
-              <input
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-slate-900 placeholder:text-slate-400"
-                placeholder="Confirm password"
-                disabled={isLoading}
-                required
-              />
-              {confirmPassword && (
-                <div className={`mt-2 text-xs ${passwordsMatch ? 'text-green-600' : 'text-red-600'}`}>
-                  {passwordsMatch ? '✓ Passwords match' : '○ Passwords do not match'}
+              {/* Regulator */}
+              <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-3xl p-6 shadow-xl border-2 border-purple-300 relative">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-purple-500 text-white text-xs px-3 py-1 rounded-full">
+                  Most Popular
                 </div>
-              )}
+                <h3 className="text-xl font-medium text-slate-900 mb-2">Regulator</h3>
+                <div className="mb-4">
+                  <span className="text-3xl font-bold text-slate-900">$39</span>
+                  <span className="text-slate-600">/month</span>
+                </div>
+                <ul className="space-y-3 mb-6">
+                  <li className="flex items-start gap-2 text-slate-700">
+                    <Check size={20} className="text-green-500 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm">Everything in Explorer</span>
+                  </li>
+                  <li className="flex items-start gap-2 text-slate-700">
+                    <Check size={20} className="text-green-500 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm">Voice (20/day)</span>
+                  </li>
+                  <li className="flex items-start gap-2 text-slate-700">
+                    <Check size={20} className="text-green-500 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm">Access to courses</span>
+                  </li>
+                  <li className="flex items-start gap-2 text-slate-700">
+                    <Check size={20} className="text-green-500 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm">Community access</span>
+                  </li>
+                </ul>
+                <button
+                  onClick={() => handleTierSelect('regulator')}
+                  disabled={loading}
+                  className="w-full bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white py-3 rounded-xl font-normal transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {loading && formData.tier === 'regulator' ? (
+                    <>
+                      <Loader2 size={18} className="animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    'Start Free Trial'
+                  )}
+                </button>
+              </div>
+
+              {/* Integrator */}
+              <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-6 shadow-xl border border-purple-100 hover:border-purple-300 transition-all">
+                <h3 className="text-xl font-medium text-slate-900 mb-2">Integrator</h3>
+                <div className="mb-4">
+                  <span className="text-3xl font-bold text-slate-900">$99</span>
+                  <span className="text-slate-600">/month</span>
+                </div>
+                <ul className="space-y-3 mb-6">
+                  <li className="flex items-start gap-2 text-slate-700">
+                    <Check size={20} className="text-green-500 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm">Everything in Regulator</span>
+                  </li>
+                  <li className="flex items-start gap-2 text-slate-700">
+                    <Check size={20} className="text-green-500 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm">Unlimited voice</span>
+                  </li>
+                  <li className="flex items-start gap-2 text-slate-700">
+                    <Check size={20} className="text-green-500 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm">Custom courses</span>
+                  </li>
+                  <li className="flex items-start gap-2 text-slate-700">
+                    <Check size={20} className="text-green-500 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm">White label options</span>
+                  </li>
+                </ul>
+                <button
+                  onClick={() => handleTierSelect('integrator')}
+                  disabled={loading}
+                  className="w-full bg-slate-900 hover:bg-slate-800 text-white py-3 rounded-xl font-normal transition-all disabled:bg-slate-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {loading && formData.tier === 'integrator' ? (
+                    <>
+                      <Loader2 size={18} className="animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    'Start Free Trial'
+                  )}
+                </button>
+              </div>
             </div>
 
-            <div className="flex items-start gap-3 p-4 bg-purple-50 rounded-xl border border-purple-100">
-              <input
-                type="checkbox"
-                checked={acceptedTerms}
-                onChange={(e) => setAcceptedTerms(e.target.checked)}
-                className="mt-1 w-4 h-4 text-purple-600 rounded"
-                disabled={isLoading}
-                required
-              />
-              <label className="text-xs text-slate-700">
-                I understand VERA is <strong>NOT a medical device or therapist</strong>. 
-                I will seek professional help when needed and call 988 or 911 in emergencies.
-              </label>
-            </div>
-
-            <button
-              type="submit"
-              disabled={isLoading || !allGood || !passwordsMatch || !acceptedTerms || !email || !password || !confirmPassword || !name}
-              className="w-full py-3 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white rounded-xl font-medium disabled:opacity-50 shadow-lg"
-            >
-              {isLoading ? 'Creating Account...' : 'Continue to Payment'}
-            </button>
-          </form>
-
-          <p className="mt-6 text-center text-sm text-slate-600">
-            Have an account?{' '}
-            <Link href="/auth/signin" className="text-purple-600 font-medium">Sign in</Link>
-          </p>
-        </div>
-
-        <div className="p-4 bg-slate-100 rounded-xl">
-          <p className="text-xs text-slate-600">
-            <strong>⚠️ Important:</strong> VERA is NOT a substitute for medical care. 
-            In crisis, call 988 or 911.
-          </p>
-        </div>
+            <p className="text-center text-sm text-slate-500 mt-8">
+              💳 Card required • 7 days free • Cancel anytime
+            </p>
+          </div>
+        )}
       </div>
     </div>
-  );
-}
-
-export default function SignUpPage() {
-  return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 flex items-center justify-center">
-        <div className="w-16 h-16 border-4 border-purple-600 border-t-transparent rounded-full animate-spin"></div>
-      </div>
-    }>
-      <SignUpForm />
-    </Suspense>
   );
 }

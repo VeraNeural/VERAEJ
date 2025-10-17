@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Wrench, Heart, Brain, Wind, Loader2 } from 'lucide-react';
+import { Loader2, X } from 'lucide-react';
 
 export default function ToolsPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedTool, setSelectedTool] = useState<string | null>(null);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -29,73 +30,245 @@ export default function ToolsPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-        <Loader2 className="animate-spin text-purple-500" size={32} />
+        <div className="slow-neurons-container" id="slowNeurons"></div>
       </div>
     );
   }
 
   const tools = [
     {
-      icon: Heart,
-      title: 'Body Scan',
-      description: 'Check in with your body and nervous system',
-      color: 'from-red-500 to-pink-500',
-    },
-    {
-      icon: Brain,
-      title: 'Pattern Recognition',
-      description: 'Identify your adaptive codes and triggers',
-      color: 'from-purple-500 to-blue-500',
-    },
-    {
-      icon: Wind,
+      id: 'breathwork',
       title: 'Breathwork',
-      description: 'Guided breathing exercises for regulation',
-      color: 'from-cyan-500 to-blue-500',
+      description: 'VERA guides you through breathwork to regulate your nervous system',
+      color: 'from-cyan-400 to-blue-400',
+    },
+    {
+      id: 'body-scan',
+      title: 'Body Scan',
+      description: 'VERA helps you scan your body and notice what needs attention',
+      color: 'from-rose-400 to-pink-400',
+    },
+    {
+      id: 'pattern-recognition',
+      title: 'Pattern Recognition',
+      description: 'VERA works with you to identify your adaptive codes and patterns',
+      color: 'from-purple-400 to-indigo-400',
+    },
+    {
+      id: 'journaling',
+      title: 'Journaling with VERA',
+      description: 'VERA guides you through 5 reflective journal prompts daily',
+      color: 'from-amber-400 to-orange-400',
     },
   ];
 
+  const openTool = (toolId: string) => {
+    setSelectedTool(toolId);
+  };
+
+  const closeTool = () => {
+    setSelectedTool(null);
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900 relative">
+      {/* Neural Background */}
+      <div className="slow-neurons-container fixed inset-0 opacity-30" id="slowNeurons"></div>
+
       {/* Header */}
-      <header className="bg-slate-900/50 backdrop-blur-sm border-b border-slate-700/50 p-4">
+      <header className="relative bg-slate-900/50 backdrop-blur-sm border-b border-slate-700/50 p-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <button
             onClick={() => router.push('/chat')}
             className="text-slate-400 hover:text-white transition-colors"
           >
-            ← Back to Chat
+            Back to Chat
           </button>
-          <h1 className="text-2xl font-light text-white flex items-center gap-2">
-            <Wrench size={24} />
-            Wellness Tools
-          </h1>
-          <div className="w-20" />
+          <h1 className="text-2xl font-light text-white">Wellness Tools</h1>
+          <div className="w-24" />
         </div>
       </header>
 
       {/* Tools Grid */}
-      <div className="max-w-6xl mx-auto p-8">
+      <div className="relative max-w-6xl mx-auto p-8">
         <p className="text-slate-400 text-center mb-8">
-          Tools to support your nervous system and wellbeing
+          VERA guides you through these tools to support your nervous system
         </p>
 
-        <div className="grid md:grid-cols-3 gap-6">
-          {tools.map((tool, index) => (
-            <div
-              key={index}
-              className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-6 border border-slate-700/50 hover:border-purple-500/50 transition-all cursor-pointer"
+        <div className="grid md:grid-cols-2 gap-6">
+          {tools.map((tool) => (
+            <button
+              key={tool.id}
+              onClick={() => openTool(tool.id)}
+              className="group relative bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 border border-slate-700/50 hover:border-purple-500/50 transition-all text-left"
             >
-              <div className={`w-16 h-16 rounded-full bg-gradient-to-r ${tool.color} flex items-center justify-center mb-4`}>
-                <tool.icon size={32} className="text-white" />
+              {/* Orb */}
+              <div className="relative w-20 h-20 mb-6">
+                <div className={`absolute inset-0 rounded-full bg-gradient-to-br ${tool.color} animate-pulse opacity-80`} />
+                <div 
+                  className={`absolute inset-2 rounded-full bg-gradient-to-br ${tool.color} animate-pulse`}
+                  style={{ animationDelay: '0.5s' }}
+                />
               </div>
+
               <h3 className="text-xl font-medium text-white mb-2">{tool.title}</h3>
               <p className="text-slate-400">{tool.description}</p>
-              <button className="mt-4 text-purple-400 hover:text-purple-300 text-sm font-medium">
-                Coming Soon
-              </button>
+
+              <div className="mt-4 text-purple-400 group-hover:text-purple-300 text-sm font-medium">
+                Start Session
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Tool Modal */}
+      {selectedTool && (
+        <ToolModal toolId={selectedTool} onClose={closeTool} />
+      )}
+    </div>
+  );
+}
+
+// Tool Modal Component
+function ToolModal({ toolId, onClose }: { toolId: string; onClose: () => void }) {
+  const [messages, setMessages] = useState<Array<{ role: string; content: string }>>([]);
+  const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [sessionStarted, setSessionStarted] = useState(false);
+
+  useEffect(() => {
+    startSession();
+  }, [toolId]);
+
+  const startSession = async () => {
+    setLoading(true);
+    
+    const toolPrompts: { [key: string]: string } = {
+      'breathwork': "Hi! I'm here to guide you through breathwork. Let's find a comfortable position. Are you ready to begin?",
+      'body-scan': "Hello. I'm going to guide you through a body scan. Find a comfortable position and let me know when you're ready to start.",
+      'pattern-recognition': "Hey. Let's explore your patterns together. What's been coming up for you lately that you'd like to understand better?",
+      'journaling': "Hi! I have some reflective prompts for you today. Ready to explore what's present for you?",
+    };
+
+    const initialMessage = toolPrompts[toolId] || "Hi! How can I support you today?";
+    
+    setMessages([{ role: 'assistant', content: initialMessage }]);
+    setSessionStarted(true);
+    setLoading(false);
+  };
+
+  const sendMessage = async () => {
+    if (!input.trim()) return;
+
+    const userMessage = input;
+    setInput('');
+    setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+    setLoading(true);
+
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [...messages, { role: 'user', content: userMessage }],
+          toolContext: toolId,
+        }),
+      });
+
+      const data = await response.json();
+      setMessages(prev => [...prev, { role: 'assistant', content: data.response }]);
+    } catch (error) {
+      console.error('Failed to send message:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  };
+
+  const toolTitles: { [key: string]: string } = {
+    'breathwork': 'Breathwork with VERA',
+    'body-scan': 'Body Scan with VERA',
+    'pattern-recognition': 'Pattern Recognition with VERA',
+    'journaling': 'Journaling with VERA',
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="bg-slate-900 rounded-3xl w-full max-w-3xl h-[600px] flex flex-col border border-slate-700 shadow-2xl">
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 border-b border-slate-700">
+          <div className="flex items-center gap-3">
+            {/* VERA Orb */}
+            <div className="relative w-12 h-12">
+              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-purple-400 to-blue-400 animate-pulse opacity-80" />
+              <div 
+                className="absolute inset-2 rounded-full bg-gradient-to-br from-purple-300 to-blue-300 animate-pulse"
+                style={{ animationDelay: '0.5s' }}
+              />
+            </div>
+            <h2 className="text-xl font-light text-white">{toolTitles[toolId]}</h2>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-slate-800 rounded-lg transition-colors"
+          >
+            <X size={24} className="text-slate-400" />
+          </button>
+        </div>
+
+        {/* Messages */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-4">
+          {messages.map((message, index) => (
+            <div
+              key={index}
+              className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+            >
+              <div
+                className={`max-w-[80%] rounded-2xl p-4 ${
+                  message.role === 'user'
+                    ? 'bg-purple-600 text-white'
+                    : 'bg-slate-800 text-slate-200'
+                }`}
+              >
+                {message.content}
+              </div>
             </div>
           ))}
+          {loading && (
+            <div className="flex justify-start">
+              <div className="bg-slate-800 rounded-2xl p-4">
+                <Loader2 className="animate-spin text-purple-400" size={20} />
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Input */}
+        <div className="p-6 border-t border-slate-700">
+          <div className="flex gap-3">
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Type your response..."
+              className="flex-1 bg-slate-800 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            />
+            <button
+              onClick={sendMessage}
+              disabled={loading || !input.trim()}
+              className="px-6 py-3 bg-purple-600 hover:bg-purple-700 disabled:bg-slate-700 disabled:cursor-not-allowed text-white rounded-xl transition-colors"
+            >
+              Send
+            </button>
+          </div>
         </div>
       </div>
     </div>

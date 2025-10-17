@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Send, Volume2, Menu, Loader2 } from 'lucide-react';
 import WellnessHub from '@/components/WellnessHubModal';
@@ -8,7 +8,7 @@ import MainNavigation from '@/components/MainNavigation';
 import CourseGenerationModal from '@/components/CourseGenerationModal';
 import NotificationsPanel from '@/components/NotificationsPanel';
 
-export default function ChatPage() {
+function ChatContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [messages, setMessages] = useState<Array<{ role: string; content: string }>>([]);
@@ -337,5 +337,18 @@ export default function ChatPage() {
         <CourseGenerationModal onClose={() => setShowCourseGeneration(false)} />
       )}
     </div>
+  );
+}
+
+// Wrap in Suspense boundary
+export default function ChatPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+        <Loader2 className="animate-spin text-purple-500" size={32} />
+      </div>
+    }>
+      <ChatContent />
+    </Suspense>
   );
 }

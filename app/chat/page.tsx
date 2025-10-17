@@ -337,15 +337,8 @@ export default function ChatPage() {
             </div>
 
            <div className="flex items-center gap-2">
-              <NotificationsPanel />
-              <button
-                onClick={() => setShowCourseGeneration(true)}
-                className="px-3 py-2 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 rounded-lg transition-all text-white shadow-sm text-sm font-medium flex items-center gap-1"
-              >
-                <Circle size={16} className="fill-white" />
-                Create Course
-              </button>
-            </div>
+  <NotificationsPanel />
+</div>
           </div>
         </header>
 

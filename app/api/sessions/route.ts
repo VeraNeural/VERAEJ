@@ -1,131 +1,176 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
-import { requireAuth } from '@/lib/auth';
+import { verifyToken } from '@/lib/auth';
+import { cookies } from 'next/headers';
+import { prisma } from '@/lib/prisma';
 
-// GET - Get all chat sessions for the current user
-export async function GET(req: NextRequest) {
+// GET - Fetch all chat sessions for the authenticated user
+export async function GET(request: NextRequest) {
   try {
-    // Check authentication
-    const auth = requireAuth(req);
-    if (!auth) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
+    console.log('📨 Fetching chat sessions');
 
-    // Get user's chat sessions
-    const sessions = await db.getChatSessions(auth.userId);
-    return NextResponse.json({ sessions });
-  } catch (error) {
-    console.error('Get sessions error:', error);
-    return NextResponse.json(
-      { error: 'Failed to get chat sessions' },
-      { status: 500 }
-    );
-  }
-}
-
-// POST - Save/update messages in an existing session
-export async function POST(req: NextRequest) {
-  try {
-    // Check authentication
-    const auth = requireAuth(req);
-    if (!auth) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
-    const { sessionId, messages, title } = await req.json();
-
-    console.log('💾 Save API called:', { sessionId, messageCount: messages?.length, title });
-
-    if (!sessionId) {
-      return NextResponse.json(
-        { error: 'Session ID is required' },
-        { status: 400 }
-      );
-    }
-
-    if (!messages || !Array.isArray(messages)) {
-      return NextResponse.json(
-        { error: 'Messages array is required' },
-        { status: 400 }
-      );
-    }
-
-    // Get the session to verify ownership
-    const session = await db.getSession(sessionId);
+    const cookieStore = await cookies();
+    const token = cookieStore.get('auth_token')?.value;
     
-    if (!session) {
-      return NextResponse.json(
-        { error: 'Session not found' },
-        { status: 404 }
-      );
+    if (!token) {
+      console.error('❌ No auth token found');
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    }
+    
+    const payload = verifyToken(token);
+    if (!payload) {
+      console.error('❌ Invalid token');
+      return NextResponse.json({ error: 'Invalid session' }, { status: 401 });
     }
 
-    // Verify ownership
-    if (session.user_id !== auth.userId) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 403 }
-      );
-    }
+    console.log('✅ User authenticated:', payload.userId);
 
-    // Update the session with messages
-    await db.updateChatSession(sessionId, {
-      messages,
-      title: title || session.title,
-      updated_at: new Date()
+    // Get all chat sessions for this user
+    const sessions = await prisma.chat_sessions.findMany({
+      where: {
+        user_id: payload.userId,
+      },
+      orderBy: {
+        updated_at: 'desc',
+      },
+      take: 50, // Get last 50 sessions
+      select: {
+        id: true,
+        title: true,
+        created_at: true,
+        updated_at: true,
+      }
     });
 
-    console.log('✅ Messages saved successfully');
+    console.log('✅ Found', sessions.length, 'sessions');
 
-    return NextResponse.json({ 
-      success: true,
-      message: 'Session saved successfully' 
-    });
+    return NextResponse.json({ sessions }, { status: 200 });
   } catch (error) {
-    console.error('❌ Save session error:', error);
+    console.error('❌ Failed to fetch sessions:', error);
     return NextResponse.json(
-      { error: 'Failed to save chat session' },
+      { 
+        error: 'Failed to fetch sessions',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      }, 
       { status: 500 }
     );
   }
 }
 
-// DELETE - Delete a chat session
-export async function DELETE(req: NextRequest) {
+// DELETE - Delete a specific chat session and all its messages
+export async function DELETE(request: NextRequest) {
   try {
-    // Check authentication
-    const auth = requireAuth(req);
-    if (!auth) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+    console.log('📨 Deleting chat session');
+
+    const cookieStore = await cookies();
+    const token = cookieStore.get('auth_token')?.value;
+    
+    if (!token) {
+      console.error('❌ No auth token found');
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    }
+    
+    const payload = verifyToken(token);
+    if (!payload) {
+      console.error('❌ Invalid token');
+      return NextResponse.json({ error: 'Invalid session' }, { status: 401 });
     }
 
-    const { searchParams } = new URL(req.url);
+    console.log('✅ User authenticated:', payload.userId);
+
+    const { searchParams } = new URL(request.url);
     const sessionId = searchParams.get('id');
 
     if (!sessionId) {
-      return NextResponse.json(
-        { error: 'Session ID is required' },
-        { status: 400 }
-      );
+      console.error('❌ No session ID provided');
+      return NextResponse.json({ error: 'Session ID required' }, { status: 400 });
     }
 
-    // Delete session
-    await db.deleteSession(sessionId);
+    console.log('🗑️ Deleting session:', sessionId);
 
-    return NextResponse.json({ success: true });
+    // Verify the session belongs to the user
+    const session = await prisma.chat_sessions.findUnique({
+      where: { id: sessionId },
+      select: { user_id: true }
+    });
+
+    if (!session) {
+      console.error('❌ Session not found');
+      return NextResponse.json({ error: 'Session not found' }, { status: 404 });
+    }
+
+    if (session.user_id !== payload.userId) {
+      console.error('❌ Unauthorized: Session does not belong to user');
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    }
+
+    // Delete all messages in the session first
+    await prisma.chat_messages.deleteMany({
+      where: { session_id: sessionId },
+    });
+
+    console.log('✅ Deleted all messages for session');
+
+    // Delete the session itself
+    await prisma.chat_sessions.delete({
+      where: { id: sessionId },
+    });
+
+    console.log('✅ Session deleted successfully');
+
+    return NextResponse.json({ success: true, message: 'Session deleted' }, { status: 200 });
   } catch (error) {
-    console.error('Delete session error:', error);
+    console.error('❌ Failed to delete session:', error);
     return NextResponse.json(
-      { error: 'Failed to delete chat session' },
+      { 
+        error: 'Failed to delete session',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      }, 
+      { status: 500 }
+    );
+  }
+}
+
+// POST - Create a new chat session
+export async function POST(request: NextRequest) {
+  try {
+    console.log('📨 Creating new chat session');
+
+    const cookieStore = await cookies();
+    const token = cookieStore.get('auth_token')?.value;
+    
+    if (!token) {
+      console.error('❌ No auth token found');
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    }
+    
+    const payload = verifyToken(token);
+    if (!payload) {
+      console.error('❌ Invalid token');
+      return NextResponse.json({ error: 'Invalid session' }, { status: 401 });
+    }
+
+    console.log('✅ User authenticated:', payload.userId);
+
+    const { title } = await request.json();
+
+    // Create new session
+    const session = await prisma.chat_sessions.create({
+      data: {
+        user_id: payload.userId,
+        title: title || 'New conversation',
+      }
+    });
+
+    console.log('✅ Created new session:', session.id);
+
+    return NextResponse.json({ session }, { status: 201 });
+  } catch (error) {
+    console.error('❌ Failed to create session:', error);
+    return NextResponse.json(
+      { 
+        error: 'Failed to create session',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      }, 
       { status: 500 }
     );
   }

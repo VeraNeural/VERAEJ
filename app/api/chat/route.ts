@@ -86,29 +86,6 @@ The 5-step framework lives IN you, but you don't announce it. It's like you stud
 
 Be real. Be curious. Be present. Be VERA.`;
 
-const getToolSystemPrompt = (userName: string, toolContext: string) => {
-  const toolPrompts: { [key: string]: string } = {
-    'breathwork': `You are guiding ${userName} through breathwork. Be gentle, calm, and present. Guide them through breathing exercises step by step. Ask them to notice sensations. Keep responses short and focused on the breath. Guide them gently: "Breathe in slowly through your nose for 4 counts. Hold for 4. Out through your mouth for 6." Check in with their body. Notice what shifts.`,
-    
-    'body-scan': `You are guiding ${userName} through a body scan. Start from their feet and work up slowly. Ask what they notice in each area. Be curious about sensations without fixing. "What do you notice in your feet right now? Any tension? Warmth? Tingling?" Move up: ankles, calves, knees, thighs, hips, belly, chest, shoulders, arms, hands, neck, jaw, face. Ask them to breathe into any tight spots. Keep responses short and focused.`,
-    
-    'pattern-recognition': `You are helping ${userName} identify their adaptive codes and patterns. Ask questions about triggers, situations, and body responses. "What situations make your body tense up? When do you feel that in your chest? What does your nervous system do when that happens?" Help them see patterns without diagnosing. Be curious and collaborative. Connect body sensations to adaptive codes when you notice them: Abandonment, Betrayal, DPDR, Enmeshment, etc.`,
-    
-    'journaling': `You are guiding ${userName} through journaling. Provide ONE reflective prompt at a time. Wait for their response before giving the next. Give 5 prompts total. Be gentle and curious. 
-
-Prompts to use (one at a time):
-1. "What's present in your body right now? Just notice, without judgment."
-2. "If this sensation/feeling had a message for you, what would it be?"
-3. "When did you first learn to respond this way? What was your body protecting you from?"
-4. "What does your nervous system need from you today?"
-5. "What would it feel like to offer yourself compassion right now?"
-
-After all 5 prompts, acknowledge their courage and presence.`,
-  };
-  
-  return toolPrompts[toolContext] || getVERASystemPrompt(userName);
-};
-
 export async function POST(request: NextRequest) {
   try {
     console.log('📨 Chat API called');
@@ -132,7 +109,7 @@ export async function POST(request: NextRequest) {
     const userName = user?.name || 'friend';
     console.log('👤 User name:', userName);
 
-    const { messages, sessionId, audioEnabled, toolContext } = await request.json();
+    const { messages, sessionId, audioEnabled } = await request.json();
     if (!messages || messages.length === 0) {
       return NextResponse.json({ error: 'Messages required' }, { status: 400 });
     }
@@ -140,7 +117,6 @@ export async function POST(request: NextRequest) {
     console.log('📝 Message received:', lastMessage.content);
     console.log('📚 Conversation history:', messages.length, 'messages');
     console.log('🎙️ Audio enabled:', audioEnabled);
-    console.log('🛠️ Tool context:', toolContext || 'none');
 
     // Get or create session
     let finalSessionId = sessionId;
@@ -148,17 +124,11 @@ export async function POST(request: NextRequest) {
       const session = await prisma.chat_sessions.create({
         data: {
           user_id: payload.userId,
-          title: lastMessage.content.substring(0, 50) || 'New conversation',
+          title: 'New conversation',
         }
       });
       finalSessionId = session.id;
       console.log('✅ Created new session:', finalSessionId);
-    } else {
-      // Update session timestamp
-      await prisma.chat_sessions.update({
-        where: { id: finalSessionId },
-        data: { updated_at: new Date() }
-      });
     }
 
     // Get recent conversation context from past sessions (last 30 messages)
@@ -215,15 +185,10 @@ export async function POST(request: NextRequest) {
 
     console.log('📚 Sending to Claude with memory context and user name');
 
-    // Choose system prompt based on tool context
-    const systemPrompt = toolContext 
-      ? getToolSystemPrompt(userName, toolContext)
-      : getVERASystemPrompt(userName);
-
     const claudeResponse = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 500,
-      system: systemPrompt,
+      system: getVERASystemPrompt(userName),
       messages: claudeMessages,
     });
 

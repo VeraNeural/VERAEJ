@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ChevronDown, MessageCircle, Send } from 'lucide-react';
+import { Heart, Lightbulb, Sparkles, ThumbsUp } from 'lucide-react';
 import PollPost from '@/components/PollPost';
 
 interface Channel {
@@ -36,6 +36,18 @@ interface Comment {
   created_at: string;
 }
 
+interface Reaction {
+  type: string;
+  count: number;
+}
+
+const REACTION_TYPES = [
+  { type: 'heart', icon: Heart, label: '💜 Resonates', color: 'text-rose-500' },
+  { type: 'helpful', icon: Lightbulb, label: '💡 Helpful', color: 'text-yellow-500' },
+  { type: 'support', icon: ThumbsUp, label: '🤝 Support', color: 'text-blue-500' },
+  { type: 'insight', icon: Sparkles, label: '✨ Insight', color: 'text-purple-500' },
+];
+
 export default function CommunityPage() {
   const router = useRouter();
   const [channels, setChannels] = useState<Channel[]>([]);
@@ -46,6 +58,8 @@ export default function CommunityPage() {
   const [hasAccess, setHasAccess] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string>('');
   const [showChannelDropdown, setShowChannelDropdown] = useState(false);
+  const [reactions, setReactions] = useState<Record<string, Reaction[]>>({});
+  const [userReactions, setUserReactions] = useState<Record<string, string | null>>({});
   
   // Comments state
   const [expandedPostId, setExpandedPostId] = useState<string | null>(null);
@@ -76,6 +90,13 @@ export default function CommunityPage() {
       loadCommentCount(post.id);
     });
   }, [posts]);
+
+  // Load reactions for all posts
+useEffect(() => {
+  posts.forEach(post => {
+    loadReactions(post.id);
+  });
+}, [posts]);
 
   async function checkAccess() {
     try {
@@ -236,6 +257,36 @@ export default function CommunityPage() {
     const conversationId = `${[currentUserId, recipientId].sort().join('_')}`;
     router.push(`/messages?conversation=${conversationId}&recipient=${recipientId}`);
   }
+
+  async function loadReactions(postId: string) {
+  try {
+    const res = await fetch(`/api/community/reactions?postId=${postId}`);
+    if (res.ok) {
+      const data = await res.json();
+      setReactions(prev => ({ ...prev, [postId]: data.reactions }));
+      setUserReactions(prev => ({ ...prev, [postId]: data.userReaction }));
+    }
+  } catch (error) {
+    console.error('Failed to load reactions:', error);
+  }
+}
+
+async function handleReaction(postId: string, reactionType: string) {
+  try {
+    const res = await fetch('/api/community/reactions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ postId, reactionType }),
+    });
+
+    if (res.ok) {
+      // Reload reactions for this post
+      loadReactions(postId);
+    }
+  } catch (error) {
+    console.error('Failed to react:', error);
+  }
+}
 
   if (isLoading) {
     return (
@@ -545,6 +596,40 @@ export default function CommunityPage() {
                               />
                             )}
 
+                             {/* Reactions */}
+<div className="flex items-center gap-2 flex-wrap mt-3">
+  {REACTION_TYPES.map(({ type, icon: Icon, label, color }) => {
+    const postReactions = reactions[post.id] || [];
+    const reactionCount = postReactions.find(r => r.type === type)?.count || 0;
+    const userReacted = userReactions[post.id] === type;
+    
+    return (
+      <button
+        key={type}
+        onClick={() => handleReaction(post.id, type)}
+        className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-sm transition-all ${
+          userReacted
+            ? 'bg-purple-100 border-2 border-purple-400 font-medium'
+            : 'bg-slate-100 hover:bg-slate-200 border border-slate-300'
+        }`}
+        title={label}
+      >
+        <Icon size={14} className={userReacted ? color : 'text-slate-600'} />
+        {reactionCount > 0 && <span className="text-xs">{reactionCount}</span>}
+      </button>
+    );
+  })}
+</div>
+
+{/* Comments Button */}
+<button
+  onClick={() => toggleComments(post.id)}
+  className="flex items-center gap-2 text-sm text-slate-600 hover:text-purple-600 transition-colors mt-3"
+>
+  <MessageCircle size={16} />
+  <span>{commentCount} {commentCount === 1 ? 'comment' : 'comments'}</span>
+</button>  
+                            
                             {/* Comments Button */}
                             <button
                               onClick={() => toggleComments(post.id)}

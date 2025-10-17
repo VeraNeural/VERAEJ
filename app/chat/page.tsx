@@ -4,9 +4,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Send, Volume2, Menu, Loader2, Circle } from 'lucide-react';
 import WellnessHub from '@/components/WellnessHubModal';
-import SidePanel from '@/components/SidePanel';
+import MainNavigation from '@/components/MainNavigation';
 import CourseGenerationModal from '@/components/CourseGenerationModal';
 import NotificationsPanel from '@/components/NotificationsPanel';
+
 
 interface Message {
   role: 'user' | 'assistant';
@@ -493,14 +494,11 @@ export default function ChatPage() {
           />
         )}
 
-        <SidePanel
-          isOpen={showSidePanel}
-          onClose={() => setShowSidePanel(false)}
-          darkMode={darkMode}
-          currentSessionId={currentSessionId}
-          onNewChat={handleNewChat}
-          onLoadChat={handleLoadChat}
-        />
+        <MainNavigation
+  isOpen={showSidePanel}
+  onClose={() => setShowSidePanel(false)}
+  currentPage="chat"
+/>
 
         {showCourseGeneration && (
           <CourseGenerationModal

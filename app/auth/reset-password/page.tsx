@@ -1,10 +1,9 @@
 'use client';
 
-import { Suspense } from 'react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import { Lock, AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
 
 function ResetPasswordForm() {
   const router = useRouter();
@@ -13,9 +12,9 @@ function ResetPasswordForm() {
 
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!token) {
@@ -27,7 +26,6 @@ function ResetPasswordForm() {
     e.preventDefault();
     setError('');
 
-    // Validation
     if (password.length < 8) {
       setError('Password must be at least 8 characters');
       return;
@@ -38,12 +36,7 @@ function ResetPasswordForm() {
       return;
     }
 
-    if (!token) {
-      setError('Invalid reset token');
-      return;
-    }
-
-    setIsLoading(true);
+    setLoading(true);
 
     try {
       const response = await fetch('/api/auth/reset-password', {
@@ -56,129 +49,149 @@ function ResetPasswordForm() {
 
       if (!response.ok) {
         setError(data.error || 'Failed to reset password');
-        setIsLoading(false);
+        setLoading(false);
         return;
       }
 
       setSuccess(true);
+      setLoading(false);
+
+      // Redirect to sign in after 2 seconds
       setTimeout(() => {
         router.push('/auth/signin');
       }, 2000);
-    } catch (error) {
-      setError('An error occurred. Please try again.');
-      setIsLoading(false);
+    } catch (err) {
+      console.error('Reset password error:', err);
+      setError('Something went wrong. Please try again.');
+      setLoading(false);
     }
   };
 
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-rose-50/30 to-blue-50/20 dark:from-slate-950 dark:via-purple-950/20 dark:to-blue-950/20 px-4">
-      <div className="w-full max-w-md">
-        {/* Back Button */}
-        <Link
-          href="/auth/signin"
-          className="inline-flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white mb-6 transition-colors"
-        >
-          <ArrowLeft size={20} />
-          Back to sign in
-        </Link>
-
-        {/* Card */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl p-8 border border-slate-200 dark:border-slate-800">
-          {/* Logo/Header */}
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 text-transparent bg-clip-text mb-2">
-              Set New Password
-            </h1>
-            <p className="text-slate-600 dark:text-slate-400">
-              Choose a strong password
+  if (success) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#faf8fc] via-[#f5f0fa] to-[#fef5fb] flex items-center justify-center p-6">
+        <div className="max-w-md w-full">
+          <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-xl border border-purple-100">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <CheckCircle size={32} className="text-green-600" />
+            </div>
+            
+            <h1 className="text-2xl font-light text-slate-900 mb-4 text-center">Password reset successful!</h1>
+            <p className="text-slate-600 text-center mb-6">
+              You can now sign in with your new password.
+            </p>
+            
+            <p className="text-sm text-slate-500 text-center">
+              Redirecting to sign in...
             </p>
           </div>
-
-          {success ? (
-            /* Success Message */
-            <div className="text-center">
-              <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">
-                Password Reset Successfully!
-              </h3>
-              <p className="text-slate-600 dark:text-slate-400 mb-6">
-                Redirecting to sign in...
-              </p>
-            </div>
-          ) : (
-            /* Form */
-            <>
-              {error && (
-                <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400 text-sm">
-                  {error}
-                </div>
-              )}
-
-              <form onSubmit={handleSubmit} className="space-y-4">
-                {/* New Password */}
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    New Password
-                  </label>
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    minLength={8}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-                    placeholder="••••••••"
-                  />
-                  <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                    At least 8 characters
-                  </p>
-                </div>
-
-                {/* Confirm Password */}
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    Confirm Password
-                  </label>
-                  <input
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                    minLength={8}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-                    placeholder="••••••••"
-                  />
-                </div>
-
-                {/* Submit Button */}
-                <button
-                  type="submit"
-                  disabled={isLoading || !token}
-                  className="w-full py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-medium rounded-xl hover:shadow-lg hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isLoading ? 'Resetting...' : 'Reset Password'}
-                </button>
-              </form>
-            </>
-          )}
         </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-[#faf8fc] via-[#f5f0fa] to-[#fef5fb] flex items-center justify-center p-6">
+      <div className="max-w-md w-full">
+        {/* Logo/Brand */}
+        <div className="text-center mb-8">
+          <div className="w-20 h-20 mx-auto mb-4 relative">
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-400 via-blue-400 to-purple-400 animate-pulse opacity-80" />
+            <div 
+              className="absolute inset-3 rounded-full bg-gradient-to-br from-purple-300 to-blue-300 animate-pulse" 
+              style={{ animationDelay: '0.5s' }}
+            />
+          </div>
+          <h1 className="text-3xl font-light text-slate-900 mb-2">Create new password</h1>
+          <p className="text-slate-600 font-light">Enter your new password below</p>
+        </div>
+
+        {/* Form */}
+        <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-xl border border-purple-100">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Error Message */}
+            {error && (
+              <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3">
+                <AlertCircle size={20} className="text-red-600 flex-shrink-0 mt-0.5" />
+                <p className="text-red-800 text-sm">{error}</p>
+              </div>
+            )}
+
+            {/* New Password */}
+            <div>
+              <label className="block text-slate-700 font-normal mb-2">New Password</label>
+              <div className="relative">
+                <Lock size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="At least 8 characters"
+                  required
+                  className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-300 focus:border-transparent text-slate-900 placeholder:text-slate-400"
+                />
+              </div>
+            </div>
+
+            {/* Confirm Password */}
+            <div>
+              <label className="block text-slate-700 font-normal mb-2">Confirm Password</label>
+              <div className="relative">
+                <Lock size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Re-enter your password"
+                  required
+                  className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-300 focus:border-transparent text-slate-900 placeholder:text-slate-400"
+                />
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={loading || !token}
+              className="w-full bg-slate-900 hover:bg-slate-800 text-white py-3 rounded-xl font-normal transition-all disabled:bg-slate-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {loading ? (
+                <>
+                  <Loader2 size={20} className="animate-spin" />
+                  Resetting...
+                </>
+              ) : (
+                <>
+                  <Lock size={20} />
+                  Reset Password
+                </>
+              )}
+            </button>
+          </form>
+
+          {/* Back to Sign In */}
+          <div className="mt-6 text-center">
+            <Link
+              href="/auth/signin"
+              className="text-slate-600 hover:text-slate-700 text-sm"
+            >
+              Back to sign in
+            </Link>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <p className="text-center text-sm text-slate-500 mt-6 font-light">
+          Need help? Email support@veraneural.com
+        </p>
       </div>
     </div>
   );
 }
 
-// ✅ Main export with Suspense wrapper
 export default function ResetPasswordPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-slate-600 dark:text-slate-400">Loading...</div>
-      </div>
-    }>
+    <Suspense fallback={<div className="min-h-screen bg-gradient-to-br from-[#faf8fc] via-[#f5f0fa] to-[#fef5fb] flex items-center justify-center"><Loader2 className="animate-spin" size={32} /></div>}>
       <ResetPasswordForm />
     </Suspense>
   );

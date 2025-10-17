@@ -190,22 +190,25 @@ export default function MainNavigation({ isOpen, onClose, currentPage }: MainNav
             </button>
           </div>
 
-          {/* User Info */}
-          {user && (
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
-              <p className="text-white font-medium">{user.name}</p>
-              <div className="flex items-center gap-2 mt-1">
-                <div className={`px-2 py-0.5 rounded-full ${tierBadge.color} flex items-center gap-1`}>
-                  {tierBadge.icon && <tierBadge.icon size={12} className="text-white" />}
-                  <span className="text-white text-xs font-medium">{tierBadge.text}</span>
-                </div>
+  {/* User Info */}
+        {user && (
+          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
+            <p className="text-white font-medium">{user.name}</p>
+            <div className="flex items-center gap-2 mt-1">
+              <div className={`px-2 py-0.5 rounded-full ${tierBadge.color} flex items-center gap-1`}>
+                {tierBadge.icon && <tierBadge.icon size={12} className="text-white" />}
+                <span className="text-white text-xs font-medium">{tierBadge.text}</span>
               </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
+      </div>
 
-          {/* Chat with History */}
-          <div>
+      {/* Navigation */}
+      <nav className="p-4 space-y-1">
+
+        {/* Chat with History */}
+        <div>
             <button
               onClick={() => setShowChatHistory(!showChatHistory)}
               className={`w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg transition-all ${

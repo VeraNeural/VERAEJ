@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Send, Volume2, Menu, Loader2 } from 'lucide-react';
 import WellnessHub from '@/components/WellnessHubModal';
 import SidePanel from '@/components/SidePanel';
+import CourseGenerationModal from '@/components/CourseGenerationModal';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -39,6 +40,7 @@ export default function ChatPage() {
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [darkMode] = useState(false);
+  const [showCourseGeneration, setShowCourseGeneration] = useState(false);
 
   // Voice state
   const [audioEnabled, setAudioEnabled] = useState(false);
@@ -341,11 +343,12 @@ export default function ChatPage() {
 
             <div className="flex items-center gap-2">
               <button
-                onClick={() => router.push('/courses')}
-                className="px-3 py-2 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 rounded-lg transition-all text-white shadow-sm text-sm font-medium"
-              >
-                Courses
-              </button>
+  onClick={() => setShowCourseGeneration(true)}
+  className="px-3 py-2 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 rounded-lg transition-all text-white shadow-sm text-sm font-medium flex items-center gap-1"
+>
+  <Sparkles size={16} />
+  Create Course
+</button>
               <button
                 onClick={() => router.push('/community')}
                 className="px-3 py-2 bg-slate-700/60 hover:bg-slate-600/60 rounded-lg transition-all text-slate-200 border border-slate-600/50 shadow-sm text-sm font-medium"
@@ -511,6 +514,14 @@ export default function ChatPage() {
           currentSessionId={currentSessionId}
           onNewChat={handleNewChat}
           onLoadChat={handleLoadChat}
+
+          {/* Course Generation Modal */}
+{showCourseGeneration && (
+  <CourseGenerationModal
+    isOpen={showCourseGeneration}
+    onClose={() => setShowCourseGeneration(false)}
+  />
+)}
         />
       </div>
     </>

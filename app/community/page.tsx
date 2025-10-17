@@ -722,12 +722,6 @@ async function handleReaction(postId: string, reactionType: string) {
               </div>
             )}
           </div>
-        </div>
-      </div>
-    </div>
-</div>
-      </div>
-    </div>
 
     {/* User Profile Modal */}
     {showProfileModal && selectedUserId && (

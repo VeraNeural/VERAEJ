@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Send, Volume2, Menu, Loader2, Circle } from 'lucide-react';
+import { Send, Volume2, Menu, Loader2, Circle, Brain, X } from 'lucide-react';
 import WellnessHub from '@/components/WellnessHubModal';
 import SidePanel from '@/components/SidePanel';
 import CourseGenerationModal from '@/components/CourseGenerationModal';

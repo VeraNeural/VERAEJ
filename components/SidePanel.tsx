@@ -27,7 +27,7 @@ export default function SidePanel({ isOpen, onClose, darkMode, currentSessionId,
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [userTier, setUserTier] = useState<string>('explorer');
-  const [userName, setUserName] = useState<string>(''); // ADDED: User name state
+  const [userName, setUserName] = useState<string>('');
 
   useEffect(() => {
     if (isOpen) {
@@ -42,7 +42,10 @@ export default function SidePanel({ isOpen, onClose, darkMode, currentSessionId,
       const response = await fetch('/api/sessions');
       if (response.ok) {
         const data = await response.json();
+        console.log('Sessions loaded:', data.sessions); // DEBUG
         setSessions(data.sessions || []);
+      } else {
+        console.error('Failed to load sessions:', response.status);
       }
     } catch (error) {
       console.error('Failed to load sessions:', error);
@@ -57,7 +60,7 @@ export default function SidePanel({ isOpen, onClose, darkMode, currentSessionId,
       if (response.ok) {
         const data = await response.json();
         setUserTier(data.user.subscription_tier);
-        setUserName(data.user.name || data.user.email); // ADDED: Load user name
+        setUserName(data.user.name || data.user.email);
       }
     } catch (error) {
       console.error('Failed to load user tier:', error);
@@ -115,6 +118,14 @@ export default function SidePanel({ isOpen, onClose, darkMode, currentSessionId,
     return date.toLocaleDateString();
   };
 
+  const handleLoadChat = (sessionId: string) => {
+    console.log('Loading chat:', sessionId); // DEBUG
+    if (onLoadChat) {
+      onLoadChat(sessionId);
+      onClose();
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -144,7 +155,6 @@ export default function SidePanel({ isOpen, onClose, darkMode, currentSessionId,
                 </div>
                 <div>
                   <h2 className="text-xl font-normal">VERA</h2>
-                  {/* ADDED: User name below VERA */}
                   {userName && (
                     <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
                       {userName}
@@ -203,12 +213,7 @@ export default function SidePanel({ isOpen, onClose, darkMode, currentSessionId,
                 {sessions.map((session) => (
                   <div
                     key={session.id}
-                    onClick={() => {
-                      if (onLoadChat) {
-                        onLoadChat(session.id);
-                        onClose();
-                      }
-                    }}
+                    onClick={() => handleLoadChat(session.id)}
                     className={`group flex items-center justify-between px-3 py-3 rounded-lg cursor-pointer transition-all ${
                       currentSessionId === session.id
                         ? darkMode
@@ -251,7 +256,7 @@ export default function SidePanel({ isOpen, onClose, darkMode, currentSessionId,
           <nav className={`p-4 border-t space-y-1 ${
             darkMode ? 'border-slate-800' : 'border-slate-200'
           }`}>
-            {/* CHANGED: Dashboard Link - Only for Regulator+ */}
+            {/* Dashboard Link - Only for Regulator+ */}
             {hasMinimumTier(userTier as any, 'regulator') && (
               <Link 
                 href="/dashboard"
@@ -266,8 +271,21 @@ export default function SidePanel({ isOpen, onClose, darkMode, currentSessionId,
               </Link>
             )}
 
+            {/* Tools Link - Available for Everyone */}
+            <Link 
+              href="/tools"
+              onClick={onClose}
+              className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                darkMode 
+                  ? 'hover:bg-slate-800 text-slate-300' 
+                  : 'hover:bg-slate-100 text-slate-700'
+              }`}
+            >
+              Tools
+            </Link>
+
             {/* Community Link - Only for Regulator+ */}
-            {hasFeatureAccess(userTier as any, 'community_access') && (
+            {hasMinimumTier(userTier as any, 'regulator') && (
               <Link 
                 href="/community"
                 onClick={onClose}
@@ -278,6 +296,21 @@ export default function SidePanel({ isOpen, onClose, darkMode, currentSessionId,
                 }`}
               >
                 Community
+              </Link>
+            )}
+
+            {/* Courses Link - Only for Integrator */}
+            {hasMinimumTier(userTier as any, 'integrator') && (
+              <Link 
+                href="/courses"
+                onClick={onClose}
+                className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  darkMode 
+                    ? 'hover:bg-slate-800 text-slate-300' 
+                    : 'hover:bg-slate-100 text-slate-700'
+                }`}
+              >
+                Courses
               </Link>
             )}
 
@@ -298,7 +331,7 @@ export default function SidePanel({ isOpen, onClose, darkMode, currentSessionId,
             )}
 
             {/* Messages Link - Only for Regulator+ */}
-            {hasFeatureAccess(userTier as any, 'community_access') && (
+            {hasMinimumTier(userTier as any, 'regulator') && (
               <Link 
                 href="/messages"
                 onClick={onClose}

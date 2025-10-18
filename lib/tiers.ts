@@ -1,4 +1,4 @@
-export type UserTier = 'free' | 'explorer' | 'regulator' | integrator' | 'test';
+export type UserTier = 'free' | 'explorer' | 'regulator' | 'integrator' | 'test';
 
 // Define tier hierarchy (higher number = more access)
 const TIER_LEVELS: Record<UserTier, number> = {

@@ -8,11 +8,12 @@ import JournalPrompts from './chat/JournalPrompts';
 import DailyCheckIn from './chat/DailyCheckIn';
 import FileAttachments from './chat/FileAttachments';
 import ProfileSettings from './chat/ProfileSettings';
+import { hasFeatureAccess } from '@/lib/tiers';
 
 interface WellnessHubModalProps {
   isOpen: boolean;
   onClose: () => void;
-  userId: string;  // ← This
+  userId: string;
   darkMode: boolean;
 }
 
@@ -43,9 +44,9 @@ export default function WellnessHubModal({ isOpen, onClose, darkMode, userId }: 
   }, [isOpen]);
 
   // Define what each tier can access
-  const hasProtocolEdit = ['regulator', 'integrator', 'test'].includes(userTier);
-  const hasDashboard = ['regulator', 'integrator', 'test'].includes(userTier);
-  const hasFiles = ['integrator', 'test'].includes(userTier); // Only Integrator tier
+  const hasProtocolEdit = hasFeatureAccess(userTier as any, 'protocol_edit');
+  const hasDashboard = hasFeatureAccess(userTier as any, 'dashboard_access');
+  const hasFiles = hasFeatureAccess(userTier as any, 'file_attachments');
 
   if (!isOpen) return null;
 

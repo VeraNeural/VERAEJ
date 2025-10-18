@@ -46,6 +46,10 @@ export default function ChatPage() {
   const [userTier, setUserTier] = useState<string>('explorer');
   const [voiceUsageToday, setVoiceUsageToday] = useState(0);
 
+  const [showAnalysis, setShowAnalysis] = useState(false);
+  const [analysisData, setAnalysisData] = useState<any>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+
   const voiceAvailable = hasFeatureAccess(userTier as any, 'voice_responses');
   const canUseVoice = voiceUsageToday < getVoiceLimit(userTier as any);
 
@@ -220,6 +224,39 @@ export default function ChatPage() {
     }
   };
 
+  const handleDeepDive = async () => {
+    if (messages.length < 5) {
+      alert('Let\'s have a few more exchanges first! Deep analysis works best with at least 5 messages.');
+      return;
+    }
+
+    setIsAnalyzing(true);
+    try {
+      const response = await fetch('/api/analysis', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          conversationHistory: messages.map(m => ({
+            role: m.role,
+            content: m.content
+          })),
+          userId: user?.id
+        }),
+      });
+
+      if (!response.ok) throw new Error('Analysis failed');
+
+      const data = await response.json();
+      setAnalysisData(data.analysis);
+      setShowAnalysis(true);
+    } catch (error) {
+      console.error('Deep dive error:', error);
+      alert('Failed to generate analysis. Please try again.');
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
   return (
     <div className="relative">
       <div className="slow-neurons-container" id="slowNeurons"></div>
@@ -330,6 +367,16 @@ export default function ChatPage() {
                 <Circle size={16} className="fill-white" />
                 Create Course
               </button>
+              {hasFeatureAccess(userTier as any, 'deep_analysis') && messages.length >= 5 && (
+                <button
+                  onClick={handleDeepDive}
+                  disabled={isAnalyzing}
+                  className="px-3 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all text-white shadow-sm text-sm font-medium flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Brain size={16} />
+                  {isAnalyzing ? 'Analyzing...' : 'Deep Dive'}
+                </button>
+              )}
               <button
                 onClick={() => router.push('/community')}
                 className="px-3 py-2 bg-slate-700/60 hover:bg-slate-600/60 rounded-lg transition-all text-slate-200 border border-slate-600/50 shadow-sm text-sm font-medium"
@@ -493,6 +540,134 @@ export default function ChatPage() {
             isOpen={showCourseGeneration}
             onClose={() => setShowCourseGeneration(false)}
           />
+        )}
+
+        {showAnalysis && analysisData && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+              <div className="sticky top-0 bg-gradient-to-r from-indigo-500 to-purple-500 text-white p-6 rounded-t-3xl">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Brain size={32} />
+                    <div>
+                      <h2 className="text-2xl font-bold">Deep Dive Analysis</h2>
+                      <p className="text-sm text-white/80">Powered by Claude + GPT-4</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowAnalysis(false)}
+                    className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+                  >
+                    <X size={24} />
+                  </button>
+                </div>
+              </div>
+
+              <div className="p-6 space-y-6">
+                {/* Empathetic Summary */}
+                <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-2xl p-6 border-2 border-purple-200">
+                  <h3 className="text-lg font-semibold text-purple-900 mb-3 flex items-center gap-2">
+                    💜 What I'm Noticing
+                  </h3>
+                  <div className="text-slate-700 whitespace-pre-wrap leading-relaxed">
+                    {analysisData.empathetic_summary}
+                  </div>
+                </div>
+
+                {/* Nervous System States */}
+                {analysisData.raw?.nervous_system_states && (
+                  <div className="bg-white rounded-2xl p-6 border border-slate-200">
+                    <h3 className="text-lg font-semibold text-slate-900 mb-3">
+                      🧠 Nervous System Patterns
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {analysisData.raw.nervous_system_states.map((state: string, i: number) => (
+                        <span key={i} className="px-4 py-2 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
+                          {state}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Emotional Themes */}
+                {analysisData.raw?.emotional_themes && (
+                  <div className="bg-white rounded-2xl p-6 border border-slate-200">
+                    <h3 className="text-lg font-semibold text-slate-900 mb-3">
+                      💭 Emotional Themes
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {analysisData.raw.emotional_themes.map((theme: string, i: number) => (
+                        <span key={i} className="px-4 py-2 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">
+                          {theme}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Triggers */}
+                {analysisData.raw?.identified_triggers && (
+                  <div className="bg-white rounded-2xl p-6 border border-slate-200">
+                    <h3 className="text-lg font-semibold text-slate-900 mb-3">
+                      ⚡ Identified Triggers
+                    </h3>
+                    <ul className="space-y-2">
+                      {analysisData.raw.identified_triggers.map((trigger: string, i: number) => (
+                        <li key={i} className="flex items-start gap-2">
+                          <span className="text-amber-500 mt-1">▸</span>
+                          <span className="text-slate-700">{trigger}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Progress Indicators */}
+                {analysisData.raw?.progress_indicators && (
+                  <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-6 border-2 border-green-200">
+                    <h3 className="text-lg font-semibold text-green-900 mb-3">
+                      ✨ Signs of Progress
+                    </h3>
+                    <ul className="space-y-2">
+                      {analysisData.raw.progress_indicators.map((indicator: string, i: number) => (
+                        <li key={i} className="flex items-start gap-2">
+                          <span className="text-green-600 mt-1">✓</span>
+                          <span className="text-slate-700">{indicator}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Recommendations */}
+                {analysisData.raw?.recommendations && (
+                  <div className="bg-white rounded-2xl p-6 border border-slate-200">
+                    <h3 className="text-lg font-semibold text-slate-900 mb-3">
+                      💡 Recommendations
+                    </h3>
+                    <ul className="space-y-3">
+                      {analysisData.raw.recommendations.map((rec: string, i: number) => (
+                        <li key={i} className="flex items-start gap-3 p-3 bg-slate-50 rounded-xl">
+                          <span className="text-indigo-500 font-bold">{i + 1}</span>
+                          <span className="text-slate-700">{rec}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                <div className="text-center pt-4">
+                  <button
+                    onClick={() => setShowAnalysis(false)}
+                    className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white rounded-xl font-medium transition-all shadow-lg"
+                  >
+                    Close Analysis
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>

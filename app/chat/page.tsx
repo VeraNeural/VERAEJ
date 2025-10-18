@@ -6,7 +6,7 @@ import { Send, Volume2, Menu, Loader2, Circle, Brain, X } from 'lucide-react';
 import WellnessHub from '@/components/WellnessHubModal';
 import SidePanel from '@/components/SidePanel';
 import CourseGenerationModal from '@/components/CourseGenerationModal';
-import { hasFeatureAccess, getVoiceLimit } from '@/lib/tiers';
+import { hasFeatureAccess, getVoiceLimit, hasMinimumTier } from '@/lib/tiers';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -212,12 +212,23 @@ export default function ChatPage() {
   };
 
   const handleLoadChat = async (sessionId: string) => {
+    console.log('Loading chat session:', sessionId); // DEBUG
     try {
-      const response = await fetch(`/api/sessions/${sessionId}`);
+      const response = await fetch(`/api/sessions?id=${sessionId}`);  // FIXED: Use query param
       if (response.ok) {
         const data = await response.json();
-        setMessages(data.messages || []);
+        console.log('Chat loaded successfully:', data); // DEBUG
+        
+        // Parse messages if they're stored as JSON string
+        let parsedMessages = data.session?.messages || [];
+        if (typeof parsedMessages === 'string') {
+          parsedMessages = JSON.parse(parsedMessages);
+        }
+        
+        setMessages(parsedMessages);
         setCurrentSessionId(sessionId);
+      } else {
+        console.error('Failed to load chat:', response.status);
       }
     } catch (error) {
       console.error('Failed to load chat:', error);
@@ -360,13 +371,17 @@ export default function ChatPage() {
             </div>
 
             <div className="flex items-center gap-2">
-              <button
-                onClick={() => setShowCourseGeneration(true)}
-                className="px-3 py-2 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 rounded-lg transition-all text-white shadow-sm text-sm font-medium flex items-center gap-1"
-              >
-                <Circle size={16} className="fill-white" />
-                Create Course
-              </button>
+              {/* FIXED: Create Course - Only for Integrator */}
+              {hasMinimumTier(userTier as any, 'integrator') && (
+                <button
+                  onClick={() => setShowCourseGeneration(true)}
+                  className="px-3 py-2 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 rounded-lg transition-all text-white shadow-sm text-sm font-medium flex items-center gap-1"
+                >
+                  <Circle size={16} className="fill-white" />
+                  Create Course
+                </button>
+              )}
+              
               {hasFeatureAccess(userTier as any, 'deep_analysis') && messages.length >= 5 && (
                 <button
                   onClick={handleDeepDive}
@@ -377,12 +392,17 @@ export default function ChatPage() {
                   {isAnalyzing ? 'Analyzing...' : 'Deep Dive'}
                 </button>
               )}
-              <button
-                onClick={() => router.push('/community')}
-                className="px-3 py-2 bg-slate-700/60 hover:bg-slate-600/60 rounded-lg transition-all text-slate-200 border border-slate-600/50 shadow-sm text-sm font-medium"
-              >
-                Community
-              </button>
+              
+              {/* FIXED: Community - Only for Regulator+ */}
+              {hasMinimumTier(userTier as any, 'regulator') && (
+                <button
+                  onClick={() => router.push('/community')}
+                  className="px-3 py-2 bg-slate-700/60 hover:bg-slate-600/60 rounded-lg transition-all text-slate-200 border border-slate-600/50 shadow-sm text-sm font-medium"
+                >
+                  Community
+                </button>
+              )}
+              
               <button
                 onClick={() => setShowWellnessHub(true)}
                 className="px-3 py-2 bg-slate-700/60 hover:bg-slate-600/60 rounded-lg transition-all text-slate-200 border border-slate-600/50 shadow-sm text-sm font-medium"

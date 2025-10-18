@@ -235,38 +235,38 @@ export default function ChatPage() {
     }
   };
 
-  const handleDeepDive = async () => {
-    if (messages.length < 5) {
-      alert('Let\'s have a few more exchanges first! Deep analysis works best with at least 5 messages.');
-      return;
-    }
+const handleDeepDive = async () => {
+  if (messages.length < 5) {
+    alert('Let\'s have a few more exchanges first! Deep analysis works best with at least 5 messages.');
+    return;
+  }
 
-    setIsAnalyzing(true);
-    try {
-      const response = await fetch('/api/analysis', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          conversationHistory: messages.map(m => ({
-            role: m.role,
-            content: m.content
-          })),
-          userId: user?.id
-        }),
-      });
+  setIsAnalyzing(true);
+  try {
+    const response = await fetch('/api/analysis', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        conversationHistory: messages.map(m => ({
+          role: m.role,
+          content: m.content
+        })),
+        userId: user?.id
+      }),
+    });
 
-      if (!response.ok) throw new Error('Analysis failed');
+    if (!response.ok) throw new Error('Analysis failed');
 
-      const data = await response.json();
-      setAnalysisData(data.analysis);
-      setShowAnalysis(true);
-    } catch (error) {
-      console.error('Deep dive error:', error);
-      alert('Failed to generate analysis. Please try again.');
-    } finally {
-      setIsAnalyzing(false);
-    }
-  };
+    const data = await response.json();
+    setAnalysisData(data.analysis);
+    setShowAnalysis(true);
+  } catch (error) {
+    console.error('Deep dive error:', error);
+    alert('Failed to generate analysis. Please try again.');
+  } finally {
+    setIsAnalyzing(false);
+  }
+};  // ← CRITICAL: Must end with }; here on line 269
 
   return (
     <div className="relative">

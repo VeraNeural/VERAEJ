@@ -1,325 +1,187 @@
-'use client';
+import { NextRequest, NextResponse } from 'next/server';
+import { verifyToken } from '@/lib/auth';
+import { cookies } from 'next/headers';
+import { prisma } from '@/lib/prisma';
+import Anthropic from '@anthropic-ai/sdk';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { hasFeatureAccess, getDecodeLimit } from '@/lib/tiers';
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY,
+});
 
-export default function DecodePage() {
-  const router = useRouter();
-  const [text, setText] = useState('');
-  const [context, setContext] = useState('');
-  const [isDecoding, setIsDecoding] = useState(false);
-  const [decodeResult, setDecodeResult] = useState<any>(null);
-  const [user, setUser] = useState<any>(null);
-  const [userTier, setUserTier] = useState<string>('explorer');
-  const [usage, setUsage] = useState<any>(null);
-  const [error, setError] = useState<string | null>(null);
+export async function POST(req: NextRequest) {
+  try {
+    // 1. Verify authentication
+    const cookieStore = await cookies();
+    const token = cookieStore.get('token')?.value;
 
-  useEffect(() => {
-    checkAuth();
-    createNeurons();
-  }, []);
-
-  const createNeurons = () => {
-    const container = document.getElementById('decodeNeurons');
-    if (!container) return;
-
-    container.innerHTML = '';
-
-    // Create floating neurons
-    for (let i = 0; i < 30; i++) {
-      const neuron = document.createElement('div');
-      neuron.className = 'decode-neuron';
-      neuron.style.left = Math.random() * 100 + '%';
-      neuron.style.top = Math.random() * 100 + '%';
-      neuron.style.animationDelay = Math.random() * 20 + 's';
-      neuron.style.animationDuration = (30 + Math.random() * 20) + 's';
-      container.appendChild(neuron);
+    if (!token) {
+      return NextResponse.json(
+        { error: 'Unauthorized', upgrade_required: false },
+        { status: 401 }
+      );
     }
 
-    // Create consciousness waves
-    for (let i = 0; i < 2; i++) {
-      const wave = document.createElement('div');
-      wave.className = 'decode-wave';
-      wave.style.left = Math.random() * 100 + '%';
-      wave.style.top = Math.random() * 100 + '%';
-      wave.style.animationDelay = i * 15 + 's';
-      container.appendChild(wave);
-    }
-  };
-
-  const checkAuth = async () => {
-    try {
-      const response = await fetch('/api/auth/me');
-      if (!response.ok) {
-        router.push('/auth/signin');
-        return;
-      }
-      const data = await response.json();
-      setUser(data.user);
-      setUserTier(data.user.subscription_tier);
-    } catch (error) {
-      console.error('Auth check failed:', error);
-      router.push('/auth/signin');
-    }
-  };
-
-  const handleDecode = async () => {
-    if (!text.trim() || text.trim().length < 20) {
-      setError('Please provide at least 20 characters to decode.');
-      return;
+    const payload = verifyToken(token);
+    if (!payload?.userId) {
+      return NextResponse.json(
+        { error: 'Invalid token', upgrade_required: false },
+        { status: 401 }
+      );
     }
 
-    setIsDecoding(true);
-    setError(null);
-    setDecodeResult(null);
+    // 2. Get user and check tier
+    const user = await prisma.users.findUnique({
+      where: { id: payload.userId },
+      select: {
+        id: true,
+        email: true,
+        subscription_tier: true,
+      },
+    });
 
-    try {
-      const response = await fetch('/api/decode', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          text: text.trim(),
-          context: context.trim() || null
-        }),
+    if (!user) {
+      return NextResponse.json(
+        { error: 'User not found', upgrade_required: false },
+        { status: 404 }
+      );
+    }
+
+    // 3. Check if user has decode access
+    const allowedTiers = ['regulator', 'integrator', 'test'];
+    if (!allowedTiers.includes(user.subscription_tier)) {
+      return NextResponse.json(
+        {
+          error: 'Decode feature requires Regulator tier or higher.',
+          upgrade_required: true,
+        },
+        { status: 403 }
+      );
+    }
+
+    // 4. Check usage limits for Regulator tier
+    if (user.subscription_tier === 'regulator') {
+      const startOfMonth = new Date();
+      startOfMonth.setDate(1);
+      startOfMonth.setHours(0, 0, 0, 0);
+
+      const usageCount = await prisma.decode_usage.count({
+        where: {
+          user_id: user.id,
+          created_at: {
+            gte: startOfMonth,
+          },
+        },
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        if (data.upgrade_required) {
-          setError(data.error + '\n\nUpgrade to Regulator ($39/month) to access Decode.');
-        } else {
-          setError(data.error || 'Failed to decode text');
-        }
-        return;
+      if (usageCount >= 5) {
+        return NextResponse.json(
+          {
+            error: 'Monthly decode limit reached (5/month). Upgrade to Integrator for unlimited decodes.',
+            upgrade_required: false,
+          },
+          { status: 429 }
+        );
       }
-
-      setDecodeResult(data);
-      setUsage(data.usage);
-    } catch (error) {
-      console.error('Decode error:', error);
-      setError('Failed to decode text. Please try again.');
-    } finally {
-      setIsDecoding(false);
     }
-  };
 
-  const hasDecodeAccess = hasFeatureAccess(userTier as any, 'decode');
-  const decodeLimit = getDecodeLimit(userTier as any);
+    // 5. Get request body
+    const { text, context } = await req.json();
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-200 via-purple-200 to-blue-200 relative">
-      {/* Neural Background */}
-      <div className="decode-neurons-container" id="decodeNeurons"></div>
+    if (!text || typeof text !== 'string' || text.trim().length < 20) {
+      return NextResponse.json(
+        { error: 'Text must be at least 20 characters long', upgrade_required: false },
+        { status: 400 }
+      );
+    }
 
-      <style dangerouslySetInnerHTML={{ __html: `
-        .decode-neurons-container {
-          position: fixed;
-          width: 100%;
-          height: 100%;
-          top: 0;
-          left: 0;
-          pointer-events: none;
-          z-index: 0;
-          overflow: hidden;
-        }
+    // 6. Create decode prompt with Eva's framework
+    const decodePrompt = `You are an expert in biological pattern recognition and nervous system analysis, trained in Eva Leka's 20-year framework for decoding human communication.
 
-        .decode-neuron {
-          position: absolute;
-          width: 4px;
-          height: 4px;
-          background: radial-gradient(circle, rgba(99, 102, 241, 0.4) 0%, transparent 70%);
-          border-radius: 50%;
-          animation: neuronFloat 40s infinite ease-in-out;
-        }
+Analyze the following communication and provide a comprehensive decode covering these layers:
 
-        @keyframes neuronFloat {
-          0%, 100% {
-            transform: translate(0, 0) scale(0.8);
-            opacity: 0.3;
-          }
-          50% {
-            transform: translate(30px, -30px) scale(1.2);
-            opacity: 0.6;
-          }
-        }
+1. **Nervous System Signature** - Identify the autonomic state (sympathetic/parasympathetic activation, fight/flight/freeze/fawn patterns)
 
-        .decode-wave {
-          position: absolute;
-          width: 300px;
-          height: 300px;
-          background: radial-gradient(circle,
-            rgba(99, 102, 241, 0.05) 0%,
-            rgba(139, 92, 246, 0.03) 30%,
-            transparent 70%);
-          border-radius: 50%;
-          filter: blur(60px);
-          animation: waveBreath 50s infinite ease-in-out;
-        }
+2. **Psychological Subtext** - What's being communicated beneath the surface words
 
-        @keyframes waveBreath {
-          0%, 100% {
-            transform: scale(1);
-            opacity: 0.2;
-          }
-          50% {
-            transform: scale(1.4);
-            opacity: 0.4;
-          }
-        }
-      ` }} />
+3. **Somatic Layer** - Body-based signals and physiological patterns evident in the language
 
-      {/* Header */}
-      <header className="bg-slate-800/80 backdrop-blur-xl border-b border-slate-700/50 px-6 py-4 relative z-10">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => router.push('/chat')}
-              className="text-slate-300 hover:text-white transition-colors text-sm"
-            >
-              ← Back to Chat
-            </button>
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-400 to-purple-400" />
-                <div className="absolute inset-0 w-8 h-8 rounded-full bg-gradient-to-br from-indigo-400 to-purple-400 animate-pulse opacity-50" />
-              </div>
-              <div>
-                <h1 className="text-xl font-normal text-white">DECODE</h1>
-                <p className="text-xs text-slate-300">Biological Pattern Intelligence</p>
-              </div>
-            </div>
-          </div>
+4. **Relational Dynamics** - Power dynamics, attachment patterns, and relational positioning
 
-          {usage && (
-            <div className="text-sm text-slate-300">
-              {usage.limit ? (
-                <span>{usage.remaining}/{usage.limit} decodes remaining this month</span>
-              ) : (
-                <span>Unlimited decodes</span>
-              )}
-            </div>
-          )}
-        </div>
-      </header>
+5. **Cognitive Profile** - Thinking patterns, decision-making style, and mental processing
 
-      {/* Main Content */}
-      <div className="max-w-6xl mx-auto px-4 py-8 relative z-10">
-        {!hasDecodeAccess ? (
-          // Upgrade Wall
-          <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-purple-200 p-12 text-center">
-            <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-400 to-purple-400 animate-pulse" />
-            </div>
-            <h2 className="text-3xl font-bold text-slate-900 mb-4">
-              Decode Communication Intelligence
-            </h2>
-            <p className="text-lg text-slate-700 mb-8 max-w-2xl mx-auto">
-              Access Eva Leka's 20-year behavioral analysis framework. Decode nervous system patterns, psychological dynamics, and hidden meanings in any communication.
-            </p>
-            <div className="space-y-4 max-w-xl mx-auto text-left mb-8">
-              <div className="flex items-start gap-3">
-                <div className="w-2 h-2 rounded-full bg-indigo-500 mt-2 flex-shrink-0" />
-                <p className="text-slate-700">Nervous system signature detection</p>
-              </div>
-              <div className="flex items-start gap-3">
-                <div className="w-2 h-2 rounded-full bg-indigo-500 mt-2 flex-shrink-0" />
-                <p className="text-slate-700">Psychological subtext analysis</p>
-              </div>
-              <div className="flex items-start gap-3">
-                <div className="w-2 h-2 rounded-full bg-indigo-500 mt-2 flex-shrink-0" />
-                <p className="text-slate-700">Relational dynamics mapping</p>
-              </div>
-              <div className="flex items-start gap-3">
-                <div className="w-2 h-2 rounded-full bg-indigo-500 mt-2 flex-shrink-0" />
-                <p className="text-slate-700">Actionable response strategies</p>
-              </div>
-            </div>
-            <button
-              onClick={() => window.location.href = 'https://buy.stripe.com/5kQ00j6N93z9dIZ26N8bS0s'}
-              className="px-8 py-4 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white rounded-xl font-medium transition-all shadow-lg text-lg"
-            >
-              Upgrade to Regulator - $39/month
-            </button>
-            <p className="text-sm text-slate-500 mt-4">Includes 5 decodes per month + all Regulator features</p>
-          </div>
-        ) : (
-          // Decode Interface
-          <div className="grid lg:grid-cols-2 gap-6">
-            {/* Input Section */}
-            <div className="space-y-6">
-              <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-lg border border-slate-200 p-6">
-                <h2 className="text-xl font-semibold text-slate-900 mb-4">Text to Decode</h2>
-                <textarea
-                  value={text}
-                  onChange={(e) => setText(e.target.value)}
-                  placeholder="Paste the message, email, or communication you want to decode..."
-                  className="w-full h-64 px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none text-slate-900 placeholder-slate-400"
-                  disabled={isDecoding}
-                />
-                <p className="text-xs text-slate-500 mt-2">
-                  {text.length} characters (minimum 20 required)
-                </p>
-              </div>
+6. **Emotional Landscape** - Core emotions, regulation strategies, and emotional drivers
 
-              <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-lg border border-slate-200 p-6">
-                <h2 className="text-xl font-semibold text-slate-900 mb-4">Context (Optional)</h2>
-                <textarea
-                  value={context}
-                  onChange={(e) => setContext(e.target.value)}
-                  placeholder="Add any relevant context: relationship, situation, background..."
-                  className="w-full h-32 px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none text-slate-900 placeholder-slate-400"
-                  disabled={isDecoding}
-                />
-              </div>
+${context ? `\n**Context Provided:** ${context}\n` : ''}
 
-              <button
-                onClick={handleDecode}
-                disabled={isDecoding || text.trim().length < 20}
-                className="w-full py-4 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 disabled:from-gray-400 disabled:to-gray-500 text-white rounded-xl font-medium transition-all shadow-lg disabled:cursor-not-allowed"
-              >
-                {isDecoding ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <div className="w-5 h-5 rounded-full border-2 border-white border-t-transparent animate-spin" />
-                    Decoding...
-                  </span>
-                ) : (
-                  'Decode Communication'
-                )}
-              </button>
+**Communication to Decode:**
+${text}
 
-              {error && (
-                <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4 text-red-700 text-sm whitespace-pre-wrap">
-                  {error}
-                </div>
-              )}
-            </div>
+Provide a detailed, professional analysis that reads like a biological intelligence report. Be specific, insightful, and actionable. Format with clear sections and natural language.`;
 
-            {/* Results Section */}
-            <div className="space-y-6">
-              {decodeResult ? (
-                <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-lg border border-slate-200 p-6 max-h-[800px] overflow-y-auto">
-                  <h2 className="text-xl font-semibold text-slate-900 mb-6">Decode Analysis</h2>
-                  <div className="prose prose-slate max-w-none">
-                    <div 
-                      className="text-slate-700 leading-relaxed whitespace-pre-wrap"
-                      dangerouslySetInnerHTML={{ __html: decodeResult.decode.replace(/\n/g, '<br />') }}
-                    />
-                  </div>
-                </div>
-              ) : (
-                <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-lg border border-slate-200 p-12 text-center">
-                  <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 opacity-20 animate-pulse" />
-                  <p className="text-slate-500">
-                    Paste communication and click "Decode" to see analysis
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
+    // 7. Call Claude API for decode
+    const response = await anthropic.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 4000,
+      messages: [
+        {
+          role: 'user',
+          content: decodePrompt,
+        },
+      ],
+    });
+
+    const decode = response.content[0].type === 'text' ? response.content[0].text : '';
+
+    // 8. Log usage to database
+    await prisma.decode_usage.create({
+      data: {
+        user_id: user.id,
+        text_length: text.length,
+      },
+    });
+
+    // 9. Calculate remaining decodes
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+
+    const currentUsage = await prisma.decode_usage.count({
+      where: {
+        user_id: user.id,
+        created_at: {
+          gte: startOfMonth,
+        },
+      },
+    });
+
+    let usage;
+    if (user.subscription_tier === 'regulator') {
+      usage = {
+        used: currentUsage,
+        limit: 5,
+        remaining: 5 - currentUsage,
+      };
+    } else {
+      // Integrator or test
+      usage = {
+        used: currentUsage,
+        limit: null,
+        remaining: null,
+      };
+    }
+
+    // 10. Return decode result
+    return NextResponse.json({
+      decode,
+      usage,
+      tier: user.subscription_tier,
+    });
+
+  } catch (error) {
+    console.error('Decode API error:', error);
+    return NextResponse.json(
+      { error: 'Failed to decode text. Please try again.', upgrade_required: false },
+      { status: 500 }
+    );
+  }
 }

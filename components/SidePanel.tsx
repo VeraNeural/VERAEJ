@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { X, Plus, MessageSquare, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { hasFeatureAccess, hasMinimumTier } from '@/lib/tiers';
 
 interface SidePanelProps {
   isOpen: boolean;
@@ -251,7 +252,7 @@ export default function SidePanel({ isOpen, onClose, darkMode, currentSessionId,
             </Link>
 
             {/* Community Link - Only for Regulator+ */}
-            {(userTier === 'regulator' || userTier === 'integrator') && (
+            {hasFeatureAccess(userTier as any, 'community_access') && (
               <Link 
                 href="/community"
                 onClick={onClose}
@@ -266,7 +267,7 @@ export default function SidePanel({ isOpen, onClose, darkMode, currentSessionId,
             )}
 
             {/* Messages Link - Only for Regulator+ */}
-            {(userTier === 'regulator' || userTier === 'integrator') && (
+            {hasFeatureAccess(userTier as any, 'community_access') && (
               <Link 
                 href="/messages"
                 onClick={onClose}
@@ -304,7 +305,7 @@ export default function SidePanel({ isOpen, onClose, darkMode, currentSessionId,
               </div>
             )}
 
-            {userTier === 'integrator' && (
+            {hasMinimumTier(userTier as any, 'integrator') && (
               <div className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm ${
                 darkMode ? 'text-green-400' : 'text-green-600'
               }`}>
@@ -328,5 +329,3 @@ export default function SidePanel({ isOpen, onClose, darkMode, currentSessionId,
     </>
   );
 }
-
-

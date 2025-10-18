@@ -212,14 +212,13 @@ export default function ChatPage() {
   };
 
   const handleLoadChat = async (sessionId: string) => {
-    console.log('Loading chat session:', sessionId); // DEBUG
+    console.log('Loading chat session:', sessionId);
     try {
-      const response = await fetch(`/api/sessions?id=${sessionId}`);  // FIXED: Use query param
+      const response = await fetch(`/api/sessions?id=${sessionId}`);
       if (response.ok) {
         const data = await response.json();
-        console.log('Chat loaded successfully:', data); // DEBUG
+        console.log('Chat loaded successfully:', data);
         
-        // Parse messages if they're stored as JSON string
         let parsedMessages = data.session?.messages || [];
         if (typeof parsedMessages === 'string') {
           parsedMessages = JSON.parse(parsedMessages);
@@ -235,38 +234,38 @@ export default function ChatPage() {
     }
   };
 
-const handleDeepDive = async () => {
-  if (messages.length < 5) {
-    alert('Let\'s have a few more exchanges first! Deep analysis works best with at least 5 messages.');
-    return;
-  }
+  const handleDeepDive = async () => {
+    if (messages.length < 5) {
+      alert('Let\'s have a few more exchanges first! Deep analysis works best with at least 5 messages.');
+      return;
+    }
 
-  setIsAnalyzing(true);
-  try {
-    const response = await fetch('/api/analysis', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        conversationHistory: messages.map(m => ({
-          role: m.role,
-          content: m.content
-        })),
-        userId: user?.id
-      }),
-    });
+    setIsAnalyzing(true);
+    try {
+      const response = await fetch('/api/analysis', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          conversationHistory: messages.map(m => ({
+            role: m.role,
+            content: m.content
+          })),
+          userId: user?.id
+        }),
+      });
 
-    if (!response.ok) throw new Error('Analysis failed');
+      if (!response.ok) throw new Error('Analysis failed');
 
-    const data = await response.json();
-    setAnalysisData(data.analysis);
-    setShowAnalysis(true);
-  } catch (error) {
-    console.error('Deep dive error:', error);
-    alert('Failed to generate analysis. Please try again.');
-  } finally {
-    setIsAnalyzing(false);
-  }
-};  // ← CRITICAL: Must end with }; here on line 269
+      const data = await response.json();
+      setAnalysisData(data.analysis);
+      setShowAnalysis(true);
+    } catch (error) {
+      console.error('Deep dive error:', error);
+      alert('Failed to generate analysis. Please try again.');
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
 
   return (
     <div className="relative">
@@ -348,7 +347,8 @@ const handleDeepDive = async () => {
         }
       ` }} />
 
-<header className="bg-slate-800/80 backdrop-blur-xl border-b border-slate-700/50 px-6 py-4 relative z-10">
+      <div className="flex flex-col h-screen bg-gradient-to-br from-indigo-200 via-purple-200 to-blue-200 relative">
+        <header className="bg-slate-800/80 backdrop-blur-xl border-b border-slate-700/50 px-6 py-4 relative z-10">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <button
@@ -370,7 +370,6 @@ const handleDeepDive = async () => {
             </div>
 
             <div className="flex items-center gap-2">
-              {/* Create Course - Only for Integrator */}
               {hasMinimumTier(userTier as any, 'integrator') && (
                 <button
                   onClick={() => setShowCourseGeneration(true)}
@@ -381,7 +380,6 @@ const handleDeepDive = async () => {
                 </button>
               )}
               
-              {/* Deep Dive - Only for Regulator+ with 5+ messages */}
               {hasFeatureAccess(userTier as any, 'deep_analysis') && messages.length >= 5 && (
                 <button
                   onClick={handleDeepDive}
@@ -393,7 +391,6 @@ const handleDeepDive = async () => {
                 </button>
               )}
               
-              {/* Community - Only for Regulator+ */}
               {hasMinimumTier(userTier as any, 'regulator') && (
                 <button
                   onClick={() => router.push('/community')}
@@ -577,7 +574,6 @@ const handleDeepDive = async () => {
               </div>
 
               <div className="p-6 space-y-6">
-                {/* Empathetic Summary */}
                 <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-2xl p-6 border-2 border-purple-200">
                   <h3 className="text-lg font-semibold text-purple-900 mb-3 flex items-center gap-2">
                     💜 What I'm Noticing
@@ -587,7 +583,6 @@ const handleDeepDive = async () => {
                   </div>
                 </div>
 
-                {/* Nervous System States */}
                 {analysisData.raw?.nervous_system_states && (
                   <div className="bg-white rounded-2xl p-6 border border-slate-200">
                     <h3 className="text-lg font-semibold text-slate-900 mb-3">
@@ -603,7 +598,6 @@ const handleDeepDive = async () => {
                   </div>
                 )}
 
-                {/* Emotional Themes */}
                 {analysisData.raw?.emotional_themes && (
                   <div className="bg-white rounded-2xl p-6 border border-slate-200">
                     <h3 className="text-lg font-semibold text-slate-900 mb-3">
@@ -619,7 +613,6 @@ const handleDeepDive = async () => {
                   </div>
                 )}
 
-                {/* Triggers */}
                 {analysisData.raw?.identified_triggers && (
                   <div className="bg-white rounded-2xl p-6 border border-slate-200">
                     <h3 className="text-lg font-semibold text-slate-900 mb-3">
@@ -636,7 +629,6 @@ const handleDeepDive = async () => {
                   </div>
                 )}
 
-                {/* Progress Indicators */}
                 {analysisData.raw?.progress_indicators && (
                   <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-6 border-2 border-green-200">
                     <h3 className="text-lg font-semibold text-green-900 mb-3">
@@ -653,7 +645,6 @@ const handleDeepDive = async () => {
                   </div>
                 )}
 
-                {/* Recommendations */}
                 {analysisData.raw?.recommendations && (
                   <div className="bg-white rounded-2xl p-6 border border-slate-200">
                     <h3 className="text-lg font-semibold text-slate-900 mb-3">

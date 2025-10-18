@@ -5,6 +5,7 @@ import { Send, Menu, Volume2, VolumeX, AlertCircle, X, Heart, Compass, Wind, Loa
 import SidePanel from './SidePanel';
 import WellnessHubModal from './WellnessHubModal';
 import NotificationsPanel from '@/components/NotificationsPanel';
+import { hasFeatureAccess, getVoiceLimit } from '@/lib/tiers';
 
 interface Message {
   id: string;
@@ -44,21 +45,8 @@ export default function ChatWindow() {
   const audioRef = useRef<HTMLAudioElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  const voiceAvailable = ['regulator', 'integrator', 'test'].includes(userTier);
-  
-const getVoiceLimit = (tier: string) => {
-  switch(tier) {
-    case 'integrator':
-    case 'test':
-      return Infinity;
-    case 'regulator':
-      return 20;
-    default:
-      return 0;
-  }
-};
-  
-  const voiceLimit = getVoiceLimit(userTier);
+  const voiceAvailable = hasFeatureAccess(userTier as any, 'voice_responses');
+  const voiceLimit = getVoiceLimit(userTier as any);
   const canUseVoice = voiceUsageToday < voiceLimit;
 
   const cycleTheme = () => {
@@ -330,22 +318,20 @@ const getVoiceLimit = (tier: string) => {
   };
 
   const handleVoiceToggle = () => {
-if (!voiceAvailable) {
-  if (window.confirm('🎙️ Voice responses available with Regulator plan ($39/month)\n\nGo to upgrade page?')) {
-    window.location.href = 'https://buy.stripe.com/5kQ00j6N93z9dIZ26N8bS0s';
-  }
-  return;
-}
+    if (!voiceAvailable) {
+      if (window.confirm('🎙️ Voice responses available with Regulator plan ($39/month)\n\nGo to upgrade page?')) {
+        window.location.href = 'https://buy.stripe.com/5kQ00j6N93z9dIZ26N8bS0s';
+      }
+      return;
+    }
 
-// Line 338-341
-if (!canUseVoice) {
-  if (window.confirm('Voice limit reached (20/day)\n\nUpgrade to Integrator for unlimited voice?\n\n$99/month')) {
-    window.location.href = '/pricing'; // or direct Integrator Stripe link when you have it
-  }
-  return;
-}
+    if (!canUseVoice) {
+      if (window.confirm('Voice limit reached (20/day)\n\nUpgrade to Integrator for unlimited voice?\n\n$99/month')) {
+        window.location.href = '/pricing';
+      }
+      return;
+    }
     setAudioEnabled(!audioEnabled);
-
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {

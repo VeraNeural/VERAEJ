@@ -429,7 +429,7 @@ export default function CommunityPage() {
                   <span className="font-medium text-slate-900">
                     {selectedChannel?.name || 'Select Channel'}
                   </span>
-                  {selectedChannel?.required_tier === 'regulator' && (
+                  {selectedChannel?.required_tier && hasFeatureAccess(selectedChannel.required_tier as any, 'community_access') && (
                     <span className="text-xs bg-purple-500 text-white px-2 py-0.5 rounded-full">
                       Exclusive
                     </span>
@@ -441,7 +441,7 @@ export default function CommunityPage() {
               {showChannelDropdown && (
                 <div className="absolute top-full mt-2 w-full bg-white rounded-2xl shadow-xl border border-purple-100 p-2 z-20">
                   {channels.map((channel) => {
-                    const isExclusive = channel.required_tier === 'regulator';
+                    const isExclusive = channel.required_tier && hasFeatureAccess(channel.required_tier as any, 'community_access');
                     return (
                       <button
                         key={channel.id}
@@ -478,7 +478,7 @@ export default function CommunityPage() {
                 <h2 className="text-lg font-medium text-slate-900 mb-4">Channels</h2>
                 <div className="space-y-2">
                   {channels.map((channel) => {
-                    const isExclusive = channel.required_tier === 'regulator';
+                    const isExclusive = channel.required_tier && hasFeatureAccess(channel.required_tier as any, 'community_access');
                     return (
                       <button
                         key={channel.id}

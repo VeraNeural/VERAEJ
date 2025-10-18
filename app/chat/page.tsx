@@ -348,8 +348,7 @@ export default function ChatPage() {
         }
       ` }} />
 
-      <div className="flex flex-col h-screen bg-gradient-to-br from-indigo-200 via-purple-200 to-blue-200 relative">
-        <header className="bg-slate-800/80 backdrop-blur-xl border-b border-slate-700/50 px-6 py-4 relative z-10">
+<header className="bg-slate-800/80 backdrop-blur-xl border-b border-slate-700/50 px-6 py-4 relative z-10">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <button
@@ -371,7 +370,7 @@ export default function ChatPage() {
             </div>
 
             <div className="flex items-center gap-2">
-              {/* FIXED: Create Course - Only for Integrator */}
+              {/* Create Course - Only for Integrator */}
               {hasMinimumTier(userTier as any, 'integrator') && (
                 <button
                   onClick={() => setShowCourseGeneration(true)}
@@ -382,6 +381,7 @@ export default function ChatPage() {
                 </button>
               )}
               
+              {/* Deep Dive - Only for Regulator+ with 5+ messages */}
               {hasFeatureAccess(userTier as any, 'deep_analysis') && messages.length >= 5 && (
                 <button
                   onClick={handleDeepDive}
@@ -393,7 +393,7 @@ export default function ChatPage() {
                 </button>
               )}
               
-              {/* FIXED: Community - Only for Regulator+ */}
+              {/* Community - Only for Regulator+ */}
               {hasMinimumTier(userTier as any, 'regulator') && (
                 <button
                   onClick={() => router.push('/community')}
@@ -402,10 +402,6 @@ export default function ChatPage() {
                   Community
                 </button>
               )}
-              
-              <button
-                onClick={() => setShowWellnessHub(true)}
-                className="px-3 py-2 bg-slate-700/60 hover:bg-slate-600/60 rounded-lg transition-all text-slate-200 border border-slate-600/50 shadow-sm text-sm font-medium"
             </div>
           </div>
         </header>

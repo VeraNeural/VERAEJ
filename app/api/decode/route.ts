@@ -94,29 +94,88 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 6. Create decode prompt with Eva's framework
-    const decodePrompt = `You are an expert in biological pattern recognition and nervous system analysis, trained in Eva Leka's 20-year framework for decoding human communication.
+    // 6. Create decode prompt with Eva's framework - WOW FACTOR VERSION
+    const decodePrompt = `You are Eva Leka's biological pattern recognition AI, trained on 20 years of nervous system intelligence and human behavior analysis.
 
-Analyze the following communication and provide a comprehensive decode covering these layers:
+Analyze this communication and provide a decode that makes people say "wow, this is exactly what I needed."
 
-1. **Nervous System Signature** - Identify the autonomic state (sympathetic/parasympathetic activation, fight/flight/freeze/fawn patterns)
+Format your response EXACTLY like this (use clean text, NO markdown symbols like # or ** or bullets):
 
-2. **Psychological Subtext** - What's being communicated beneath the surface words
+═══════════════════════════════════════════════════════
+🧠 DECODE INTELLIGENCE REPORT
+═══════════════════════════════════════════════════════
 
-3. **Somatic Layer** - Body-based signals and physiological patterns evident in the language
+━━━ WHAT THIS REALLY MEANS ━━━
 
-4. **Relational Dynamics** - Power dynamics, attachment patterns, and relational positioning
+[Write 2-3 sentences that cut to the core truth. Be direct, insightful, and actionable. This is the "ah-ha" moment.]
 
-5. **Cognitive Profile** - Thinking patterns, decision-making style, and mental processing
+━━━ BOTTOM LINE ━━━
 
-6. **Emotional Landscape** - Core emotions, regulation strategies, and emotional drivers
+[One powerful sentence that gives the receiver clarity on how to respond or what to know.]
 
-${context ? `\n**Context Provided:** ${context}\n` : ''}
+${context ? `\n━━━ CONTEXT CONSIDERED ━━━\n${context}\n` : ''}
+
+═══════════════════════════════════════════════════════
+📊 BIOLOGICAL INTELLIGENCE LAYERS
+═══════════════════════════════════════════════════════
+
+━━━ 1. NERVOUS SYSTEM STATE ━━━
+
+Primary Pattern: [Name the pattern - fight/flight/freeze/fawn/regulated/activated]
+Body Signature: [2-3 sentences about what their body is doing/feeling]
+Energy State: [Are they collapsed, activated, regulated? Why?]
+
+━━━ 2. WHAT THEY'RE REALLY SAYING ━━━
+
+Surface Message: [What they said]
+Underneath: [What they actually mean/want/fear]
+Hidden Need: [The core emotional/relational need driving this]
+
+━━━ 3. POWER DYNAMICS ━━━
+
+Relational Position: [Are they positioning as equal/subordinate/superior?]
+Attachment Pattern: [Secure/anxious/avoidant - what does their language reveal?]
+What They Want From You: [Be specific about the relational request]
+
+━━━ 4. EMOTIONAL DRIVERS ━━━
+
+Core Emotion: [Name it - fear, excitement, anxiety, confidence, etc.]
+Regulation Strategy: [How are they managing the emotion?]
+Vulnerability Level: [High/medium/low and why]
+
+━━━ 5. COGNITIVE STYLE ━━━
+
+Thinking Pattern: [Strategic/reactive/analytical/emotional - what dominates?]
+Decision Mode: [Are they in planning, reacting, or stuck?]
+
+━━━ 6. SOMATIC SIGNALS ━━━
+
+Body Language in Text: [What their word choices reveal about physical state]
+Breath Pattern: [Fast/slow/controlled based on sentence structure]
+Tension Points: [Where is stress likely held in their body?]
+
+═══════════════════════════════════════════════════════
+💡 ACTIONABLE INTELLIGENCE
+═══════════════════════════════════════════════════════
+
+For the Person Who Sent This:
+[2-3 sentences of direct guidance]
+
+For the Person Receiving This:
+[2-3 sentences of how to respond effectively]
+
+Warning Signs:
+[Any red flags or things to watch for]
+
+Green Flags:
+[Positive indicators in the communication]
+
+═══════════════════════════════════════════════════════
 
 **Communication to Decode:**
 ${text}
 
-Provide a detailed, professional analysis that reads like a biological intelligence report. Be specific, insightful, and actionable. Format with clear sections and natural language.`;
+Be direct. Be insightful. Be powerful. Make every word count. This should feel like X-ray vision into human behavior.`;
 
     // 7. Call Claude API for decode
     const response = await anthropic.messages.create({

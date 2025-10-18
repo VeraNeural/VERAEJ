@@ -241,12 +241,16 @@ Remember: Write like Eva - direct, warm, insightful, and human. Use "I'm seeing.
     const decode = response.content[0].type === 'text' ? response.content[0].text : '';
 
     // 8. Log usage to database
-    await prisma.decode_usage.create({
-      data: {
-        user_id: user.id,
-        text_length: text.length,
-      },
-    });
+    // 8. Log usage to database with full decode history
+await prisma.decode_usage.create({
+  data: {
+    user_id: user.id,
+    text_length: text.length,
+    original_text: text,
+    decode_result: decode,
+    context: context || null,
+  },
+});
 
     // 9. Calculate remaining decodes
     const startOfMonth = new Date();

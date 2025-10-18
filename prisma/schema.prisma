@@ -211,6 +211,16 @@ model daily_rituals {
   @@index([user_id, date(sort: Desc)], map: "idx_daily_rituals_user_date")
 }
 
+model decode_usage {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id     String    @db.Uuid
+  text_length Int
+  created_at  DateTime? @default(now()) @db.Timestamp(6)
+  users       users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([user_id, created_at], map: "idx_decode_usage_user_date")
+}
+
 model direct_messages {
   id                                        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   conversation_id                           String    @db.Uuid
@@ -519,6 +529,7 @@ model users {
   community_resources                                 community_resources[]
   daily_check_ins_simple                              daily_check_ins_simple[]
   daily_rituals                                       daily_rituals[]
+  decode_usage                                        decode_usage[]
   direct_messages_direct_messages_recipient_idTousers direct_messages[]        @relation("direct_messages_recipient_idTousers")
   direct_messages_direct_messages_sender_idTousers    direct_messages[]        @relation("direct_messages_sender_idTousers")
   event_rsvps                                         event_rsvps[]

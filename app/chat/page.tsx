@@ -406,8 +406,6 @@ export default function ChatPage() {
               <button
                 onClick={() => setShowWellnessHub(true)}
                 className="px-3 py-2 bg-slate-700/60 hover:bg-slate-600/60 rounded-lg transition-all text-slate-200 border border-slate-600/50 shadow-sm text-sm font-medium"
-              >
-              
             </div>
           </div>
         </header>

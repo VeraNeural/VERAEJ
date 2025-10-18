@@ -4,6 +4,7 @@ import { cookies } from 'next/headers';
 import { prisma } from '@/lib/prisma';
 
 // GET - Fetch all chat sessions for the authenticated user
+// GET - Fetch all chat sessions OR a specific session by ID
 export async function GET(request: NextRequest) {
   try {
     console.log('📨 Fetching chat sessions');
@@ -24,7 +25,59 @@ export async function GET(request: NextRequest) {
 
     console.log('✅ User authenticated:', payload.userId);
 
-    // Get all chat sessions for this user
+    // Check if requesting a specific session
+    const { searchParams } = new URL(request.url);
+    const sessionId = searchParams.get('id');
+
+    // If session ID provided, return that specific session with messages
+    if (sessionId) {
+      console.log('📨 Fetching specific session:', sessionId);
+      
+      const session = await prisma.chat_sessions.findUnique({
+        where: { id: sessionId },
+        include: {
+          chat_messages: {
+            orderBy: {
+              created_at: 'asc',
+            },
+            select: {
+              role: true,
+              content: true,
+              audio_url: true,
+            }
+          }
+        }
+      });
+
+      if (!session) {
+        console.error('❌ Session not found');
+        return NextResponse.json({ error: 'Session not found' }, { status: 404 });
+      }
+
+      if (session.user_id !== payload.userId) {
+        console.error('❌ Unauthorized: Session does not belong to user');
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+      }
+
+      // Format messages for chat
+      const messages = session.chat_messages.map(msg => ({
+        role: msg.role as 'user' | 'assistant',
+        content: msg.content,
+        audioUrl: msg.audio_url || undefined,
+      }));
+
+      console.log('✅ Found session with', messages.length, 'messages');
+
+      return NextResponse.json({ 
+        session: {
+          id: session.id,
+          title: session.title,
+          messages: messages,
+        }
+      }, { status: 200 });
+    }
+
+    // Otherwise, return all sessions (list view)
     const sessions = await prisma.chat_sessions.findMany({
       where: {
         user_id: payload.userId,

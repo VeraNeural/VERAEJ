@@ -27,6 +27,7 @@ export default function SidePanel({ isOpen, onClose, darkMode, currentSessionId,
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [userTier, setUserTier] = useState<string>('explorer');
+  const [userName, setUserName] = useState<string>(''); // ADDED: User name state
 
   useEffect(() => {
     if (isOpen) {
@@ -56,6 +57,7 @@ export default function SidePanel({ isOpen, onClose, darkMode, currentSessionId,
       if (response.ok) {
         const data = await response.json();
         setUserTier(data.user.subscription_tier);
+        setUserName(data.user.name || data.user.email); // ADDED: Load user name
       }
     } catch (error) {
       console.error('Failed to load user tier:', error);
@@ -140,7 +142,15 @@ export default function SidePanel({ isOpen, onClose, darkMode, currentSessionId,
                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-blue-500" />
                   <div className="absolute inset-0 w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 animate-pulse opacity-30" />
                 </div>
-                <h2 className="text-xl font-normal">VERA</h2>
+                <div>
+                  <h2 className="text-xl font-normal">VERA</h2>
+                  {/* ADDED: User name below VERA */}
+                  {userName && (
+                    <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                      {userName}
+                    </p>
+                  )}
+                </div>
               </div>
               <button 
                 onClick={onClose}
@@ -194,8 +204,10 @@ export default function SidePanel({ isOpen, onClose, darkMode, currentSessionId,
                   <div
                     key={session.id}
                     onClick={() => {
-                      if (onLoadChat) onLoadChat(session.id);
-                      onClose();
+                      if (onLoadChat) {
+                        onLoadChat(session.id);
+                        onClose();
+                      }
                     }}
                     className={`group flex items-center justify-between px-3 py-3 rounded-lg cursor-pointer transition-all ${
                       currentSessionId === session.id
@@ -239,17 +251,20 @@ export default function SidePanel({ isOpen, onClose, darkMode, currentSessionId,
           <nav className={`p-4 border-t space-y-1 ${
             darkMode ? 'border-slate-800' : 'border-slate-200'
           }`}>
-            <Link 
-              href="/dashboard"
-              onClick={onClose}
-              className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                darkMode 
-                  ? 'hover:bg-slate-800 text-slate-300' 
-                  : 'hover:bg-slate-100 text-slate-700'
-              }`}
-            >
-              Dashboard
-            </Link>
+            {/* CHANGED: Dashboard Link - Only for Regulator+ */}
+            {hasMinimumTier(userTier as any, 'regulator') && (
+              <Link 
+                href="/dashboard"
+                onClick={onClose}
+                className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  darkMode 
+                    ? 'hover:bg-slate-800 text-slate-300' 
+                    : 'hover:bg-slate-100 text-slate-700'
+                }`}
+              >
+                Dashboard
+              </Link>
+            )}
 
             {/* Community Link - Only for Regulator+ */}
             {hasFeatureAccess(userTier as any, 'community_access') && (

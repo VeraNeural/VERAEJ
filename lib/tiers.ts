@@ -19,7 +19,8 @@ export const TIER_FEATURES = {
   basic_courses: ['explorer', 'regulator', 'integrator', 'test'],
   wellness_hub: ['explorer', 'regulator', 'integrator', 'test'],
   direct_messages: ['regulator', 'integrator', 'test'],
-  deep_analysis: ['regulator', 'integrator', 'test'], // ← NEW: Deep Dive Analysis
+  deep_analysis: ['regulator', 'integrator', 'test'],
+  decode: ['regulator', 'integrator', 'test'], // ← NEW: Decode Feature
   protocol_edit: ['regulator', 'integrator', 'test'],
   dashboard_access: ['regulator', 'integrator', 'test'],
   file_attachments: ['integrator', 'test'],

@@ -266,6 +266,22 @@ export default function SidePanel({ isOpen, onClose, darkMode, currentSessionId,
               </Link>
             )}
 
+            {/* Decode Link - Only for Regulator+ */}
+            {hasFeatureAccess(userTier as any, 'decode') && (
+              <Link 
+                href="/decode"
+                onClick={onClose}
+                className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  darkMode 
+                    ? 'hover:bg-slate-800 text-slate-300' 
+                    : 'hover:bg-slate-100 text-slate-700'
+                }`}
+              >
+                <div className="w-2 h-2 rounded-full bg-gradient-to-r from-purple-400 to-indigo-400" />
+                Decode
+              </Link>
+            )}
+
             {/* Messages Link - Only for Regulator+ */}
             {hasFeatureAccess(userTier as any, 'community_access') && (
               <Link 

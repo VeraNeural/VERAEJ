@@ -20,7 +20,7 @@ export const TIER_FEATURES = {
   wellness_hub: ['explorer', 'regulator', 'integrator', 'test'],
   direct_messages: ['regulator', 'integrator', 'test'],
   deep_analysis: ['regulator', 'integrator', 'test'],
-  decode: ['regulator', 'integrator', 'test'], // ← NEW: Decode Feature
+  decode: ['regulator', 'integrator', 'test'],
   protocol_edit: ['regulator', 'integrator', 'test'],
   dashboard_access: ['regulator', 'integrator', 'test'],
   file_attachments: ['integrator', 'test'],
@@ -59,5 +59,12 @@ export function getTierDisplayName(tier: UserTier): string {
 export function getVoiceLimit(tier: UserTier): number {
   if (tier === 'integrator' || tier === 'test') return Infinity;
   if (tier === 'regulator') return 20;
+  return 0;
+}
+
+// Decode limits by tier
+export function getDecodeLimit(tier: UserTier): number {
+  if (tier === 'integrator' || tier === 'test') return Infinity;
+  if (tier === 'regulator') return 5;
   return 0;
 }
